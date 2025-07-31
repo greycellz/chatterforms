@@ -45,9 +45,10 @@ async function getFormData(formId: string): Promise<FormData | null> {
 export default async function PublicFormPage({ 
   params 
 }: { 
-  params: { id: string } 
+  params: Promise<{ id: string }>
 }) {
-  const formData = await getFormData(params.id)
+  const { id } = await params
+  const formData = await getFormData(id)
   
   if (!formData) {
     notFound()
