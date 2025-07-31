@@ -1,0 +1,77 @@
+{
+  "id": "oaic01mdqxl5sl",
+  "schema": {
+    "title": "Patient Intake Form",
+    "fields": [
+      {
+        "id": "patient_name",
+        "type": "text",
+        "label": "Full Name",
+        "required": true,
+        "placeholder": "John Doe"
+      },
+      {
+        "id": "patient_dob",
+        "type": "date",
+        "label": "Date of Birth",
+        "required": true,
+        "placeholder": "MM/DD/YYYY"
+      },
+      {
+        "id": "patient_gender",
+        "type": "select",
+        "label": "Gender",
+        "required": true,
+        "placeholder": "Select your gender",
+        "options": [
+          "Male",
+          "Female"
+        ]
+      },
+      {
+        "id": "patient_address",
+        "type": "textarea",
+        "label": "Address",
+        "required": true,
+        "placeholder": "123 Main St, Anytown, USA"
+      },
+      {
+        "id": "patient_phone",
+        "type": "tel",
+        "label": "Phone Number",
+        "required": true,
+        "placeholder": "(123) 456-7890"
+      },
+      {
+        "id": "patient_email",
+        "type": "email",
+        "label": "Email",
+        "required": true,
+        "placeholder": "example@domain.com"
+      },
+      {
+        "id": "patient_insurance",
+        "type": "select",
+        "label": "Insurance Provider",
+        "required": true,
+        "placeholder": "Select your insurance provider",
+        "options": [
+          "Provider A",
+          "Provider B",
+          "Provider C",
+          "Provider D",
+          "Other"
+        ]
+      },
+      {
+        "id": "patient_insurance_policy",
+        "type": "text",
+        "label": "Insurance Policy Number",
+        "required": true,
+        "placeholder": "Enter your policy number"
+      }
+    ]
+  },
+  "createdAt": "2025-07-31T05:05:15.670Z",
+  "submissions": []
+}

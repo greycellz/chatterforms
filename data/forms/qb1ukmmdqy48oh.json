@@ -1,0 +1,77 @@
+{
+  "id": "qb1ukmmdqy48oh",
+  "schema": {
+    "title": "Patient Intake Form",
+    "fields": [
+      {
+        "id": "first_name",
+        "type": "text",
+        "label": "First Name",
+        "required": true,
+        "placeholder": "Enter your first name"
+      },
+      {
+        "id": "last_name",
+        "type": "text",
+        "label": "Last Name",
+        "required": true,
+        "placeholder": "Enter your last name"
+      },
+      {
+        "id": "date_of_birth",
+        "type": "date",
+        "label": "Date of Birth",
+        "required": true,
+        "placeholder": "Enter your date of birth"
+      },
+      {
+        "id": "gender",
+        "type": "select",
+        "label": "Gender",
+        "required": true,
+        "placeholder": "Select your gender",
+        "options": [
+          "Male",
+          "Female"
+        ]
+      },
+      {
+        "id": "contact_number",
+        "type": "tel",
+        "label": "Contact Number",
+        "required": true,
+        "placeholder": "Enter your contact number"
+      },
+      {
+        "id": "email_id",
+        "type": "email",
+        "label": "Email ID",
+        "required": true,
+        "placeholder": "Enter your email address"
+      },
+      {
+        "id": "address",
+        "type": "textarea",
+        "label": "Address",
+        "required": true,
+        "placeholder": "Enter your full address"
+      },
+      {
+        "id": "insurance_provider",
+        "type": "text",
+        "label": "Insurance Provider",
+        "required": true,
+        "placeholder": "Enter your insurance provider"
+      },
+      {
+        "id": "insurance_policy_number",
+        "type": "text",
+        "label": "Insurance Policy Number",
+        "required": true,
+        "placeholder": "Enter your insurance policy number"
+      }
+    ]
+  },
+  "createdAt": "2025-07-31T05:20:05.873Z",
+  "submissions": []
+}
