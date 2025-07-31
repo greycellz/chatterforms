@@ -1,7 +1,8 @@
 import { notFound } from 'next/navigation'
-import { readFileSync } from 'fs'
-import { join } from 'path'
+import { Redis } from '@upstash/redis'
 import PublicFormClient from './PublicFormClient'
+
+const redis = Redis.fromEnv()
 
 interface FormField {
   id: string
@@ -33,9 +34,8 @@ interface FormData {
 
 async function getFormData(formId: string): Promise<FormData | null> {
   try {
-    const filePath = join(process.cwd(), 'data', 'forms', `${formId}.json`)
-    const fileContent = readFileSync(filePath, 'utf-8')
-    return JSON.parse(fileContent)
+    const formData = await redis.get(`form:${formId}`)
+    return formData as FormData | null
   } catch (error) {
     console.error('Error reading form data:', error)
     return null

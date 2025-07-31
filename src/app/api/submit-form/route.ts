@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { readFileSync, writeFileSync } from 'fs'
-import { join } from 'path'
+import { Redis } from '@upstash/redis'
+
+const redis = Redis.fromEnv()
 
 interface FormSubmission {
   id: string
@@ -43,12 +44,13 @@ export async function POST(request: NextRequest) {
     }
 
     // Read the existing form data
-    const filePath = join(process.cwd(), 'data', 'forms', `${formId}.json`)
-    
     let formData: FormData
     try {
-      const fileContent = readFileSync(filePath, 'utf-8')
-      formData = JSON.parse(fileContent)
+      const data = await redis.get(`form:${formId}`)
+      if (!data) {
+        return NextResponse.json({ error: 'Form not found' }, { status: 404 })
+      }
+      formData = data as FormData
     } catch {
       return NextResponse.json({ error: 'Form not found' }, { status: 404 })
     }
@@ -64,8 +66,8 @@ export async function POST(request: NextRequest) {
     // Add submission to form data
     formData.submissions.push(submission)
 
-    // Save updated form data
-    writeFileSync(filePath, JSON.stringify(formData, null, 2))
+    // Save updated form data to Redis
+    await redis.set(`form:${formId}`, formData)
 
     return NextResponse.json({ 
       success: true,

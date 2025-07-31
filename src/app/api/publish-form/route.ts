@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { writeFileSync, mkdirSync } from 'fs'
-import { join } from 'path'
+import { Redis } from '@upstash/redis'
+
+const redis = Redis.fromEnv()
 
 // Generate a unique form ID
 function generateFormId(): string {
@@ -17,15 +18,7 @@ export async function POST(request: NextRequest) {
 
     const formId = generateFormId()
     
-    // Create the data directory if it doesn't exist
-    const dataDir = join(process.cwd(), 'data', 'forms')
-    try {
-      mkdirSync(dataDir, { recursive: true })
-    } catch {
-      // Directory might already exist
-    }
-    
-    // Save form schema to file system (in production, you'd use a database)
+    // Save form schema to Vercel KV
     const formData = {
       id: formId,
       schema: formSchema,
@@ -33,8 +26,7 @@ export async function POST(request: NextRequest) {
       submissions: []
     }
     
-    const filePath = join(dataDir, `${formId}.json`)
-    writeFileSync(filePath, JSON.stringify(formData, null, 2))
+    await redis.set(`form:${formId}`, formData)
     
     return NextResponse.json({ 
       formId,
