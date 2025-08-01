@@ -36,6 +36,8 @@ export default function Dashboard() {
     saveChanges,
     discardChanges,
     toggleRequired,
+    handleSizeChange,
+    sizeConfig,
     getEffectiveFormSchema
   } = useFormEditing(formSchema)
 
@@ -130,6 +132,8 @@ export default function Dashboard() {
         onSaveEdit={saveEdit}
         onCancelEdit={cancelEdit}
         onToggleRequired={toggleRequired}
+        sizeConfig={sizeConfig}
+        onSizeChange={handleSizeChange}
         submitButtonText={getEffectiveButtonText()}
       />
     </div>

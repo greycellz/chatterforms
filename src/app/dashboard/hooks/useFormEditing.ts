@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { SizeType, SizeConfig } from '../components/SizeUtilities'
 
 interface FormField {
   id: string
@@ -7,17 +8,23 @@ interface FormField {
   required: boolean
   placeholder?: string
   options?: string[]
+  size?: SizeType
 }
 
 interface FormSchema {
   title: string
   fields: FormField[]
+  styling?: {
+    globalFontSize?: SizeType
+    fieldSizes?: Record<string, SizeType>
+  }
 }
 
 interface PendingChanges {
   title?: string
   fields?: (Partial<FormField> & { id?: string })[]
   submitButtonText?: string
+  sizeConfig?: Partial<SizeConfig>
 }
 
 export function useFormEditing(formSchema: FormSchema | null) {
@@ -25,6 +32,22 @@ export function useFormEditing(formSchema: FormSchema | null) {
   const [pendingChanges, setPendingChanges] = useState<PendingChanges>({})
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
   const [editValue, setEditValue] = useState('')
+  
+  // Initialize size config from form schema or defaults
+  const [sizeConfig, setSizeConfig] = useState<SizeConfig>(() => ({
+    globalFontSize: formSchema?.styling?.globalFontSize || 'm',
+    fieldSizes: formSchema?.styling?.fieldSizes || {}
+  }))
+
+  // Update size config when form schema changes
+  useEffect(() => {
+    if (formSchema?.styling) {
+      setSizeConfig({
+        globalFontSize: formSchema.styling.globalFontSize || 'm',
+        fieldSizes: formSchema.styling.fieldSizes || {}
+      })
+    }
+  }, [formSchema])
 
   // Get the effective form schema with pending changes applied
   const getEffectiveFormSchema = (): FormSchema | null => {
@@ -37,15 +60,31 @@ export function useFormEditing(formSchema: FormSchema | null) {
       effective.title = pendingChanges.title
     }
 
-    // Apply pending field changes
-    if (pendingChanges.fields) {
-      effective.fields = effective.fields.map((field, index) => {
-        const pendingField = pendingChanges.fields?.[index]
-        if (pendingField) {
-          return { ...field, ...pendingField }
-        }
-        return field
-      })
+    // Apply pending field changes AND size changes
+    effective.fields = effective.fields.map((field, index) => {
+      const pendingField = pendingChanges.fields?.[index]
+      const fieldSize = sizeConfig.fieldSizes[field.id]
+      
+      let updatedField = { ...field }
+      
+      // Apply pending changes
+      if (pendingField) {
+        updatedField = { ...updatedField, ...pendingField }
+      }
+      
+      // Apply size changes
+      if (fieldSize) {
+        updatedField.size = fieldSize
+      }
+      
+      return updatedField
+    })
+
+    // Apply styling changes
+    effective.styling = {
+      ...effective.styling,
+      globalFontSize: sizeConfig.globalFontSize,
+      fieldSizes: sizeConfig.fieldSizes
     }
 
     return effective
@@ -163,7 +202,7 @@ export function useFormEditing(formSchema: FormSchema | null) {
   const saveChanges = (): FormSchema | null => {
     const effective = getEffectiveFormSchema()
     if (effective) {
-      // Only clear field and title changes, preserve button text
+      // Only clear field and title changes, preserve button text and sizing
       setPendingChanges({
         submitButtonText: pendingChanges.submitButtonText
       })
@@ -173,7 +212,18 @@ export function useFormEditing(formSchema: FormSchema | null) {
     return null
   }
 
-  // Toggle required status for a field
+  // Handle size changes
+  const handleSizeChange = (fieldId: string | 'global', size: SizeType) => {
+    if (fieldId === 'global') {
+      setSizeConfig(prev => ({ ...prev, globalFontSize: size }))
+    } else {
+      setSizeConfig(prev => ({
+        ...prev,
+        fieldSizes: { ...prev.fieldSizes, [fieldId]: size }
+      }))
+    }
+    setHasUnsavedChanges(true)
+  }
   const toggleRequired = (fieldId: string, required: boolean) => {
     if (!formSchema) return
 
@@ -207,6 +257,7 @@ export function useFormEditing(formSchema: FormSchema | null) {
     hasUnsavedChanges,
     editValue,
     setEditValue,
+    sizeConfig,
     
     // Actions
     startEditing,
@@ -215,6 +266,7 @@ export function useFormEditing(formSchema: FormSchema | null) {
     saveChanges,
     discardChanges,
     toggleRequired,
+    handleSizeChange,
     getEffectiveFormSchema
   }
 }

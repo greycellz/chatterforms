@@ -1,4 +1,5 @@
 import EditableText from './EditableText'
+import { getInputSizeClasses, SizeType } from '../components/SizeUtilities'
 
 interface FormField {
   id: string
@@ -7,10 +8,12 @@ interface FormField {
   required: boolean
   placeholder?: string
   options?: string[]
+  size?: SizeType
 }
 
 interface FormFieldComponentProps {
   field: FormField
+  globalSize: SizeType
   // Add editing props to make radio options editable
   onStartEditing?: (fieldType: 'options', fieldId: string, optionIndex: number) => void
   editingField?: string | null
@@ -22,6 +25,7 @@ interface FormFieldComponentProps {
 
 export default function FormField({ 
   field, 
+  globalSize,
   onStartEditing,
   editingField,
   editValue,
@@ -29,7 +33,10 @@ export default function FormField({
   onSaveEdit,
   onCancelEdit
 }: FormFieldComponentProps) {
-  const baseClasses = "w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 bg-white"
+  const baseClasses = "w-full border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 bg-white"
+  // Use field-specific size if available, otherwise fall back to global size
+  const effectiveSize = field.size || globalSize
+  const sizeClasses = getInputSizeClasses(effectiveSize)
 
   switch (field.type) {
     case 'textarea':

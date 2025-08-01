@@ -1,6 +1,8 @@
 import EditableText from './EditableText'
 import FormField from './FormField'
 import RequiredToggle from './RequiredToggle'
+import SizeSlider from './SizeSlider'
+import { getTextSizeClasses, getButtonSizeClasses, SizeType, SizeConfig } from '../components/SizeUtilities'
 
 interface FormField {
   id: string
@@ -9,6 +11,7 @@ interface FormField {
   required: boolean
   placeholder?: string
   options?: string[]
+  size?: SizeType
 }
 
 interface FormSchema {
@@ -30,6 +33,8 @@ interface FormPreviewProps {
   onSaveEdit: () => void
   onCancelEdit: () => void
   onToggleRequired: (fieldId: string, required: boolean) => void
+  sizeConfig: SizeConfig
+  onSizeChange: (fieldId: string | 'global', size: SizeType) => void
   
   // Submit button text
   submitButtonText: string
@@ -47,6 +52,8 @@ export default function FormPreview({
   onSaveEdit,
   onCancelEdit,
   onToggleRequired,
+  sizeConfig,
+  onSizeChange,
   submitButtonText
 }: FormPreviewProps) {
   
@@ -71,11 +78,26 @@ export default function FormPreview({
       <div className="bg-white border-2 border-black rounded-lg p-6">
         {formSchema ? (
           <div className="space-y-4">
+            {/* Global Font Size Slider */}
+            <div className="mb-6 p-3 bg-gray-50 rounded-lg border">
+              <SizeSlider
+                currentSize={sizeConfig.globalFontSize}
+                onSizeChange={onSizeChange}
+                isGlobal={true}
+                label="Global Font Size"
+              />
+              {hasUnsavedChanges && (
+                <div className="text-xs text-orange-600 mt-1">
+                  ⚠️ Size changes need to be saved and republished
+                </div>
+              )}
+            </div>
+            
             {/* Editable Form Title */}
             <EditableText
               text={effectiveFormSchema?.title || formSchema.title}
               editKey="title"
-              className="text-xl font-bold text-gray-900 mb-6 inline-block"
+              className={`font-bold text-gray-900 mb-6 inline-block ${getTextSizeClasses(sizeConfig.globalFontSize, 'title')}`}
               onStartEdit={() => onStartEditing('title')}
               isEditing={editingField === 'title'}
               editValue={editValue}
@@ -84,14 +106,28 @@ export default function FormPreview({
               onCancel={onCancelEdit}
             />
             
-            {effectiveFormSchema?.fields.map((field, index) => (
-              <div key={field.id} className="space-y-2">
+            {effectiveFormSchema?.fields.map((field, index) => {
+              // Debug: Get the current field size
+              const currentFieldSize = sizeConfig.fieldSizes[field.id] || field.size || 'm'
+              
+              return (
+              <div key={field.id} className="space-y-2 relative">
+                {/* Field Size Slider - positioned top-right */}
+                <div className="flex justify-end mb-1">
+                  <SizeSlider
+                    fieldId={field.id}
+                    currentSize={currentFieldSize}
+                    onSizeChange={onSizeChange}
+                    label="Field Size"
+                  />
+                </div>
+                
                 {/* Editable Field Label with Required Toggle */}
                 <div className="flex items-center">
                   <EditableText
                     text={field.label}
                     editKey={`label-${field.id}`}
-                    className="block text-sm font-medium text-gray-700"
+                    className={`block font-medium text-gray-700 ${getTextSizeClasses(sizeConfig.globalFontSize, 'label')}`}
                     onStartEdit={() => onStartEditing('label', field.id, index)}
                     isEditing={editingField === `label-${field.id}`}
                     editValue={editValue}
@@ -111,7 +147,11 @@ export default function FormPreview({
                 
                 {/* Form Field with integrated editing for radio options */}
                 <FormField 
-                  field={field}
+                  field={{
+                    ...field,
+                    size: currentFieldSize
+                  }}
+                  globalSize={sizeConfig.globalFontSize}
                   onStartEditing={(fieldType, fieldId, optionIndex) => {
                     if (fieldType === 'options' && optionIndex !== undefined) {
                       handleRadioOptionEdit(fieldId, optionIndex)
@@ -158,13 +198,13 @@ export default function FormPreview({
                   </div>
                 )}
               </div>
-            )) || []}
-            
+            )})
+        } 
             {/* Editable Submit Button */}
             <EditableText
               text={submitButtonText}
               editKey="submitButton"
-              className="mt-6 bg-green-600 text-white py-2 px-6 rounded-lg hover:bg-green-700 transition-colors"
+              className={`mt-6 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors ${getButtonSizeClasses(sizeConfig.globalFontSize)}`}
               onStartEdit={() => onStartEditing('submitButton')}
               isButton={true}
               isEditing={editingField === 'submitButton'}
