@@ -78,6 +78,8 @@ Return the complete updated form schema.`
     }
 
     const formSchema = JSON.parse(content)
+
+    console.log('Form Schema: ',formSchema)
     
     return NextResponse.json({ formSchema })
   } catch (error) {

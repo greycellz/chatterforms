@@ -30,6 +30,7 @@ interface FormData {
   schema: FormSchema
   createdAt: string
   submissions: FormSubmission[]
+  submitButtonText?: string // Add button text to interface
 }
 
 async function getFormData(formId: string): Promise<FormData | null> {
@@ -70,6 +71,7 @@ export default async function PublicFormPage({
           <PublicFormClient 
             formSchema={formData.schema} 
             formId={formData.id}
+            submitButtonText={formData.submitButtonText} // Pass button text
           />
         </div>
       </div>

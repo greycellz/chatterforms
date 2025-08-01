@@ -8,11 +8,9 @@ function generateFormId(): string {
   return Math.random().toString(36).substring(2, 8) + Date.now().toString(36)
 }
 
-
-
 export async function POST(request: NextRequest) {
   try {
-    const { formSchema } = await request.json()
+    const { formSchema, submitButtonText } = await request.json()
     
     if (!formSchema || !formSchema.fields || formSchema.fields.length === 0) {
       return NextResponse.json({ error: 'Invalid form schema' }, { status: 400 })
@@ -20,12 +18,13 @@ export async function POST(request: NextRequest) {
 
     const formId = generateFormId()
     
-    // Save form schema to Vercel KV
+    // Save form schema to Redis with button text
     const formData = {
       id: formId,
       schema: formSchema,
       createdAt: new Date().toISOString(),
-      submissions: []
+      submissions: [],
+      submitButtonText: submitButtonText || 'Submit Form' // Include button text
     }
     
     await redis.set(`form:${formId}`, formData)

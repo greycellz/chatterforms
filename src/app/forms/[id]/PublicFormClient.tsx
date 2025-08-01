@@ -19,9 +19,10 @@ interface FormSchema {
 interface PublicFormClientProps {
   formSchema: FormSchema
   formId: string
+  submitButtonText?: string
 }
 
-export default function PublicFormClient({ formSchema, formId }: PublicFormClientProps) {
+export default function PublicFormClient({ formSchema, formId, submitButtonText = 'Submit Form' }: PublicFormClientProps) {
   const [formData, setFormData] = useState<Record<string, string | boolean | string[]>>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
@@ -64,7 +65,7 @@ export default function PublicFormClient({ formSchema, formId }: PublicFormClien
   }
 
   const renderField = (field: FormField) => {
-    const baseClasses = "w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+    const baseClasses = "w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 bg-white"
 
     switch (field.type) {
       case 'textarea':
@@ -94,6 +95,25 @@ export default function PublicFormClient({ formSchema, formId }: PublicFormClien
               </option>
             ))}
           </select>
+        )
+      case 'radio':
+        return (
+          <div key={field.id} className="space-y-3">
+            {field.options?.map((option, idx) => (
+              <label key={idx} className="flex items-center space-x-3 cursor-pointer">
+                <input
+                  type="radio"
+                  name={field.id}
+                  value={option}
+                  checked={formData[field.id] === option}
+                  onChange={(e) => handleInputChange(field.id, e.target.value)}
+                  className="w-4 h-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                  required={field.required}
+                />
+                <span className="text-sm text-gray-900 font-medium">{option}</span>
+              </label>
+            ))}
+          </div>
         )
       case 'checkbox':
         return (
@@ -160,7 +180,7 @@ export default function PublicFormClient({ formSchema, formId }: PublicFormClien
         disabled={isSubmitting}
         className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
       >
-        {isSubmitting ? 'Submitting...' : 'Submit Form'}
+        {isSubmitting ? 'Submitting...' : submitButtonText}
       </button>
     </form>
   )
