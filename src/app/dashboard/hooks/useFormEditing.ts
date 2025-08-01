@@ -173,6 +173,25 @@ export function useFormEditing(formSchema: FormSchema | null) {
     return null
   }
 
+  // Toggle required status for a field
+  const toggleRequired = (fieldId: string, required: boolean) => {
+    if (!formSchema) return
+
+    const fieldIndex = formSchema.fields.findIndex(f => f.id === fieldId)
+    if (fieldIndex === -1) return
+
+    const newPendingChanges = { ...pendingChanges }
+    if (!newPendingChanges.fields) {
+      newPendingChanges.fields = []
+    }
+    if (!newPendingChanges.fields[fieldIndex]) {
+      newPendingChanges.fields[fieldIndex] = { id: fieldId }
+    }
+
+    newPendingChanges.fields[fieldIndex].required = required
+    setPendingChanges(newPendingChanges)
+    setHasUnsavedChanges(true)
+  }
   // Discard pending changes
   const discardChanges = () => {
     setPendingChanges({})
@@ -195,6 +214,7 @@ export function useFormEditing(formSchema: FormSchema | null) {
     cancelEdit,
     saveChanges,
     discardChanges,
+    toggleRequired,
     getEffectiveFormSchema
   }
 }

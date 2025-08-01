@@ -1,5 +1,6 @@
 import EditableText from './EditableText'
 import FormField from './FormField'
+import RequiredToggle from './RequiredToggle'
 
 interface FormField {
   id: string
@@ -28,6 +29,7 @@ interface FormPreviewProps {
   onStartEditing: (fieldType: 'title' | 'label' | 'placeholder' | 'options' | 'submitButton', fieldId?: string, fieldIndex?: number, optionIndex?: number) => void
   onSaveEdit: () => void
   onCancelEdit: () => void
+  onToggleRequired: (fieldId: string, required: boolean) => void
   
   // Submit button text
   submitButtonText: string
@@ -44,6 +46,7 @@ export default function FormPreview({
   onStartEditing,
   onSaveEdit,
   onCancelEdit,
+  onToggleRequired,
   submitButtonText
 }: FormPreviewProps) {
   
@@ -64,8 +67,8 @@ export default function FormPreview({
         )}
       </div>
       
-      {/* Form Preview Container - Black Border, Light Blue Background */}
-      <div className="bg-blue-50 border-2 border-black rounded-lg p-6">
+      {/* Form Preview Container - Black Border, White Background (consistent with published form) */}
+      <div className="bg-white border-2 border-black rounded-lg p-6">
         {formSchema ? (
           <div className="space-y-4">
             {/* Editable Form Title */}
@@ -83,7 +86,7 @@ export default function FormPreview({
             
             {effectiveFormSchema?.fields.map((field, index) => (
               <div key={field.id} className="space-y-2">
-                {/* Editable Field Label */}
+                {/* Editable Field Label with Required Toggle */}
                 <div className="flex items-center">
                   <EditableText
                     text={field.label}
@@ -97,6 +100,13 @@ export default function FormPreview({
                     onCancel={onCancelEdit}
                   />
                   {field.required && <span className="text-red-500 ml-1">*</span>}
+                  
+                  {/* Required/Optional Toggle */}
+                  <RequiredToggle
+                    fieldId={field.id}
+                    isRequired={field.required}
+                    onToggle={onToggleRequired}
+                  />
                 </div>
                 
                 {/* Form Field with integrated editing for radio options */}

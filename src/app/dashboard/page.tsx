@@ -35,6 +35,7 @@ export default function Dashboard() {
     cancelEdit,
     saveChanges,
     discardChanges,
+    toggleRequired,
     getEffectiveFormSchema
   } = useFormEditing(formSchema)
 
@@ -128,6 +129,7 @@ export default function Dashboard() {
         onStartEditing={startEditing}
         onSaveEdit={saveEdit}
         onCancelEdit={cancelEdit}
+        onToggleRequired={toggleRequired}
         submitButtonText={getEffectiveButtonText()}
       />
     </div>
