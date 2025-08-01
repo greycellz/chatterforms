@@ -25,7 +25,7 @@ interface FormPreviewProps {
   editingField: string | null
   editValue: string
   onEditValueChange: (value: string) => void
-  onStartEditing: (fieldType: 'title' | 'label' | 'placeholder' | 'options' | 'submitButton', fieldId?: string, fieldIndex?: number) => void
+  onStartEditing: (fieldType: 'title' | 'label' | 'placeholder' | 'options' | 'submitButton', fieldId?: string, fieldIndex?: number, optionIndex?: number) => void
   onSaveEdit: () => void
   onCancelEdit: () => void
   
@@ -46,6 +46,13 @@ export default function FormPreview({
   onCancelEdit,
   submitButtonText
 }: FormPreviewProps) {
+  
+  // Handle individual radio option editing
+  const handleRadioOptionEdit = (fieldId: string, optionIndex: number) => {
+    const fieldIndex = effectiveFormSchema?.fields.findIndex(f => f.id === fieldId) ?? -1
+    onStartEditing('options', fieldId, fieldIndex, optionIndex)
+  }
+
   return (
     <div className="flex-1 bg-white p-6">
       <div className="flex justify-between items-center mb-4">
@@ -92,8 +99,20 @@ export default function FormPreview({
                   {field.required && <span className="text-red-500 ml-1">*</span>}
                 </div>
                 
-                {/* Form Field */}
-                <FormField field={field} />
+                {/* Form Field with integrated editing for radio options */}
+                <FormField 
+                  field={field}
+                  onStartEditing={(fieldType, fieldId, optionIndex) => {
+                    if (fieldType === 'options' && optionIndex !== undefined) {
+                      handleRadioOptionEdit(fieldId, optionIndex)
+                    }
+                  }}
+                  editingField={editingField}
+                  editValue={editValue}
+                  onEditValueChange={onEditValueChange}
+                  onSaveEdit={onSaveEdit}
+                  onCancelEdit={onCancelEdit}
+                />
                 
                 {/* Editable Placeholder (for applicable field types) */}
                 {(field.type === 'text' || field.type === 'email' || field.type === 'tel' || field.type === 'textarea') && field.placeholder && (
@@ -112,8 +131,8 @@ export default function FormPreview({
                   </div>
                 )}
                 
-                {/* Editable Options (for select fields) */}
-                {(field.type === 'select' || field.type === 'radio') && field.options && (
+                {/* Editable Options (only for select fields, radio options are now inline) */}
+                {field.type === 'select' && field.options && (
                   <div className="text-xs text-gray-500">
                     Options: <EditableText
                       text={field.options.join(', ')}

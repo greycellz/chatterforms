@@ -26,11 +26,14 @@ export function useFormGeneration() {
   const [publishedFormId, setPublishedFormId] = useState<string | null>(null)
   const [error, setError] = useState('')
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([])
+  // Add state to track custom button text
+  const [customButtonText, setCustomButtonText] = useState<string>('Submit Form')
 
   const generateForm = async (
     description: string, 
     currentForm: FormSchema | null = null,
-    isEdit: boolean = false
+    isEdit: boolean = false,
+    preserveButtonText?: string
   ) => {
     if (!description.trim()) return
 
@@ -57,6 +60,11 @@ export function useFormGeneration() {
       }
 
       setFormSchema(data.formSchema)
+      
+      // Preserve custom button text during updates
+      if (isEdit && preserveButtonText) {
+        setCustomButtonText(preserveButtonText)
+      }
       
       // Add to chat history
       setChatHistory(prev => [
@@ -114,6 +122,11 @@ export function useFormGeneration() {
     setFormSchema(newSchema)
   }
 
+  // Add method to update button text
+  const updateButtonText = (buttonText: string) => {
+    setCustomButtonText(buttonText)
+  }
+
   const clearError = () => setError('')
 
   return {
@@ -124,11 +137,13 @@ export function useFormGeneration() {
     publishedFormId,
     error,
     chatHistory,
+    customButtonText,
 
     // Actions
     generateForm,
     publishForm,
     updateFormSchema,
+    updateButtonText,
     clearError
   }
 }

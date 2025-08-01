@@ -55,15 +55,20 @@ export function useFormEditing(formSchema: FormSchema | null) {
   const startEditing = (
     fieldType: 'title' | 'label' | 'placeholder' | 'options' | 'submitButton',
     fieldId?: string,
-    fieldIndex?: number
+    fieldIndex?: number,
+    optionIndex?: number
   ) => {
     const effective = getEffectiveFormSchema()
     if (!effective) return
 
     let currentValue = ''
-    const editKey = fieldId ? `${fieldType}-${fieldId}` : fieldType
+    let editKey = fieldId ? `${fieldType}-${fieldId}` : fieldType
 
-    if (fieldType === 'title') {
+    // Handle individual radio option editing
+    if (fieldType === 'options' && optionIndex !== undefined && fieldIndex !== undefined) {
+      editKey = `option-${fieldId}-${optionIndex}`
+      currentValue = effective.fields[fieldIndex]?.options?.[optionIndex] || ''
+    } else if (fieldType === 'title') {
       currentValue = effective.title
     } else if (fieldType === 'submitButton') {
       currentValue = pendingChanges.submitButtonText || 'Submit Form'
@@ -83,37 +88,67 @@ export function useFormEditing(formSchema: FormSchema | null) {
   const saveEdit = () => {
     if (!editingField || !formSchema) return
 
-    const [fieldType, fieldId] = editingField.split('-')
-    const fieldIndex = fieldId ? formSchema.fields.findIndex(f => f.id === fieldId) : -1
+    // Handle individual radio option editing
+    if (editingField.startsWith('option-')) {
+      const parts = editingField.split('-')
+      const fieldId = parts[1]
+      const optionIndex = parseInt(parts[2], 10)
+      const fieldIndex = formSchema.fields.findIndex(f => f.id === fieldId)
 
-    const newPendingChanges = { ...pendingChanges }
+      if (fieldIndex !== -1 && !isNaN(optionIndex)) {
+        const newPendingChanges = { ...pendingChanges }
+        if (!newPendingChanges.fields) {
+          newPendingChanges.fields = []
+        }
+        if (!newPendingChanges.fields[fieldIndex]) {
+          newPendingChanges.fields[fieldIndex] = { id: fieldId }
+        }
 
-    if (fieldType === 'title') {
-      newPendingChanges.title = editValue
-    } else if (fieldType === 'submitButton') {
-      newPendingChanges.submitButtonText = editValue
-    } else if (fieldIndex !== -1) {
-      if (!newPendingChanges.fields) {
-        newPendingChanges.fields = []
+        // Update the specific option
+        const currentOptions = newPendingChanges.fields[fieldIndex].options || 
+                             formSchema.fields[fieldIndex].options || []
+        const updatedOptions = [...currentOptions]
+        updatedOptions[optionIndex] = editValue
+
+        newPendingChanges.fields[fieldIndex].options = updatedOptions
+        setPendingChanges(newPendingChanges)
+        setHasUnsavedChanges(true)
       }
-      if (!newPendingChanges.fields[fieldIndex]) {
-        newPendingChanges.fields[fieldIndex] = { id: fieldId }
+    } else {
+      // Handle regular field editing
+      const [fieldType, fieldId] = editingField.split('-')
+      const fieldIndex = fieldId ? formSchema.fields.findIndex(f => f.id === fieldId) : -1
+
+      const newPendingChanges = { ...pendingChanges }
+
+      if (fieldType === 'title') {
+        newPendingChanges.title = editValue
+      } else if (fieldType === 'submitButton') {
+        newPendingChanges.submitButtonText = editValue
+      } else if (fieldIndex !== -1) {
+        if (!newPendingChanges.fields) {
+          newPendingChanges.fields = []
+        }
+        if (!newPendingChanges.fields[fieldIndex]) {
+          newPendingChanges.fields[fieldIndex] = { id: fieldId }
+        }
+
+        if (fieldType === 'label') {
+          newPendingChanges.fields[fieldIndex].label = editValue
+        } else if (fieldType === 'placeholder') {
+          newPendingChanges.fields[fieldIndex].placeholder = editValue
+        } else if (fieldType === 'options') {
+          newPendingChanges.fields[fieldIndex].options = editValue
+            .split(',')
+            .map(opt => opt.trim())
+            .filter(opt => opt.length > 0)
+        }
       }
 
-      if (fieldType === 'label') {
-        newPendingChanges.fields[fieldIndex].label = editValue
-      } else if (fieldType === 'placeholder') {
-        newPendingChanges.fields[fieldIndex].placeholder = editValue
-      } else if (fieldType === 'options') {
-        newPendingChanges.fields[fieldIndex].options = editValue
-          .split(',')
-          .map(opt => opt.trim())
-          .filter(opt => opt.length > 0)
-      }
+      setPendingChanges(newPendingChanges)
+      setHasUnsavedChanges(true)
     }
 
-    setPendingChanges(newPendingChanges)
-    setHasUnsavedChanges(true)
     setEditingField(null)
     setEditValue('')
   }

@@ -17,9 +17,11 @@ export default function Dashboard() {
     publishedFormId,
     error,
     chatHistory,
+    customButtonText,
     generateForm,
     publishForm,
-    updateFormSchema
+    updateFormSchema,
+    updateButtonText
   } = useFormGeneration()
 
   const {
@@ -36,6 +38,11 @@ export default function Dashboard() {
     getEffectiveFormSchema
   } = useFormEditing(formSchema)
 
+  // Get the current effective button text (pending changes take priority)
+  const getEffectiveButtonText = () => {
+    return pendingChanges.submitButtonText || customButtonText
+  }
+
   // Handler functions
   const handleGenerateForm = async () => {
     try {
@@ -51,7 +58,11 @@ export default function Dashboard() {
   const handleUpdateForm = async () => {
     try {
       const effectiveForm = getEffectiveFormSchema()
-      await generateForm(description, effectiveForm, true)
+      const currentButtonText = getEffectiveButtonText()
+      
+      // Pass the current button text to preserve it during update
+      await generateForm(description, effectiveForm, true, currentButtonText)
+      
       // Clear pending changes after successful generation
       discardChanges()
       setDescription('')
@@ -64,6 +75,11 @@ export default function Dashboard() {
     const updatedSchema = saveChanges()
     if (updatedSchema) {
       updateFormSchema(updatedSchema)
+      
+      // Also save the button text to the persistent state
+      if (pendingChanges.submitButtonText) {
+        updateButtonText(pendingChanges.submitButtonText)
+      }
     }
   }
 
@@ -71,10 +87,9 @@ export default function Dashboard() {
     try {
       const effectiveForm = getEffectiveFormSchema()
       if (effectiveForm) {
-        await publishForm(
-          effectiveForm, 
-          pendingChanges.submitButtonText || 'Submit Form'
-        )
+        const effectiveButtonText = getEffectiveButtonText()
+        await publishForm(effectiveForm, effectiveButtonText)
+        
         // Save changes after successful publish
         handleSaveChanges()
       }
@@ -113,7 +128,7 @@ export default function Dashboard() {
         onStartEditing={startEditing}
         onSaveEdit={saveEdit}
         onCancelEdit={cancelEdit}
-        submitButtonText={pendingChanges.submitButtonText || 'Submit Form'}
+        submitButtonText={getEffectiveButtonText()}
       />
     </div>
   )
