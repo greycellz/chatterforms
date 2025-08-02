@@ -171,7 +171,7 @@ export default function PublicFormClient({ formSchema, formId, submitButtonText 
                   className="w-4 h-4 text-blue-600 focus:ring-blue-500 border-gray-300"
                   required={field.required}
                 />
-                <span className={`font-medium ${getTextSizeClasses(globalSize, 'label')}`}>{option}</span>
+                <span className={`text-gray-900 font-medium ${getTextSizeClasses(globalSize, 'label')}`}>{option}</span>
               </label>
             ))}
           </div>
