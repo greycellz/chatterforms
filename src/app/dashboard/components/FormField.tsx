@@ -1,5 +1,5 @@
 import EditableText from './EditableText'
-import { getInputSizeClasses, SizeType } from '../components/SizeUtilities'
+import { getInputSizeClasses, getTextSizeClasses, SizeType, StylingConfig } from '../components/SizeUtilities'
 
 interface FormField {
   id: string
@@ -14,6 +14,7 @@ interface FormField {
 interface FormFieldComponentProps {
   field: FormField
   globalSize: SizeType
+  stylingConfig: StylingConfig
   // Add editing props to make radio options editable
   onStartEditing?: (fieldType: 'options', fieldId: string, optionIndex: number) => void
   editingField?: string | null
@@ -26,6 +27,7 @@ interface FormFieldComponentProps {
 export default function FormField({ 
   field, 
   globalSize,
+  stylingConfig,
   onStartEditing,
   editingField,
   editValue,
@@ -33,10 +35,17 @@ export default function FormField({
   onSaveEdit,
   onCancelEdit
 }: FormFieldComponentProps) {
-  const baseClasses = "w-full border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 bg-white"
+  const baseClasses = "w-full border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
   // Use field-specific size if available, otherwise fall back to global size
   const effectiveSize = field.size || globalSize
   const sizeClasses = getInputSizeClasses(effectiveSize)
+
+  // Keep input fields white with gray-900 text (as requested)
+  const inputStyle = {
+    fontFamily: stylingConfig.fontFamily,
+    color: '#111827', // gray-900
+    backgroundColor: '#ffffff' // white
+  }
 
   switch (field.type) {
     case 'textarea':
@@ -44,14 +53,21 @@ export default function FormField({
         <textarea
           key={field.id}
           placeholder={field.placeholder}
-          className={`${baseClasses} h-24 resize-none`}
+          className={`${baseClasses} ${sizeClasses} h-24 resize-none`}
+          style={inputStyle}
           required={field.required}
           readOnly
         />
       )
     case 'select':
       return (
-        <select key={field.id} className={baseClasses} required={field.required} disabled>
+        <select 
+          key={field.id} 
+          className={`${baseClasses} ${sizeClasses}`}
+          style={inputStyle}
+          required={field.required} 
+          disabled
+        >
           <option value="">{field.placeholder || 'Choose an option'}</option>
           {field.options?.map((option, idx) => (
             <option key={idx} value={option}>
@@ -78,16 +94,28 @@ export default function FormField({
                 <EditableText
                   text={option}
                   editKey={`option-${field.id}-${idx}`}
-                  className="text-sm text-gray-900 capitalize cursor-pointer hover:bg-blue-50 px-1 py-0.5 rounded"
+                  className={`text-sm capitalize cursor-pointer hover:bg-blue-50 px-1 py-0.5 rounded ${getTextSizeClasses(globalSize, 'label')}`}
                   onStartEdit={() => onStartEditing('options', field.id, idx)}
                   isEditing={editingField === `option-${field.id}-${idx}`}
                   editValue={editValue || ''}
                   onEditValueChange={onEditValueChange || (() => {})}
                   onSave={onSaveEdit || (() => {})}
                   onCancel={onCancelEdit || (() => {})}
+                  style={{
+                    fontFamily: stylingConfig.fontFamily,
+                    color: stylingConfig.fontColor
+                  }}
                 />
               ) : (
-                <span className="text-sm text-gray-900 capitalize">{option}</span>
+                <span 
+                  className={`text-sm capitalize ${getTextSizeClasses(globalSize, 'label')}`}
+                  style={{
+                    fontFamily: stylingConfig.fontFamily,
+                    color: stylingConfig.fontColor
+                  }}
+                >
+                  {option}
+                </span>
               )}
             </div>
           )) || []}
@@ -102,7 +130,14 @@ export default function FormField({
             required={field.required}
             disabled
           />
-          <span>{field.label}</span>
+          <span 
+            style={{
+              fontFamily: stylingConfig.fontFamily,
+              color: stylingConfig.fontColor
+            }}
+          >
+            {field.label}
+          </span>
         </label>
       )
     default:
@@ -111,7 +146,8 @@ export default function FormField({
           key={field.id}
           type={field.type}
           placeholder={field.placeholder}
-          className={baseClasses}
+          className={`${baseClasses} ${sizeClasses}`}
+          style={inputStyle}
           required={field.required}
           readOnly
         />

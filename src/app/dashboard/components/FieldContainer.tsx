@@ -2,7 +2,7 @@ import FormField from './FormField'
 import FieldLabelWithToggle from './FieldLabelWithToggle'
 import FieldMetadata from './FieldMetaData'
 import SizeSlider from './SizeSlider'
-import { SizeType } from '../components/SizeUtilities'
+import { SizeType, StylingConfig } from '../components/SizeUtilities'
 
 interface FormFieldType {
   id: string
@@ -19,6 +19,7 @@ interface FieldContainerProps {
   fieldIndex: number
   currentFieldSize: SizeType
   globalSize: SizeType
+  stylingConfig: StylingConfig
   editingField: string | null
   editValue: string
   onEditValueChange: (value: string) => void
@@ -35,6 +36,7 @@ export default function FieldContainer({
   fieldIndex,
   currentFieldSize,
   globalSize,
+  stylingConfig,
   editingField,
   editValue,
   onEditValueChange,
@@ -64,6 +66,7 @@ export default function FieldContainer({
         label={field.label}
         isRequired={field.required}
         globalSize={globalSize}
+        stylingConfig={stylingConfig}
         editingField={editingField}
         editValue={editValue}
         onEditValueChange={onEditValueChange}
@@ -80,6 +83,7 @@ export default function FieldContainer({
           size: currentFieldSize
         }}
         globalSize={globalSize}
+        stylingConfig={stylingConfig}
         onStartEditing={(fieldType, fieldId, optionIndex) => {
           if (fieldType === 'options' && optionIndex !== undefined) {
             onRadioOptionEdit(fieldId, optionIndex)

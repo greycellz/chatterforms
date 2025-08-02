@@ -1,5 +1,12 @@
 export type SizeType = 'xs' | 's' | 'm' | 'l' | 'xl'
 
+export interface StylingConfig {
+  fontFamily: string
+  fontColor: string
+  backgroundColor: string
+  buttonColor: string
+}
+
 export interface SizeConfig {
   globalFontSize: SizeType
   fieldSizes: Record<string, SizeType>

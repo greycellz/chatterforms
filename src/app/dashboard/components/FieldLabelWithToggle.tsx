@@ -1,6 +1,6 @@
 import EditableText from './EditableText'
 import RequiredToggle from './RequiredToggle'
-import { getTextSizeClasses, SizeType } from '../components/SizeUtilities'
+import { getTextSizeClasses, SizeType, StylingConfig } from '../components/SizeUtilities'
 
 interface FieldLabelWithToggleProps {
   fieldId: string
@@ -8,6 +8,7 @@ interface FieldLabelWithToggleProps {
   label: string
   isRequired: boolean
   globalSize: SizeType
+  stylingConfig: StylingConfig
   editingField: string | null
   editValue: string
   onEditValueChange: (value: string) => void
@@ -23,6 +24,7 @@ export default function FieldLabelWithToggle({
   label,
   isRequired,
   globalSize,
+  stylingConfig,
   editingField,
   editValue,
   onEditValueChange,
@@ -36,13 +38,17 @@ export default function FieldLabelWithToggle({
       <EditableText
         text={label}
         editKey={`label-${fieldId}`}
-        className={`block font-medium text-gray-700 ${getTextSizeClasses(globalSize, 'label')}`}
+        className={`block font-medium ${getTextSizeClasses(globalSize, 'label')}`}
         onStartEdit={() => onStartEditing('label', fieldId, fieldIndex)}
         isEditing={editingField === `label-${fieldId}`}
         editValue={editValue}
         onEditValueChange={onEditValueChange}
         onSave={onSaveEdit}
         onCancel={onCancelEdit}
+        style={{
+          fontFamily: stylingConfig.fontFamily,
+          color: stylingConfig.fontColor
+        }}
       />
       {isRequired && <span className="text-red-500 ml-1">*</span>}
       

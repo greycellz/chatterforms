@@ -1,9 +1,10 @@
 import EditableText from './EditableText'
-import { getButtonSizeClasses, SizeType } from '../components/SizeUtilities'
+import { getButtonSizeClasses, SizeType, StylingConfig } from '../components/SizeUtilities'
 
 interface SubmitButtonEditorProps {
   submitButtonText: string
   globalSize: SizeType
+  stylingConfig: StylingConfig
   editingField: string | null
   editValue: string
   onEditValueChange: (value: string) => void
@@ -15,6 +16,7 @@ interface SubmitButtonEditorProps {
 export default function SubmitButtonEditor({
   submitButtonText,
   globalSize,
+  stylingConfig,
   editingField,
   editValue,
   onEditValueChange,
@@ -26,7 +28,7 @@ export default function SubmitButtonEditor({
     <EditableText
       text={submitButtonText}
       editKey="submitButton"
-      className={`mt-6 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors ${getButtonSizeClasses(globalSize)}`}
+      className={`mt-6 text-white rounded-lg transition-colors ${getButtonSizeClasses(globalSize)}`}
       onStartEdit={() => onStartEditing('submitButton')}
       isButton={true}
       isEditing={editingField === 'submitButton'}
@@ -34,6 +36,10 @@ export default function SubmitButtonEditor({
       onEditValueChange={onEditValueChange}
       onSave={onSaveEdit}
       onCancel={onCancelEdit}
+      style={{
+        fontFamily: stylingConfig.fontFamily,
+        background: stylingConfig.buttonColor
+      }}
     />
   )
 }

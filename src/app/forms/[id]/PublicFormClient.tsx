@@ -18,6 +18,10 @@ interface FormSchema {
   styling?: {
     globalFontSize?: string
     fieldSizes?: Record<string, string>
+    fontFamily?: string
+    fontColor?: string
+    backgroundColor?: string
+    buttonColor?: string
   }
 }
 
@@ -81,6 +85,14 @@ export default function PublicFormClient({ formSchema, formId, submitButtonText 
 
   const globalSize = formSchema.styling?.globalFontSize || 'm'
   const fieldSizes = formSchema.styling?.fieldSizes || {}
+  
+  // Get styling configuration with defaults
+  const stylingConfig = {
+    fontFamily: formSchema.styling?.fontFamily || 'Arial, sans-serif',
+    fontColor: formSchema.styling?.fontColor || '#000000',
+    backgroundColor: formSchema.styling?.backgroundColor || '#ffffff',
+    buttonColor: formSchema.styling?.buttonColor || '#3b82f6'
+  }
 
   const handleInputChange = (fieldId: string, value: string | boolean | string[]) => {
     setFormData(prev => ({
@@ -120,8 +132,15 @@ export default function PublicFormClient({ formSchema, formId, submitButtonText 
 
   const renderField = (field: FormField) => {
     const fieldSize = fieldSizes[field.id] || field.size || 'm'
-    const baseClasses = "w-full border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 bg-white"
+    const baseClasses = "w-full border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
     const sizeClasses = getInputSizeClasses(fieldSize)
+    
+    // Keep input fields white with gray-900 text (as requested)
+    const inputStyle = {
+      fontFamily: stylingConfig.fontFamily,
+      color: '#111827', // gray-900
+      backgroundColor: '#ffffff' // white
+    }
 
     switch (field.type) {
       case 'textarea':
@@ -134,6 +153,7 @@ export default function PublicFormClient({ formSchema, formId, submitButtonText 
             onChange={(e) => handleInputChange(field.id, e.target.value)}
             placeholder={field.placeholder}
             className={`${baseClasses} ${sizeClasses} h-24 resize-none`}
+            style={inputStyle}
             required={field.required}
           />
         )
@@ -145,7 +165,8 @@ export default function PublicFormClient({ formSchema, formId, submitButtonText 
             key={field.id}
             value={typeof formData[field.id] === 'string' ? formData[field.id] as string : ''}
             onChange={(e) => handleInputChange(field.id, e.target.value)}
-            className={`${baseClasses} ${sizeClasses}`} 
+            className={`${baseClasses} ${sizeClasses}`}
+            style={inputStyle}
             required={field.required}
           >
             <option value="">Choose an option</option>
@@ -171,7 +192,15 @@ export default function PublicFormClient({ formSchema, formId, submitButtonText 
                   className="w-4 h-4 text-blue-600 focus:ring-blue-500 border-gray-300"
                   required={field.required}
                 />
-                <span className={`text-gray-900 font-medium ${getTextSizeClasses(globalSize, 'label')}`}>{option}</span>
+                <span 
+                  className={`font-medium ${getTextSizeClasses(globalSize, 'label')}`}
+                  style={{
+                    fontFamily: stylingConfig.fontFamily,
+                    color: stylingConfig.fontColor
+                  }}
+                >
+                  {option}
+                </span>
               </label>
             ))}
           </div>
@@ -188,7 +217,15 @@ export default function PublicFormClient({ formSchema, formId, submitButtonText 
               className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
               required={field.required}
             />
-            <span className={getTextSizeClasses(globalSize, 'label')}>{field.label}</span>
+            <span 
+              className={getTextSizeClasses(globalSize, 'label')}
+              style={{
+                fontFamily: stylingConfig.fontFamily,
+                color: stylingConfig.fontColor
+              }}
+            >
+              {field.label}
+            </span>
           </label>
         )
       default:
@@ -202,6 +239,7 @@ export default function PublicFormClient({ formSchema, formId, submitButtonText 
             onChange={(e) => handleInputChange(field.id, e.target.value)}
             placeholder={field.placeholder}
             className={`${baseClasses} ${sizeClasses}`}
+            style={inputStyle}
             required={field.required}
           />
         )
@@ -210,43 +248,85 @@ export default function PublicFormClient({ formSchema, formId, submitButtonText 
 
   if (isSubmitted) {
     return (
-      <div className="text-center py-12">
+      <div 
+        className="text-center py-12"
+        style={{
+          background: stylingConfig.backgroundColor,
+          fontFamily: stylingConfig.fontFamily,
+          color: stylingConfig.fontColor
+        }}
+      >
         <div className="mb-4">
           <svg className="mx-auto h-16 w-16 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
           </svg>
         </div>
-        <h2 className={`font-bold text-gray-900 mb-2 ${getTextSizeClasses(globalSize, 'title')}`}>Thank you!</h2>
-        <p className={`text-gray-600 ${getTextSizeClasses(globalSize, 'label')}`}>Your form has been submitted successfully.</p>
+        <h2 
+          className={`font-bold mb-2 ${getTextSizeClasses(globalSize, 'title')}`}
+          style={{
+            fontFamily: stylingConfig.fontFamily,
+            color: stylingConfig.fontColor
+          }}
+        >
+          Thank you!
+        </h2>
+        <p 
+          className={`text-gray-600 ${getTextSizeClasses(globalSize, 'label')}`}
+          style={{
+            fontFamily: stylingConfig.fontFamily,
+            color: stylingConfig.fontColor
+          }}
+        >
+          Your form has been submitted successfully.
+        </p>
       </div>
     )
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      {formSchema.fields.map((field) => (
-        <div key={field.id} className="space-y-2">
-          <label className={`block font-medium text-gray-700 ${getTextSizeClasses(globalSize, 'label')}`}>
-            {field.label}
-            {field.required && <span className="text-red-500 ml-1">*</span>}
-          </label>
-          {renderField(field)}
-        </div>
-      ))}
-      
-      {error && (
-        <div className="text-red-600 text-sm p-3 bg-red-50 border border-red-200 rounded">
-          {error}
-        </div>
-      )}
-      
-      <button 
-        type="submit"
-        disabled={isSubmitting}
-        className={`w-full bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed ${getButtonSizeClasses(globalSize)}`}
-      >
-        {isSubmitting ? 'Submitting...' : submitButtonText}
-      </button>
-    </form>
+    <div 
+      style={{
+        background: stylingConfig.backgroundColor,
+        fontFamily: stylingConfig.fontFamily,
+        color: stylingConfig.fontColor
+      }}
+      className="p-6 rounded-lg"
+    >
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {formSchema.fields.map((field) => (
+          <div key={field.id} className="space-y-2">
+            <label 
+              className={`block font-medium ${getTextSizeClasses(globalSize, 'label')}`}
+              style={{
+                fontFamily: stylingConfig.fontFamily,
+                color: stylingConfig.fontColor
+              }}
+            >
+              {field.label}
+              {field.required && <span className="text-red-500 ml-1">*</span>}
+            </label>
+            {renderField(field)}
+          </div>
+        ))}
+        
+        {error && (
+          <div className="text-red-600 text-sm p-3 bg-red-50 border border-red-200 rounded">
+            {error}
+          </div>
+        )}
+        
+        <button 
+          type="submit"
+          disabled={isSubmitting}
+          className={`w-full text-white rounded-lg transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed ${getButtonSizeClasses(globalSize)}`}
+          style={{
+            fontFamily: stylingConfig.fontFamily,
+            background: stylingConfig.buttonColor
+          }}
+        >
+          {isSubmitting ? 'Submitting...' : submitButtonText}
+        </button>
+      </form>
+    </div>
   )
 }

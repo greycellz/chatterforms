@@ -1,7 +1,7 @@
 import FormHeader from './FormHeader'
 import FieldList from './FieldList'
 import SubmitButtonEditor from './SubmitButtonEditor'
-import { SizeType, SizeConfig } from '../components/SizeUtilities'
+import { SizeType, SizeConfig, StylingConfig } from '../components/SizeUtilities'
 
 interface FormField {
   id: string
@@ -33,7 +33,9 @@ interface FormPreviewProps {
   onCancelEdit: () => void
   onToggleRequired: (fieldId: string, required: boolean) => void
   sizeConfig: SizeConfig
+  stylingConfig: StylingConfig
   onSizeChange: (fieldId: string | 'global', size: SizeType) => void
+  onStylingChange: (config: Partial<StylingConfig>) => void
   
   // Submit button text
   submitButtonText: string
@@ -52,7 +54,9 @@ export default function FormPreview({
   onCancelEdit,
   onToggleRequired,
   sizeConfig,
+  stylingConfig,
   onSizeChange,
+  onStylingChange,
   submitButtonText
 }: FormPreviewProps) {
   
@@ -73,14 +77,22 @@ export default function FormPreview({
         )}
       </div>
       
-      {/* Form Preview Container - Black Border, White Background */}
-      <div className="bg-white border-2 border-black rounded-lg p-6">
+      {/* Form Preview Container - Black Border with Custom Background */}
+      <div 
+        className="border-2 border-black rounded-lg p-6"
+        style={{ 
+          background: stylingConfig.backgroundColor,
+          fontFamily: stylingConfig.fontFamily,
+          color: stylingConfig.fontColor
+        }}
+      >
         {formSchema ? (
           <div className="space-y-4">
             {/* Form Header with Global Controls */}
             <FormHeader
               title={effectiveFormSchema?.title || formSchema.title}
               sizeConfig={sizeConfig}
+              stylingConfig={stylingConfig}
               hasUnsavedChanges={hasUnsavedChanges}
               editingField={editingField}
               editValue={editValue}
@@ -89,6 +101,7 @@ export default function FormPreview({
               onSaveEdit={onSaveEdit}
               onCancelEdit={onCancelEdit}
               onSizeChange={onSizeChange}
+              onStylingChange={onStylingChange}
             />
             
             {/* Field List */}
@@ -96,6 +109,7 @@ export default function FormPreview({
               <FieldList
                 fields={effectiveFormSchema.fields}
                 sizeConfig={sizeConfig}
+                stylingConfig={stylingConfig}
                 editingField={editingField}
                 editValue={editValue}
                 onEditValueChange={onEditValueChange}
@@ -112,6 +126,7 @@ export default function FormPreview({
             <SubmitButtonEditor
               submitButtonText={submitButtonText}
               globalSize={sizeConfig.globalFontSize}
+              stylingConfig={stylingConfig}
               editingField={editingField}
               editValue={editValue}
               onEditValueChange={onEditValueChange}

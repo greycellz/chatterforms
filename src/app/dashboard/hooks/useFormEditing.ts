@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { SizeType, SizeConfig } from '../components/SizeUtilities'
+import { SizeType, SizeConfig, StylingConfig } from '../components/SizeUtilities'
 
 interface FormField {
   id: string
@@ -17,6 +17,10 @@ interface FormSchema {
   styling?: {
     globalFontSize?: SizeType
     fieldSizes?: Record<string, SizeType>
+    fontFamily?: string
+    fontColor?: string
+    backgroundColor?: string
+    buttonColor?: string
   }
 }
 
@@ -25,6 +29,7 @@ interface PendingChanges {
   fields?: (Partial<FormField> & { id?: string })[]
   submitButtonText?: string
   sizeConfig?: Partial<SizeConfig>
+  stylingConfig?: Partial<StylingConfig>
 }
 
 export function useFormEditing(formSchema: FormSchema | null) {
@@ -39,12 +44,26 @@ export function useFormEditing(formSchema: FormSchema | null) {
     fieldSizes: formSchema?.styling?.fieldSizes || {}
   }))
 
-  // Update size config when form schema changes
+  // Initialize styling config from form schema or defaults
+  const [stylingConfig, setStylingConfig] = useState<StylingConfig>(() => ({
+    fontFamily: formSchema?.styling?.fontFamily || 'Arial, sans-serif',
+    fontColor: formSchema?.styling?.fontColor || '#000000',
+    backgroundColor: formSchema?.styling?.backgroundColor || '#ffffff',
+    buttonColor: formSchema?.styling?.buttonColor || '#3b82f6'
+  }))
+
+  // Update configs when form schema changes
   useEffect(() => {
     if (formSchema?.styling) {
       setSizeConfig({
         globalFontSize: formSchema.styling.globalFontSize || 'm',
         fieldSizes: formSchema.styling.fieldSizes || {}
+      })
+      setStylingConfig({
+        fontFamily: formSchema.styling.fontFamily || 'Arial, sans-serif',
+        fontColor: formSchema.styling.fontColor || '#000000',
+        backgroundColor: formSchema.styling.backgroundColor || '#ffffff',
+        buttonColor: formSchema.styling.buttonColor || '#3b82f6'
       })
     }
   }, [formSchema])
@@ -84,7 +103,11 @@ export function useFormEditing(formSchema: FormSchema | null) {
     effective.styling = {
       ...effective.styling,
       globalFontSize: sizeConfig.globalFontSize,
-      fieldSizes: sizeConfig.fieldSizes
+      fieldSizes: sizeConfig.fieldSizes,
+      fontFamily: stylingConfig.fontFamily,
+      fontColor: stylingConfig.fontColor,
+      backgroundColor: stylingConfig.backgroundColor,
+      buttonColor: stylingConfig.buttonColor
     }
 
     return effective
@@ -202,7 +225,7 @@ export function useFormEditing(formSchema: FormSchema | null) {
   const saveChanges = (): FormSchema | null => {
     const effective = getEffectiveFormSchema()
     if (effective) {
-      // Only clear field and title changes, preserve button text and sizing
+      // Only clear field and title changes, preserve button text and styling/sizing
       setPendingChanges({
         submitButtonText: pendingChanges.submitButtonText
       })
@@ -224,6 +247,13 @@ export function useFormEditing(formSchema: FormSchema | null) {
     }
     setHasUnsavedChanges(true)
   }
+
+  // Handle styling changes
+  const handleStylingChange = (changes: Partial<StylingConfig>) => {
+    setStylingConfig(prev => ({ ...prev, ...changes }))
+    setHasUnsavedChanges(true)
+  }
+
   const toggleRequired = (fieldId: string, required: boolean) => {
     if (!formSchema) return
 
@@ -242,12 +272,27 @@ export function useFormEditing(formSchema: FormSchema | null) {
     setPendingChanges(newPendingChanges)
     setHasUnsavedChanges(true)
   }
+
   // Discard pending changes
   const discardChanges = () => {
     setPendingChanges({})
     setHasUnsavedChanges(false)
     setEditingField(null)
     setEditValue('')
+    
+    // Reset styling and size configs to form schema defaults
+    if (formSchema?.styling) {
+      setSizeConfig({
+        globalFontSize: formSchema.styling.globalFontSize || 'm',
+        fieldSizes: formSchema.styling.fieldSizes || {}
+      })
+      setStylingConfig({
+        fontFamily: formSchema.styling.fontFamily || 'Arial, sans-serif',
+        fontColor: formSchema.styling.fontColor || '#000000',
+        backgroundColor: formSchema.styling.backgroundColor || '#ffffff',
+        buttonColor: formSchema.styling.buttonColor || '#3b82f6'
+      })
+    }
   }
 
   return {
@@ -258,6 +303,7 @@ export function useFormEditing(formSchema: FormSchema | null) {
     editValue,
     setEditValue,
     sizeConfig,
+    stylingConfig,
     
     // Actions
     startEditing,
@@ -267,6 +313,7 @@ export function useFormEditing(formSchema: FormSchema | null) {
     discardChanges,
     toggleRequired,
     handleSizeChange,
+    handleStylingChange,
     getEffectiveFormSchema
   }
 }

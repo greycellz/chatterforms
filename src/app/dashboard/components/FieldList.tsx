@@ -1,5 +1,5 @@
 import FieldContainer from './FieldContainer'
-import { SizeType, SizeConfig } from '../components/SizeUtilities'
+import { SizeType, SizeConfig, StylingConfig } from '../components/SizeUtilities'
 
 interface FormFieldType {
   id: string
@@ -14,6 +14,7 @@ interface FormFieldType {
 interface FieldListProps {
   fields: FormFieldType[]
   sizeConfig: SizeConfig
+  stylingConfig: StylingConfig
   editingField: string | null
   editValue: string
   onEditValueChange: (value: string) => void
@@ -28,6 +29,7 @@ interface FieldListProps {
 export default function FieldList({
   fields,
   sizeConfig,
+  stylingConfig,
   editingField,
   editValue,
   onEditValueChange,
@@ -51,6 +53,7 @@ export default function FieldList({
             fieldIndex={index}
             currentFieldSize={currentFieldSize}
             globalSize={sizeConfig.globalFontSize}
+            stylingConfig={stylingConfig}
             editingField={editingField}
             editValue={editValue}
             onEditValueChange={onEditValueChange}
