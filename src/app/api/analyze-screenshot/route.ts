@@ -31,51 +31,97 @@ export async function POST(request: NextRequest) {
 For each field you identify, determine:
 
 1. **Field Label**: The visible text label (exactly as shown)
-2. **Field Type**: Choose the most appropriate type:
-   - text: for general text inputs, names, addresses
+
+2. **Field Type**: Choose the most appropriate type based on visual structure:
+   - text: for single-line text inputs (names, addresses, single values)
    - email: for email address fields
    - tel: for phone/telephone number fields  
    - textarea: for large text areas, comments, messages
-   - select: for dropdown menus
-   - radio: for radio button groups
-   - checkbox: for single checkboxes or checkbox groups
+   - select: for dropdown menus with arrow indicators
+   - radio: for radio button groups (○ symbols)
+   - radio-with-other: for radio buttons that include "Other:" with text input
+   - checkbox: for single checkboxes (☐ or ☑ symbols)
+   - checkbox-group: for multiple related checkboxes (like languages, skills, etc.)
+   - checkbox-with-other: for checkbox groups that include "Other:" with text input
    - date: for date picker fields
 
-3. **Required Status**: Look for visual indicators:
+3. **Key Visual Patterns to Detect**:
+   - **Multiple Checkboxes**: Look for ☐ ☐ ☐ patterns = use "checkbox-group" or "checkbox-with-other"
+   - **Multiple Radio Buttons**: Look for ○ ○ ○ patterns = use "radio" or "radio-with-other"
+   - **Text Lines After Options**: If you see checkboxes/radio + blank line = add "Other" support
+   - **"Other:" Labels**: Explicit "Other:" text = definitely use "-with-other" variants
+   - **Single Text Box**: Only use "text" for standalone input fields, NOT for option lists
+
+4. **Required Status**: Look for visual indicators:
    - Red asterisks (*)
    - "(required)" text
    - "(optional)" text (mark as not required)
    - Red field borders or labels
 
-4. **Placeholder Text**: Any gray/light text inside input fields
-5. **Options**: For dropdowns/radio buttons, extract ALL visible options
-6. **Confidence**: Rate 0.0-1.0 how confident you are about this field
+5. **Options Extraction**: For dropdowns/radio buttons/checkboxes, extract ALL visible options
+
+6. **"Other" Field Detection**: Look for patterns like:
+   - "Other:" followed by blank lines or text inputs
+   - "Other (specify):" with text fields
+   - "Please specify:" or "Please describe:"
+   - Blank lines after option lists
+   - Text inputs next to the last option in a group
+
+7. **Multi-selection indicators**: Look for:
+   - "Select all that apply"
+   - "Check all that apply" 
+   - Multiple checkboxes for same category
+   - "Choose multiple" instructions
+
+8. **Confidence**: Rate 0.0-1.0 how confident you are about this field
+
+**CRITICAL RULES**:
+- If you see multiple checkboxes (☐ ☐ ☐), NEVER use "text" - use "checkbox-group" or "checkbox-with-other"
+- If you see multiple radio buttons (○ ○ ○), NEVER use "text" - use "radio" or "radio-with-other"
+- Only use "text" for standalone input fields with no visible options
+- If there are 3+ options visible, it's almost certainly a multi-select field
+- Look for visual grouping of related options (languages, status options, etc.)
 
 Important guidelines:
 - Only extract fields you can clearly see
-- Be conservative with field types - when uncertain, use "text"
+- Prioritize visual structure over assumptions
 - Look for form structure top to bottom
 - Pay attention to groupings and sections
 - Don't make assumptions about hidden fields
+- When in doubt between text and multi-select, choose multi-select if you see multiple options
 
 Return a JSON array of field objects with this exact structure:
 [
   {
-    "label": "Full Name",
-    "type": "text", 
-    "required": true,
-    "placeholder": "Enter your full name",
-    "confidence": 0.95
+    "label": "Primary Language",
+    "type": "checkbox-with-other", 
+    "required": false,
+    "options": ["English", "Spanish"],
+    "allowOther": true,
+    "otherLabel": "Other:",
+    "otherPlaceholder": "Please specify language",
+    "confidence": 0.90
   }
 ]
 
-If you see select/radio fields, include the "options" array:
+For checkbox groups without "other":
 {
-  "label": "Gender",
-  "type": "select",
+  "label": "Languages Spoken",
+  "type": "checkbox-group",
   "required": false,
-  "options": ["Male", "Female", "Other"],
-  "confidence": 0.90
+  "options": ["English", "Spanish", "French", "German"],
+  "confidence": 0.85
+}
+
+For radio groups with "other":
+{
+  "label": "Marital Status",
+  "type": "radio-with-other",
+  "required": false,
+  "options": ["Single", "Married", "Divorced", "Separated", "Widowed"],
+  "allowOther": true,
+  "otherLabel": "Other:",
+  "confidence": 0.88
 }`
 
     const userMessage = additionalContext 
@@ -151,7 +197,7 @@ If you see select/radio fields, include the "options" array:
       .map((field: Record<string, unknown>, index: number) => ({
         id: typeof field.id === 'string' ? field.id : `field_${Date.now()}_${index}`,
         label: String(field.label).trim(),
-        type: ['text', 'email', 'tel', 'textarea', 'select', 'radio', 'checkbox', 'date'].includes(field.type as string) 
+        type: ['text', 'email', 'tel', 'textarea', 'select', 'radio', 'checkbox', 'date', 'checkbox-group', 'radio-with-other', 'checkbox-with-other'].includes(field.type as string) 
           ? (field.type as FieldExtraction['type'])
           : 'text' as const, // Default to text for invalid types
         required: Boolean(field.required),
@@ -161,7 +207,10 @@ If you see select/radio fields, include the "options" array:
           : undefined,
         confidence: typeof field.confidence === 'number' 
           ? Math.max(0, Math.min(1, field.confidence))
-          : 0.8 // Default confidence
+          : 0.8, // Default confidence
+        allowOther: Boolean(field.allowOther),
+        otherLabel: typeof field.otherLabel === 'string' ? field.otherLabel : undefined,
+        otherPlaceholder: typeof field.otherPlaceholder === 'string' ? field.otherPlaceholder : undefined
       }))
 
     console.log('Validated extracted fields:', validatedFields)

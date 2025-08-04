@@ -10,6 +10,9 @@ interface FormField {
   placeholder?: string
   options?: string[]
   size?: string
+  allowOther?: boolean
+  otherLabel?: string
+  otherPlaceholder?: string
 }
 
 interface FormSchema {
@@ -34,11 +37,11 @@ interface PublicFormClientProps {
 // Utility functions for sizing (copied from SizeUtilities)
 function getInputSizeClasses(size: string = 'm'): string {
   const sizeMap = {
-    xs: 'px-2 py-1 text-xs',
-    s: 'px-2.5 py-1.5 text-sm',
-    m: 'px-3 py-2 text-base',
-    l: 'px-4 py-3 text-lg',
-    xl: 'px-5 py-4 text-xl'
+    xs: 'px-2 py-1.5 text-sm w-1/4',
+    s: 'px-2.5 py-2 text-sm w-2/5',
+    m: 'px-3 py-2 text-base w-3/5',
+    l: 'px-4 py-2.5 text-base w-4/5',
+    xl: 'px-5 py-3 text-lg w-[95%]'
   }
   
   return sizeMap[size as keyof typeof sizeMap] || sizeMap.m
@@ -78,7 +81,7 @@ function getButtonSizeClasses(globalSize: string = 'm'): string {
 }
 
 export default function PublicFormClient({ formSchema, formId, submitButtonText = 'Submit Form' }: PublicFormClientProps) {
-  const [formData, setFormData] = useState<Record<string, string | boolean | string[]>>({})
+  const [formData, setFormData] = useState<Record<string, string | boolean | string[] | { selected: string[], other?: string }>>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [error, setError] = useState('')
@@ -94,11 +97,25 @@ export default function PublicFormClient({ formSchema, formId, submitButtonText 
     buttonColor: formSchema.styling?.buttonColor || '#3b82f6'
   }
 
-  const handleInputChange = (fieldId: string, value: string | boolean | string[]) => {
+  const handleInputChange = (fieldId: string, value: string | boolean | string[] | { selected: string[], other?: string }) => {
     setFormData(prev => ({
       ...prev,
       [fieldId]: value
     }))
+  }
+
+  const handleCheckboxGroupChange = (fieldId: string, option: string, checked: boolean) => {
+    const currentData = formData[fieldId] as { selected: string[], other?: string } || { selected: [] }
+    const newSelected = checked 
+      ? [...currentData.selected, option]
+      : currentData.selected.filter(item => item !== option)
+    
+    handleInputChange(fieldId, { ...currentData, selected: newSelected })
+  }
+
+  const handleOtherChange = (fieldId: string, otherValue: string) => {
+    const currentData = formData[fieldId] as { selected: string[], other?: string } || { selected: [] }
+    handleInputChange(fieldId, { ...currentData, other: otherValue })
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -178,6 +195,7 @@ export default function PublicFormClient({ formSchema, formId, submitButtonText 
           </select>
         )
       case 'radio':
+      case 'radio-with-other':
         return (
           <div key={field.id} className="space-y-3">
             {field.options?.map((option, idx) => (
@@ -203,6 +221,97 @@ export default function PublicFormClient({ formSchema, formId, submitButtonText 
                 </span>
               </label>
             ))}
+            
+            {/* Other option for radio-with-other */}
+            {field.type === 'radio-with-other' && field.allowOther && (
+              <label className="flex items-center space-x-3 cursor-pointer">
+                <input
+                  name={field.id}
+                  type="radio"
+                  value="other"
+                  checked={formData[field.id] === 'other'}
+                  onChange={(e) => handleInputChange(field.id, e.target.value)}
+                  className="w-4 h-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                />
+                <span 
+                  className={`font-medium ${getTextSizeClasses(globalSize, 'label')}`}
+                  style={{
+                    fontFamily: stylingConfig.fontFamily,
+                    color: stylingConfig.fontColor
+                  }}
+                >
+                  {field.otherLabel || 'Other:'}
+                </span>
+                <input
+                  type="text"
+                  placeholder={field.otherPlaceholder || 'Please specify...'}
+                  className="ml-2 border border-gray-300 rounded px-2 py-1 text-sm flex-1"
+                  style={inputStyle}
+                  onChange={(e) => handleOtherChange(field.id, e.target.value)}
+                  disabled={formData[field.id] !== 'other'}
+                />
+              </label>
+            )}
+          </div>
+        )
+      case 'checkbox-group':
+      case 'checkbox-with-other':
+        const checkboxData = formData[field.id] as { selected: string[], other?: string } || { selected: [] }
+        return (
+          <div key={field.id} className="space-y-3">
+            {field.options?.map((option, idx) => (
+              <label key={idx} htmlFor={`${field.id}-${idx}`} className="flex items-center space-x-2 cursor-pointer">
+                <input
+                  id={`${field.id}-${idx}`}
+                  type="checkbox"
+                  checked={checkboxData.selected.includes(option)}
+                  onChange={(e) => handleCheckboxGroupChange(field.id, option, e.target.checked)}
+                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                />
+                <span 
+                  className={`font-medium ${getTextSizeClasses(globalSize, 'label')}`}
+                  style={{
+                    fontFamily: stylingConfig.fontFamily,
+                    color: stylingConfig.fontColor
+                  }}
+                >
+                  {option}
+                </span>
+              </label>
+            ))}
+            
+            {/* Other option for checkbox-with-other */}
+            {field.type === 'checkbox-with-other' && field.allowOther && (
+              <label className="flex items-center space-x-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={!!checkboxData.other}
+                  onChange={(e) => {
+                    if (!e.target.checked) {
+                      handleOtherChange(field.id, '')
+                    }
+                  }}
+                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                />
+                <span 
+                  className={`font-medium ${getTextSizeClasses(globalSize, 'label')}`}
+                  style={{
+                    fontFamily: stylingConfig.fontFamily,
+                    color: stylingConfig.fontColor
+                  }}
+                >
+                  {field.otherLabel || 'Other:'}
+                </span>
+                <input
+                  type="text"
+                  placeholder={field.otherPlaceholder || 'Please specify...'}
+                  value={checkboxData.other || ''}
+                  className="ml-2 border border-gray-300 rounded px-2 py-1 text-sm flex-1"
+                  style={inputStyle}
+                  onChange={(e) => handleOtherChange(field.id, e.target.value)}
+                />
+              </label>
+            )}
           </div>
         )
       case 'checkbox':

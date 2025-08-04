@@ -9,6 +9,9 @@ interface FormField {
   placeholder?: string
   options?: string[]
   size?: SizeType
+  allowOther?: boolean
+  otherLabel?: string
+  otherPlaceholder?: string
 }
 
 interface FormFieldComponentProps {
@@ -82,6 +85,7 @@ export default function FormField({
         </div>
       )
     case 'radio':
+    case 'radio-with-other':
       return (
         <div key={field.id} className="space-y-2">
           {field.options?.map((option, idx) => (
@@ -124,6 +128,35 @@ export default function FormField({
               )}
             </div>
           )) || []}
+          
+          {/* Other option for radio-with-other */}
+          {field.type === 'radio-with-other' && field.allowOther && (
+            <div className="flex items-center space-x-3">
+              <input
+                type="radio"
+                name={field.id}
+                value="other"
+                className="w-4 h-4 text-blue-600 focus:ring-blue-500 border-gray-300 flex-shrink-0"
+                disabled
+              />
+              <span 
+                className={`text-sm ${getTextSizeClasses(globalSize, 'label')}`}
+                style={{
+                  fontFamily: stylingConfig.fontFamily,
+                  color: stylingConfig.fontColor
+                }}
+              >
+                {field.otherLabel || 'Other:'}
+              </span>
+              <input
+                type="text"
+                placeholder={field.otherPlaceholder || 'Please specify...'}
+                className="ml-2 border border-gray-300 rounded px-2 py-1 text-sm flex-1"
+                style={inputStyle}
+                disabled
+              />
+            </div>
+          )}
         </div>
       )
     case 'checkbox':
@@ -145,6 +178,64 @@ export default function FormField({
           </span>
         </label>
       )
+      
+    case 'checkbox-group':
+    case 'checkbox-with-other':
+      return (
+        <div key={field.id} className="space-y-2">
+          {field.options?.map((option, idx) => (
+            <label key={idx} htmlFor={`${field.id}-${idx}`} className="flex items-center space-x-2 cursor-pointer">
+              <input
+                id={`${field.id}-${idx}`}
+                type="checkbox"
+                name={field.id}
+                value={option}
+                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 flex-shrink-0"
+                disabled
+              />
+              <span 
+                className={`text-sm ${getTextSizeClasses(globalSize, 'label')}`}
+                style={{
+                  fontFamily: stylingConfig.fontFamily,
+                  color: stylingConfig.fontColor
+                }}
+              >
+                {option}
+              </span>
+            </label>
+          )) || []}
+          
+          {/* Other option for checkbox-with-other */}
+          {field.type === 'checkbox-with-other' && field.allowOther && (
+            <label className="flex items-center space-x-2 cursor-pointer">
+              <input
+                type="checkbox"
+                name={`${field.id}_other`}
+                value="other"
+                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 flex-shrink-0"
+                disabled
+              />
+              <span 
+                className={`text-sm ${getTextSizeClasses(globalSize, 'label')}`}
+                style={{
+                  fontFamily: stylingConfig.fontFamily,
+                  color: stylingConfig.fontColor
+                }}
+              >
+                {field.otherLabel || 'Other:'}
+              </span>
+              <input
+                type="text"
+                placeholder={field.otherPlaceholder || 'Please specify...'}
+                className="ml-2 border border-gray-300 rounded px-2 py-1 text-sm flex-1"
+                style={inputStyle}
+                disabled
+              />
+            </label>
+          )}
+        </div>
+      )
+      
     default:
       return (
         <div className={containerClasses}>

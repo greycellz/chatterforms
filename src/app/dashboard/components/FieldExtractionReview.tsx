@@ -3,11 +3,14 @@ import { useState } from 'react'
 interface FieldExtraction {
   id: string
   label: string
-  type: 'text' | 'email' | 'tel' | 'textarea' | 'select' | 'radio' | 'checkbox' | 'date'
+  type: 'text' | 'email' | 'tel' | 'textarea' | 'select' | 'radio' | 'checkbox' | 'date' | 'checkbox-group' | 'radio-with-other' | 'checkbox-with-other'
   required: boolean
   placeholder?: string
   options?: string[]
   confidence: number
+  allowOther?: boolean
+  otherLabel?: string
+  otherPlaceholder?: string
 }
 
 interface FieldExtractionReviewProps {
@@ -34,7 +37,10 @@ export default function FieldExtractionReview({
     { value: 'textarea', label: 'Text Area' },
     { value: 'select', label: 'Dropdown' },
     { value: 'radio', label: 'Radio Buttons' },
+    { value: 'radio-with-other', label: 'Radio + Other' },
     { value: 'checkbox', label: 'Checkbox' },
+    { value: 'checkbox-group', label: 'Checkbox Group' },
+    { value: 'checkbox-with-other', label: 'Checkbox Group + Other' },
     { value: 'date', label: 'Date' }
   ]
 
@@ -167,7 +173,7 @@ export default function FieldExtractionReview({
                     />
                   )}
                   
-                  {(field.type === 'select' || field.type === 'radio') && (
+                  {(field.type === 'select' || field.type === 'radio' || field.type === 'radio-with-other' || field.type === 'checkbox-group' || field.type === 'checkbox-with-other') && (
                     <input
                       type="text"
                       value={field.options?.join(', ') || ''}
@@ -177,6 +183,26 @@ export default function FieldExtractionReview({
                       className="w-full text-sm border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
                       placeholder="Options (comma separated)"
                     />
+                  )}
+                  
+                  {/* Other Field Controls */}
+                  {(field.type === 'radio-with-other' || field.type === 'checkbox-with-other') && (
+                    <div className="space-y-2">
+                      <input
+                        type="text"
+                        value={field.otherLabel || ''}
+                        onChange={(e) => updateField(field.id, { otherLabel: e.target.value })}
+                        className="w-full text-sm border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="Other label (e.g., 'Other:', 'Please specify:')"
+                      />
+                      <input
+                        type="text"
+                        value={field.otherPlaceholder || ''}
+                        onChange={(e) => updateField(field.id, { otherPlaceholder: e.target.value })}
+                        className="w-full text-sm border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="Other placeholder text"
+                      />
+                    </div>
                   )}
                   
                   <div className="flex items-center justify-between">
@@ -225,6 +251,9 @@ export default function FieldExtractionReview({
                     {field.options && field.options.length > 0 && (
                       <div className="text-xs text-gray-500 ml-6">
                         Options: {field.options.join(', ')}
+                        {(field.type === 'radio-with-other' || field.type === 'checkbox-with-other') && 
+                          ` + ${field.otherLabel || 'Other'}`
+                        }
                       </div>
                     )}
                   </div>

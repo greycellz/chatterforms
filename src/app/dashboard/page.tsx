@@ -9,12 +9,15 @@ import FormPreview from './components/FormPreview'
 interface FieldExtraction {
   id: string
   label: string
-  type: 'text' | 'email' | 'tel' | 'textarea' | 'select' | 'radio' | 'checkbox' | 'date'
+  type: 'text' | 'email' | 'tel' | 'textarea' | 'select' | 'radio' | 'checkbox' | 'date' | 'checkbox-group' | 'radio-with-other' | 'checkbox-with-other'
   required: boolean
   placeholder?: string
   options?: string[]
   confidence: number
   additionalContext?: string
+  allowOther?: boolean
+  otherLabel?: string
+  otherPlaceholder?: string
 }
 
 export default function Dashboard() {
