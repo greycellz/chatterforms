@@ -6,10 +6,21 @@ import { useFormGeneration } from './hooks/useFormGeneration'
 import ChatPanel from './components/ChatPanel'
 import FormPreview from './components/FormPreview'
 
+interface FieldExtraction {
+  id: string
+  label: string
+  type: 'text' | 'email' | 'tel' | 'textarea' | 'select' | 'radio' | 'checkbox' | 'date'
+  required: boolean
+  placeholder?: string
+  options?: string[]
+  confidence: number
+  additionalContext?: string
+}
+
 export default function Dashboard() {
   const [description, setDescription] = useState('')
 
-  // Custom hooks for clean separation of concerns
+  // Enhanced hook with screenshot functionality
   const {
     formSchema,
     isLoading,
@@ -18,10 +29,18 @@ export default function Dashboard() {
     error,
     chatHistory,
     customButtonText,
+    uploadedImage,
+    extractedFields,
+    isAnalyzing,
+    analysisComplete,
     generateForm,
     publishForm,
     updateFormSchema,
-    updateButtonText
+    updateButtonText,
+    analyzeScreenshot,
+    generateFormFromFields,
+    handleImageUpload,
+    resetAnalysis
   } = useFormGeneration()
 
   const {
@@ -103,6 +122,27 @@ export default function Dashboard() {
     }
   }
 
+  // Screenshot analysis handlers
+  const handleAnalyzeImage = async (additionalContext?: string) => {
+    if (!uploadedImage) return
+    
+    try {
+      await analyzeScreenshot(uploadedImage, additionalContext)
+    } catch {
+      // Error is handled in the hook
+    }
+  }
+
+  const handleFieldsValidated = async (validatedFields: FieldExtraction[]) => {
+    try {
+      await generateFormFromFields(validatedFields)
+      // Clear pending changes after successful generation
+      discardChanges()
+    } catch {
+      // Error is handled in the hook
+    }
+  }
+
   return (
     <div className="h-screen flex">
       <ChatPanel
@@ -120,6 +160,16 @@ export default function Dashboard() {
         isPublishing={isPublishing}
         publishedFormId={publishedFormId}
         error={error}
+        
+        // Screenshot analysis props
+        uploadedImage={uploadedImage}
+        extractedFields={extractedFields}
+        isAnalyzing={isAnalyzing}
+        analysisComplete={analysisComplete}
+        onImageUpload={handleImageUpload}
+        onAnalyzeImage={handleAnalyzeImage}
+        onFieldsValidated={handleFieldsValidated}
+        onResetAnalysis={resetAnalysis}
       />
 
       <FormPreview
