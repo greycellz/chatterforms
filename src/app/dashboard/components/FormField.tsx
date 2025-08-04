@@ -1,5 +1,5 @@
 import EditableText from './EditableText'
-import { getInputSizeClasses, getTextSizeClasses, SizeType, StylingConfig } from '../components/SizeUtilities'
+import { getInputSizeClasses, getTextSizeClasses, getFieldContainerClasses, SizeType, StylingConfig } from '../components/SizeUtilities'
 
 interface FormField {
   id: string
@@ -35,10 +35,11 @@ export default function FormField({
   onSaveEdit,
   onCancelEdit
 }: FormFieldComponentProps) {
-  const baseClasses = "w-full border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
   // Use field-specific size if available, otherwise fall back to global size
   const effectiveSize = field.size || globalSize
+  const baseClasses = "border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
   const sizeClasses = getInputSizeClasses(effectiveSize)
+  const containerClasses = getFieldContainerClasses()
 
   // Keep input fields white with gray-900 text (as requested)
   const inputStyle = {
@@ -50,31 +51,35 @@ export default function FormField({
   switch (field.type) {
     case 'textarea':
       return (
-        <textarea
-          key={field.id}
-          placeholder={field.placeholder}
-          className={`${baseClasses} ${sizeClasses} h-24 resize-none`}
-          style={inputStyle}
-          required={field.required}
-          readOnly
-        />
+        <div className={containerClasses}>
+          <textarea
+            key={field.id}
+            placeholder={field.placeholder}
+            className={`${baseClasses} ${sizeClasses} h-24 resize-none`}
+            style={inputStyle}
+            required={field.required}
+            readOnly
+          />
+        </div>
       )
     case 'select':
       return (
-        <select 
-          key={field.id} 
-          className={`${baseClasses} ${sizeClasses}`}
-          style={inputStyle}
-          required={field.required} 
-          disabled
-        >
-          <option value="">{field.placeholder || 'Choose an option'}</option>
-          {field.options?.map((option, idx) => (
-            <option key={idx} value={option}>
-              {option}
-            </option>
-          ))}
-        </select>
+        <div className={containerClasses}>
+          <select 
+            key={field.id} 
+            className={`${baseClasses} ${sizeClasses}`}
+            style={inputStyle}
+            required={field.required} 
+            disabled
+          >
+            <option value="">{field.placeholder || 'Choose an option'}</option>
+            {field.options?.map((option, idx) => (
+              <option key={idx} value={option}>
+                {option}
+              </option>
+            ))}
+          </select>
+        </div>
       )
     case 'radio':
       return (
@@ -85,7 +90,7 @@ export default function FormField({
                 type="radio"
                 name={field.id}
                 value={option}
-                className="w-4 h-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                className="w-4 h-4 text-blue-600 focus:ring-blue-500 border-gray-300 flex-shrink-0"
                 required={field.required}
                 disabled
               />
@@ -126,7 +131,7 @@ export default function FormField({
         <label key={field.id} className="flex items-center space-x-2">
           <input
             type="checkbox"
-            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 flex-shrink-0"
             required={field.required}
             disabled
           />
@@ -142,15 +147,17 @@ export default function FormField({
       )
     default:
       return (
-        <input
-          key={field.id}
-          type={field.type}
-          placeholder={field.placeholder}
-          className={`${baseClasses} ${sizeClasses}`}
-          style={inputStyle}
-          required={field.required}
-          readOnly
-        />
+        <div className={containerClasses}>
+          <input
+            key={field.id}
+            type={field.type}
+            placeholder={field.placeholder}
+            className={`${baseClasses} ${sizeClasses}`}
+            style={inputStyle}
+            required={field.required}
+            readOnly
+          />
+        </div>
       )
   }
 }

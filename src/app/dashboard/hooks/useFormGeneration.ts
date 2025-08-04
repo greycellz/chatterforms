@@ -12,6 +12,7 @@ interface FormField {
 interface FormSchema {
   title: string
   fields: FormField[]
+  formId?: string // Add formId to schema for persistence
 }
 
 interface ChatMessage {
@@ -59,7 +60,13 @@ export function useFormGeneration() {
         throw new Error(data.error || 'Failed to generate form')
       }
 
-      setFormSchema(data.formSchema)
+      // Preserve formId from existing schema during updates
+      const updatedSchema = {
+        ...data.formSchema,
+        formId: currentForm?.formId || data.formSchema.formId
+      }
+      
+      setFormSchema(updatedSchema)
       
       // Preserve custom button text during updates
       if (isEdit && preserveButtonText) {
@@ -73,7 +80,7 @@ export function useFormGeneration() {
         { role: 'assistant', content: isEdit ? 'Form updated!' : 'Form created!' }
       ])
       
-      return data.formSchema
+      return updatedSchema
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Something went wrong'
       setError(errorMessage)
@@ -90,15 +97,19 @@ export function useFormGeneration() {
     setError('')
 
     try {
+      // Include existing formId if available for update
+      const requestBody = {
+        formSchema: effectiveFormSchema,
+        submitButtonText,
+        existingFormId: effectiveFormSchema.formId || publishedFormId // Use either schema formId or published formId
+      }
+
       const response = await fetch('/api/publish-form', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ 
-          formSchema: effectiveFormSchema,
-          submitButtonText
-        }),
+        body: JSON.stringify(requestBody),
       })
 
       const data = await response.json()
@@ -107,7 +118,15 @@ export function useFormGeneration() {
         throw new Error(data.error || 'Failed to publish form')
       }
 
+      // Always set the published form ID to the returned one
       setPublishedFormId(data.formId)
+      
+      // Update the form schema with the persistent formId if it doesn't have one
+      if (effectiveFormSchema && !effectiveFormSchema.formId) {
+        const updatedSchema = { ...effectiveFormSchema, formId: data.formId }
+        setFormSchema(updatedSchema)
+      }
+      
       return data.formId
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Something went wrong'

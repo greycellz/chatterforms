@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chatterform</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      background: radial-gradient(circle at bottom, #FF6F00, #1e1e2f);
+      color: white;
+    }
+
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      padding: 1rem 2rem;
+      align-items: center;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      font-weight: 800;
+      font-size: 1.25rem;
+    }
+
+    .logo img {
+      width: 32px;
+      height: 32px;
+      margin-right: 0.5rem;
+    }
+
+    .nav-links a {
+      margin-left: 1.5rem;
+      text-decoration: none;
+      color: white;
+      font-weight: 500;
+    }
+
+    .signup {
+      background: #FFD54F;
+      border-radius: 9999px;
+      color: black;
+      padding: 0.5rem 1rem;
+      margin-left: 2rem;
+      font-weight: 600;
+    }
+
+    .hero {
+      display: flex;
+      flex-wrap: wrap;
+      padding: 3rem 2rem;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .hero-text {
+      max-width: 500px;
+    }
+
+    .hero h1 {
+      font-size: 3rem;
+      font-weight: 800;
+      margin-bottom: 1rem;
+    }
+
+    .hero p {
+      font-size: 1.1rem;
+      color: #ddd;
+      margin-bottom: 2rem;
+    }
+
+    .input-box {
+      background: #222;
+      padding: 1rem;
+      border-radius: 1rem;
+      display: flex;
+      align-items: center;
+      max-width: 100%;
+    }
+
+    .input-box input {
+      flex: 1;
+      border: none;
+      background: transparent;
+      color: white;
+      font-size: 1rem;
+      outline: none;
+    }
+
+    .input-box input::placeholder {
+      color: #888;
+    }
+
+    .input-box button {
+      background: #333;
+      border: none;
+      color: white;
+      font-size: 1.2rem;
+      border-radius: 9999px;
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+    }
+
+    .parrot {
+      max-width: 400px;
+      width: 100%;
+    }
+
+    @media (max-width: 768px) {
+      .hero {
+        flex-direction: column;
+        text-align: center;
+      }
+
+      .nav-links {
+        display: none;
+      }
+
+      .parrot {
+        margin-top: 2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="navbar">
+    <div class="logo">
+      <img src="/parrot.png" alt="Chatterform Mascot">
+      Chatterform
+    </div>
+    <div class="nav-links">
+      <a href="#">Home</a>
+      <a href="#">About</a>
+      <a href="#">Contact</a>
+      <a href="#" class="signup">Sign Up</a>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="hero-text">
+      <h1>Build Forms Easily</h1>
+      <p>Create powerful forms just by talking to AI.</p>
+      <form class="input-box" onsubmit="event.preventDefault(); goToBuilder();">
+        <input id="prompt" type="text" placeholder="Ask Chatterform to create a form to..." />
+        <button type="submit">↵</button>
+      </form>
+    </div>
+    <img class="parrot" src="/parrot.png" alt="Chatterform Mascot">
+  </section>
+
+  <script>
+    function goToBuilder() {
+      const val = document.getElementById("prompt").value.trim();
+      if (val.length > 0) {
+        window.location.href = `/builder?prompt=${encodeURIComponent(val)}`;
+      }
+    }
+  </script>
+</body>
+</html>

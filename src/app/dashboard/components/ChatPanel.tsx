@@ -10,6 +10,7 @@ interface FormField {
   interface FormSchema {
     title: string
     fields: FormField[]
+    formId?: string // Add formId to interface
   }
   
   interface ChatMessage {
@@ -50,6 +51,10 @@ interface FormField {
     publishedFormId,
     error
   }: ChatPanelProps) {
+    // Check if this form has been published before (has persistent URL)
+    const hasExistingForm = formSchema?.formId || publishedFormId
+    const formUrl = publishedFormId || formSchema?.formId
+    
     return (
       <div className="w-1/3 bg-yellow-50 border-r border-gray-200 p-4 flex flex-col h-full">
         <h2 className="text-lg font-semibold mb-4 text-gray-900">Describe your form</h2>
@@ -123,21 +128,30 @@ interface FormField {
               disabled={isPublishing}
               className="w-full bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
             >
-              {isPublishing ? 'Publishing...' : 'Publish Form'}
+              {isPublishing ? 'Publishing...' : (hasExistingForm ? 'Update Published Form' : 'Publish Form')}
             </button>
           )}
   
-          {publishedFormId && (
+          {formUrl && (
             <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
-              <p className="text-sm font-medium text-green-800 mb-2">Form Published!</p>
-              <p className="text-xs text-green-600 mb-2">Share this link:</p>
+              <p className="text-sm font-medium text-green-800 mb-2">
+                {hasExistingForm && !publishedFormId ? 'Form Previously Published!' : 'Form Published!'}
+              </p>
+              <p className="text-xs text-green-600 mb-2">
+                {hasExistingForm && !publishedFormId ? 'Existing form URL:' : 'Share this link:'}
+              </p>
               <a 
-                href={`/forms/${publishedFormId}`}
+                href={`/forms/${formUrl}`}
                 target="_blank"
                 className="text-sm text-blue-600 hover:underline break-all"
               >
-                {typeof window !== 'undefined' ? window.location.origin : ''}/forms/{publishedFormId}
+                {typeof window !== 'undefined' ? window.location.origin : ''}/forms/{formUrl}
               </a>
+              {hasExistingForm && (
+                <p className="text-xs text-green-500 mt-2">
+                  ✅ Updates will use the same URL
+                </p>
+              )}
             </div>
           )}
           
