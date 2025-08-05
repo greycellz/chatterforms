@@ -229,24 +229,7 @@ const EnhancedFieldMetadata = ({
         </div>
       )}
       
-      {/* Multi-option field types indicator */}
-      {(fieldType === 'radio' || fieldType === 'radio-with-other' || fieldType === 'checkbox-group' || fieldType === 'checkbox-with-other') && options && (
-        <div className="flex items-center space-x-2">
-          <span className="text-xs font-medium text-green-700 px-2 py-1 bg-green-100/80 rounded-full inline-flex items-center space-x-1"
-                style={{
-                  boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.6)'
-                }}>
-            <span>🔘</span>
-            <span>{options.length} option{options.length !== 1 ? 's' : ''}{(fieldType === 'radio-with-other' || fieldType === 'checkbox-with-other') && ' + Other'}</span>
-          </span>
-          <span className="text-xs text-green-600 px-2 py-1 bg-green-100/60 rounded-full italic"
-                style={{
-                  boxShadow: '0 1px 2px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.4)'
-                }}>
-            (Click options below to edit)
-          </span>
-        </div>
-      )}
+      {/* REMOVED: Multi-option field indicators - letting users discover double-click naturally */}
     </div>
   )
 }
