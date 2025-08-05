@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import LoadingBubbles from './LoadingBubbles'
 
 interface FormField {
@@ -86,13 +86,51 @@ export default function ChatPanel({
   onResetAnalysis
 }: ChatPanelProps) {
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const chatContainerRef = useRef<HTMLDivElement>(null)
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
   const [additionalContext, setAdditionalContext] = useState('')
   const [showAttachMenu, setShowAttachMenu] = useState(false)
-  const [showAllHistory, setShowAllHistory] = useState(false)
+  const [isAtBottom, setIsAtBottom] = useState(true)
 
   // Check if this form has been published before (has persistent URL)
   const hasExistingForm = formSchema?.formId || publishedFormId
   const formUrl = publishedFormId || formSchema?.formId
+
+  // Auto-scroll to bottom when new messages arrive, but only if user was already at bottom
+  useEffect(() => {
+    if (isAtBottom && chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight
+    }
+  }, [chatHistory, isAtBottom])
+
+  // Check if user is at bottom of chat
+  const handleChatScroll = () => {
+    if (chatContainerRef.current) {
+      const { scrollTop, scrollHeight, clientHeight } = chatContainerRef.current
+      const threshold = 50 // pixels from bottom
+      setIsAtBottom(scrollHeight - scrollTop - clientHeight < threshold)
+    }
+  }
+
+  // Scroll to bottom function
+  const scrollToBottom = () => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight
+      setIsAtBottom(true)
+    }
+  }
+
+  // Handle keyboard shortcuts (Cmd+Enter or Ctrl+Enter)
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+      e.preventDefault()
+      if (formSchema) {
+        onUpdateForm()
+      } else {
+        onGenerateForm()
+      }
+    }
+  }
 
   // Handle file selection
   const handleFileSelect = (file: File) => {
@@ -127,18 +165,26 @@ export default function ChatPanel({
   }
 
   return (
-    <div className="w-1/3 bg-yellow-50 border-r border-gray-200 p-4 flex flex-col h-full">
-      <h2 className="text-lg font-semibold mb-4 text-gray-900">Describe your form</h2>
+    <div className="w-1/3 bg-yellow-50 border-r border-gray-200 flex flex-col h-full">
+      {/* Header */}
+      <div className="p-4 border-b border-gray-200">
+        <h2 className="text-lg font-semibold text-gray-900">Describe your form</h2>
+      </div>
       
-      {/* Chat History - Enhanced with larger area and scroll indicator */}
+      {/* Chat History - ChatGPT Style with Fixed Height */}
       {chatHistory.length > 0 && (
-        <div className="mb-4">
-          <h3 className="text-sm font-medium text-gray-700 mb-2">Chat History</h3>
-          <div className="relative">
+        <div className="flex-1 flex flex-col min-h-0">
+          <div className="p-4 pb-2">
+            <h3 className="text-sm font-medium text-gray-700 mb-2">Chat History</h3>
+          </div>
+          
+          <div className="flex-1 relative">
+            {/* Scrollable Messages Container */}
             <div 
-              className={`space-y-2 overflow-y-auto transition-all duration-300 ${
-                showAllHistory ? 'max-h-96' : 'max-h-48'
-              }`}
+              ref={chatContainerRef}
+              onScroll={handleChatScroll}
+              className="absolute inset-0 overflow-y-auto px-4 pb-2 space-y-3"
+              style={{ scrollBehavior: 'smooth' }}
             >
               {chatHistory.map((message, idx) => (
                 <div
@@ -157,32 +203,30 @@ export default function ChatPanel({
               ))}
             </div>
             
-            {/* Scroll indicator */}
-            {chatHistory.length > 3 && (
-              <div className="flex justify-center mt-2">
-                <button
-                  onClick={() => setShowAllHistory(!showAllHistory)}
-                  className="flex items-center space-x-1 text-xs text-gray-500 hover:text-gray-700 transition-colors"
+            {/* Scroll to Bottom Button - Only show when not at bottom */}
+            {!isAtBottom && (
+              <button
+                onClick={scrollToBottom}
+                className="absolute bottom-4 right-4 w-10 h-10 bg-white border border-gray-300 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center text-gray-600 hover:text-gray-800 z-10"
+                title="Scroll to bottom"
+              >
+                <svg 
+                  className="w-5 h-5" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
                 >
-                  <span>{showAllHistory ? 'Show less' : 'Show more'}</span>
-                  <svg 
-                    className={`w-3 h-3 transition-transform duration-200 ${showAllHistory ? 'rotate-180' : ''}`}
-                    fill="none" 
-                    stroke="currentColor" 
-                    viewBox="0 0 24 24"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </button>
-              </div>
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                </svg>
+              </button>
             )}
           </div>
         </div>
       )}
 
-      {/* Field Extraction Review - Enhanced with thumbnail */}
+      {/* Field Extraction Review */}
       {analysisComplete && extractedFields.length > 0 && (
-        <div className="mb-4 space-y-4">
+        <div className="p-4 space-y-4 border-t border-gray-200">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-medium text-gray-700">🔍 Analysis Complete</h3>
             <button
@@ -193,7 +237,7 @@ export default function ChatPanel({
             </button>
           </div>
 
-          {/* Screenshot Thumbnail - Enhanced visibility */}
+          {/* Screenshot Thumbnail */}
           {uploadedImage && (
             <div className="text-center bg-white p-2 rounded-lg border border-gray-200">
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -235,25 +279,48 @@ export default function ChatPanel({
         </div>
       )}
 
-      {/* Analysis in progress - Enhanced with animated bubbles */}
+      {/* Analysis in progress */}
       {isAnalyzing && (
-        <LoadingBubbles 
-          message="Analyzing screenshot and extracting form fields..." 
-          icon="🔍" 
-        />
+        <div className="p-4">
+          <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+            <div className="flex items-center space-x-3">
+              <span className="text-lg animate-pulse">🔍</span>
+              <div className="flex-1">
+                <div className="flex items-center space-x-2">
+                  <span className="text-sm text-purple-700 font-medium">
+                    Analyzing screenshot and extracting form fields...
+                  </span>
+                  <div className="flex space-x-1">
+                    <div className="w-2 h-2 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                    <div className="w-2 h-2 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                    <div className="w-2 h-2 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                  </div>
+                </div>
+                <div className="mt-1 text-xs text-purple-600">
+                  AI is reading your image and identifying form fields...
+                </div>
+              </div>
+            </div>
+            
+            {/* Progress bar */}
+            <div className="mt-3 h-1 bg-purple-100 rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-purple-400 rounded-full animate-pulse"
+                style={{
+                  width: '60%',
+                  animation: 'progress 2s ease-in-out infinite'
+                }}
+              ></div>
+            </div>
+          </div>
+        </div>
       )}
 
-      {/* Form generation/update loading */}
-      {isLoading && (
-        <LoadingBubbles 
-          message={formSchema ? "Updating your form..." : "Generating your form..."} 
-          icon={formSchema ? "⚡" : "✨"} 
-        />
-      )}
+      {/* Form generation/update loading - REMOVED, only show on preview side */}
 
-      {/* Input section */}
-      <div className="space-y-4 flex-1 flex flex-col justify-end">
-        {/* Additional context for uploaded files - Enhanced contrast */}
+      {/* Input section - Always at bottom */}
+      <div className="p-4 space-y-4 border-t border-gray-200 bg-yellow-50">
+        {/* Additional context for uploaded files */}
         {uploadedImage && !analysisComplete && !isAnalyzing && (
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -276,68 +343,84 @@ export default function ChatPanel({
           </div>
         )}
 
-        {/* Main textarea - Enhanced contrast and styling */}
+        {/* Main textarea with keyboard shortcut support */}
         {!uploadedImage && !analysisComplete && (
-          <textarea 
-            value={description}
-            onChange={(e) => onDescriptionChange(e.target.value)}
-            placeholder={
-              formSchema 
-                ? "Add a gender field after date of birth with dropdown options male, female..."
-                : "I need a patient intake form with contact info, insurance details..."
-            }
-            className="w-full h-32 p-4 bg-white text-gray-900 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-500 shadow-sm"
-          />
-        )}
-
-        {/* Attachment Button */}
-        {!uploadedImage && !analysisComplete && (
-          <div className="relative">
-            <button
-              onClick={() => setShowAttachMenu(!showAttachMenu)}
-              className="w-12 h-12 bg-gray-100 hover:bg-gray-200 border-2 border-dashed border-gray-300 rounded-full flex items-center justify-center transition-colors group"
-              title="Attach file"
-            >
-              <svg className="w-6 h-6 text-gray-400 group-hover:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-              </svg>
-            </button>
-
-            {/* Attachment Menu */}
-            {showAttachMenu && (
-              <div className="absolute bottom-full left-0 mb-2 bg-gray-800 rounded-lg shadow-lg py-2 min-w-max">
-                <button
-                  onClick={() => triggerFileInput('image/*')}
-                  className="flex items-center space-x-3 px-4 py-2 text-white hover:bg-gray-700 transition-colors w-full text-left"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
-                  <span className="text-sm">Attach Form Screenshot</span>
-                </button>
-                <button
-                  onClick={() => triggerFileInput('application/pdf')}
-                  className="flex items-center space-x-3 px-4 py-2 text-white hover:bg-gray-700 transition-colors w-full text-left"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                  <span className="text-sm">Attach PDF to Convert</span>
-                </button>
-              </div>
-            )}
-
-            {/* Hidden file input */}
-            <input
-              ref={fileInputRef}
-              type="file"
-              onChange={handleFileInputChange}
-              className="hidden"
+          <div className="space-y-2">
+            <textarea 
+              ref={textareaRef}
+              value={description}
+              onChange={(e) => onDescriptionChange(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder={
+                formSchema 
+                  ? "Add a gender field after date of birth with dropdown options male, female..."
+                  : "I need a patient intake form with contact info, insurance details..."
+              }
+              className="w-full h-32 p-4 bg-white text-gray-900 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-500 shadow-sm"
             />
+            <p className="text-xs text-gray-500">
+              Press {navigator.platform.includes('Mac') ? 'Cmd' : 'Ctrl'} + Enter to submit
+            </p>
           </div>
         )}
 
-        {/* Generate/Update Button - Enhanced styling */}
+        {/* Enhanced Attachment Button with descriptive text */}
+        {!uploadedImage && !analysisComplete && (
+          <div className="flex items-center space-x-3">
+            <div className="relative">
+              <button
+                onClick={() => setShowAttachMenu(!showAttachMenu)}
+                className="w-12 h-12 bg-gray-100 hover:bg-gray-200 border-2 border-dashed border-gray-300 rounded-full flex items-center justify-center transition-colors group"
+                title="Attach file"
+              >
+                <svg className="w-6 h-6 text-gray-400 group-hover:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+              </button>
+
+              {/* Attachment Menu */}
+              {showAttachMenu && (
+                <div className="absolute bottom-full left-0 mb-2 bg-gray-800 rounded-lg shadow-lg py-2 min-w-max z-50">
+                  <button
+                    onClick={() => triggerFileInput('image/*')}
+                    className="flex items-center space-x-3 px-4 py-2 text-white hover:bg-gray-700 transition-colors w-full text-left"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    <span className="text-sm">Attach Form Screenshot</span>
+                  </button>
+                  <button
+                    onClick={() => triggerFileInput('application/pdf')}
+                    className="flex items-center space-x-3 px-4 py-2 text-white hover:bg-gray-700 transition-colors w-full text-left"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <span className="text-sm">Attach PDF to Convert</span>
+                  </button>
+                </div>
+              )}
+
+              {/* Hidden file input */}
+              <input
+                ref={fileInputRef}
+                type="file"
+                onChange={handleFileInputChange}
+                className="hidden"
+              />
+            </div>
+            
+            {/* Descriptive text */}
+            <div className="flex-1">
+              <p className="text-sm text-gray-600 leading-tight">
+                Upload images or documents to instantly convert to forms 🎉
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Generate/Update Button */}
         {(!uploadedImage && !analysisComplete) && (
           <button 
             onClick={formSchema ? onUpdateForm : onGenerateForm}

@@ -15,16 +15,28 @@ interface RequiredToggleProps {
               onChange={(e) => onToggle(fieldId, e.target.checked)}
               className="sr-only"
             />
-            <div className={`w-11 h-6 rounded-full transition-colors duration-200 ease-in-out ${
-              isRequired ? 'bg-blue-500' : 'bg-gray-200'
-            }`}>
-              <div className={`w-5 h-5 bg-white rounded-full shadow-sm transform transition-transform duration-200 ease-in-out mt-0.5 ${
+            <div className={`w-11 h-6 rounded-full transition-all duration-200 ease-in-out shadow-inner ${
+              isRequired 
+                ? 'bg-blue-500 shadow-blue-200' 
+                : 'bg-gray-300 shadow-gray-100'
+            }`}
+            style={{
+              boxShadow: isRequired 
+                ? '0 2px 4px rgba(59, 130, 246, 0.4), inset 0 2px 4px rgba(0, 0, 0, 0.1)' 
+                : '0 2px 4px rgba(0, 0, 0, 0.1), inset 0 2px 4px rgba(0, 0, 0, 0.05)'
+            }}>
+              <div className={`w-5 h-5 bg-white rounded-full shadow-lg transform transition-transform duration-200 ease-in-out mt-0.5 ${
                 isRequired ? 'translate-x-5' : 'translate-x-0.5'
-              }`} />
+              }`}
+              style={{
+                boxShadow: '0 2px 6px rgba(0, 0, 0, 0.2), 0 1px 2px rgba(0, 0, 0, 0.1)'
+              }} />
             </div>
           </div>
-          <span className={`text-xs font-medium ml-2 ${
-            isRequired ? 'text-blue-600' : 'text-gray-500'
+          <span className={`text-xs font-semibold ml-2 px-2 py-1 rounded-full transition-colors duration-200 ${
+            isRequired 
+              ? 'text-blue-700 bg-blue-100' 
+              : 'text-gray-600 bg-gray-100'
           }`}>
             {isRequired ? 'Required' : 'Optional'}
           </span>
