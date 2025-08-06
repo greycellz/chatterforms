@@ -12,7 +12,7 @@ interface FormField {
 interface FormSchema {
   title: string
   fields: FormField[]
-  formId?: string // Add formId to schema for persistence
+  formId?: string
 }
 
 interface ChatMessage {
@@ -32,6 +32,7 @@ interface FieldExtraction {
   allowOther?: boolean
   otherLabel?: string
   otherPlaceholder?: string
+  pageNumber?: number
 }
 
 export function useFormGeneration() {
@@ -43,8 +44,9 @@ export function useFormGeneration() {
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([])
   const [customButtonText, setCustomButtonText] = useState<string>('Submit Form')
 
-  // Screenshot analysis states
+  // File analysis states
   const [uploadedImage, setUploadedImage] = useState<string | null>(null)
+  const [uploadedPDF, setUploadedPDF] = useState<File | null>(null)
   const [extractedFields, setExtractedFields] = useState<FieldExtraction[]>([])
   const [isAnalyzing, setIsAnalyzing] = useState(false)
   const [analysisComplete, setAnalysisComplete] = useState(false)
@@ -71,7 +73,7 @@ export function useFormGeneration() {
           description,
           currentForm,
           isEdit,
-          extractedFields // Pass extracted fields from screenshot
+          extractedFields
         }),
       })
 
@@ -81,7 +83,6 @@ export function useFormGeneration() {
         throw new Error(data.error || 'Failed to generate form')
       }
 
-      // Preserve formId from existing schema during updates
       const updatedSchema = {
         ...data.formSchema,
         formId: currentForm?.formId || data.formSchema.formId
@@ -89,23 +90,27 @@ export function useFormGeneration() {
       
       setFormSchema(updatedSchema)
       
-      // Preserve custom button text during updates
       if (isEdit && preserveButtonText) {
         setCustomButtonText(preserveButtonText)
       }
       
-      // Add to chat history
+      // Enhanced chat history for different sources
       const userMessage = extractedFields 
-        ? `Generated form from screenshot with ${extractedFields.length} fields${description ? ` and instructions: ${description}` : ''}`
+        ? `Generated form from ${uploadedPDF ? 'PDF document' : 'screenshot'} with ${extractedFields.length} fields${description ? ` and instructions: ${description}` : ''}`
         : description
+      
+      const assistantMessage = isEdit 
+        ? 'Form updated!' 
+        : extractedFields 
+          ? `Form created from ${uploadedPDF ? 'PDF' : 'screenshot'}! Found ${extractedFields.length} fields.`
+          : 'Form created!'
       
       setChatHistory(prev => [
         ...prev,
         { role: 'user', content: userMessage },
-        { role: 'assistant', content: isEdit ? 'Form updated!' : (extractedFields ? 'Form created from screenshot!' : 'Form created!') }
+        { role: 'assistant', content: assistantMessage }
       ])
       
-      // Reset screenshot analysis state after successful form generation
       if (extractedFields) {
         resetAnalysis()
       }
@@ -145,7 +150,6 @@ export function useFormGeneration() {
       setExtractedFields(data.extractedFields)
       setAnalysisComplete(true)
       
-      // Add to chat history
       setChatHistory(prev => [
         ...prev,
         { role: 'user', content: `Uploaded screenshot for analysis${additionalContext ? ` with context: ${additionalContext}` : ''}` },
@@ -162,15 +166,62 @@ export function useFormGeneration() {
     }
   }
 
+  const analyzePDF = async (file: File, additionalContext?: string) => {
+    setIsAnalyzing(true)
+    setError('')
+
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+      if (additionalContext) {
+        formData.append('additionalContext', additionalContext)
+      }
+
+      const response = await fetch('/api/analyze-screenshot', {
+        method: 'POST',
+        body: formData,
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to analyze PDF')
+      }
+
+      setExtractedFields(data.extractedFields)
+      setAnalysisComplete(true)
+      
+      setChatHistory(prev => [
+        ...prev,
+        { role: 'user', content: `Uploaded PDF "${file.name}" for analysis${additionalContext ? ` with context: ${additionalContext}` : ''}` },
+        { 
+          role: 'assistant', 
+          content: `Analyzed PDF using ${data.strategy} method and extracted ${data.extractedFields.length} fields. Please review before generating.`
+        }
+      ])
+
+      return data.extractedFields
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Something went wrong'
+      setError(errorMessage)
+      throw err
+    } finally {
+      setIsAnalyzing(false)
+    }
+  }
+
   const generateFormFromFields = async (validatedFields: FieldExtraction[]) => {
-    // Extract additional context from first field if available
     const additionalContext = validatedFields.find(f => f.additionalContext)?.additionalContext || ''
     
-    // Convert extracted fields to description for form generation
-    const description = `Create a form with these fields: ${validatedFields.map(field => {
+    const sourceInfo = uploadedPDF 
+      ? `PDF document "${uploadedPDF.name}"`
+      : 'screenshot'
+    
+    const description = `Create a form based on fields extracted from ${sourceInfo}: ${validatedFields.map(field => {
       let fieldDesc = `${field.label} (${field.type}${field.required ? ', required' : ', optional'})`
       if (field.placeholder) fieldDesc += ` with placeholder "${field.placeholder}"`
       if (field.options) fieldDesc += ` with options: ${field.options.join(', ')}`
+      if (field.pageNumber && uploadedPDF) fieldDesc += ` [page ${field.pageNumber}]`
       return fieldDesc
     }).join('; ')}. ${additionalContext}`
 
@@ -223,6 +274,15 @@ export function useFormGeneration() {
 
   const handleImageUpload = (imageData: string) => {
     setUploadedImage(imageData)
+    setUploadedPDF(null) // Clear PDF if image is uploaded
+    setExtractedFields([])
+    setAnalysisComplete(false)
+    setError('')
+  }
+
+  const handlePDFUpload = (file: File) => {
+    setUploadedPDF(file)
+    setUploadedImage(null) // Clear image if PDF is uploaded
     setExtractedFields([])
     setAnalysisComplete(false)
     setError('')
@@ -230,6 +290,7 @@ export function useFormGeneration() {
 
   const resetAnalysis = () => {
     setUploadedImage(null)
+    setUploadedPDF(null)
     setExtractedFields([])
     setAnalysisComplete(false)
     setIsAnalyzing(false)
@@ -247,7 +308,7 @@ export function useFormGeneration() {
   const clearError = () => setError('')
 
   return {
-    // Original state
+    // Form state
     formSchema,
     isLoading,
     isPublishing,
@@ -256,23 +317,26 @@ export function useFormGeneration() {
     chatHistory,
     customButtonText,
 
-    // Screenshot analysis state
+    // File analysis state
     uploadedImage,
+    uploadedPDF,
     extractedFields,
     isAnalyzing,
     analysisComplete,
 
-    // Original actions
+    // Form actions
     generateForm,
     publishForm,
     updateFormSchema,
     updateButtonText,
     clearError,
 
-    // Screenshot analysis actions
+    // File analysis actions
     analyzeScreenshot,
+    analyzePDF,
     generateFormFromFields,
     handleImageUpload,
+    handlePDFUpload,
     resetAnalysis
   }
 }

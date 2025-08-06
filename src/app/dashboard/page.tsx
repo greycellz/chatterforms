@@ -18,12 +18,13 @@ interface FieldExtraction {
   allowOther?: boolean
   otherLabel?: string
   otherPlaceholder?: string
+  pageNumber?: number
 }
 
 export default function Dashboard() {
   const [description, setDescription] = useState('')
 
-  // Enhanced hook with screenshot functionality
+  // Enhanced hook with PDF functionality
   const {
     formSchema,
     isLoading,
@@ -33,6 +34,7 @@ export default function Dashboard() {
     chatHistory,
     customButtonText,
     uploadedImage,
+    uploadedPDF,
     extractedFields,
     isAnalyzing,
     analysisComplete,
@@ -41,8 +43,10 @@ export default function Dashboard() {
     updateFormSchema,
     updateButtonText,
     analyzeScreenshot,
+    analyzePDF,
     generateFormFromFields,
     handleImageUpload,
+    handlePDFUpload,
     resetAnalysis
   } = useFormGeneration()
 
@@ -125,12 +129,20 @@ export default function Dashboard() {
     }
   }
 
-  // Screenshot analysis handlers
+  // File analysis handlers
   const handleAnalyzeImage = async (additionalContext?: string) => {
     if (!uploadedImage) return
     
     try {
       await analyzeScreenshot(uploadedImage, additionalContext)
+    } catch {
+      // Error is handled in the hook
+    }
+  }
+
+  const handleAnalyzePDF = async (file: File, additionalContext?: string) => {
+    try {
+      await analyzePDF(file, additionalContext)
     } catch {
       // Error is handled in the hook
     }
@@ -164,13 +176,16 @@ export default function Dashboard() {
         publishedFormId={publishedFormId}
         error={error}
         
-        // Screenshot analysis props
+        // File analysis props
         uploadedImage={uploadedImage}
+        uploadedPDF={uploadedPDF}
         extractedFields={extractedFields}
         isAnalyzing={isAnalyzing}
         analysisComplete={analysisComplete}
         onImageUpload={handleImageUpload}
+        onPDFUpload={handlePDFUpload}
         onAnalyzeImage={handleAnalyzeImage}
+        onAnalyzePDF={handleAnalyzePDF}
         onFieldsValidated={handleFieldsValidated}
         onResetAnalysis={resetAnalysis}
       />

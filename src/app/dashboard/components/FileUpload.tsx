@@ -2,39 +2,46 @@ import { useRef, useState } from 'react'
 
 interface FileUploadProps {
   onImageUpload: (imageData: string) => void
+  onPDFUpload: (file: File) => void
   uploadedImage: string | null
+  uploadedPDF: File | null
   analysisComplete: boolean
 }
 
 export default function FileUpload({ 
   onImageUpload, 
-  uploadedImage, 
+  onPDFUpload,
+  uploadedImage,
+  uploadedPDF, 
   analysisComplete 
 }: FileUploadProps) {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [showAttachMenu, setShowAttachMenu] = useState(false)
 
-  // Don't show upload if we already have an image or analysis is complete
-  if (uploadedImage || analysisComplete) {
+  // Don't show upload if we already have a file or analysis is complete
+  if ((uploadedImage || uploadedPDF) || analysisComplete) {
     return null
   }
 
   // Handle file selection
   const handleFileSelect = (file: File) => {
-    if (file && (file.type.startsWith('image/') || file.type === 'application/pdf')) {
+    if (!file) return
+
+    if (file.type === 'application/pdf') {
+      onPDFUpload(file)
+    } else if (file.type.startsWith('image/')) {
       const reader = new FileReader()
       reader.onload = (e) => {
         const fileData = e.target?.result as string
-        if (file.type === 'application/pdf') {
-          // TODO: Handle PDF upload
-          console.log('PDF upload to be implemented')
-        } else {
-          onImageUpload(fileData)
-        }
+        onImageUpload(fileData)
       }
       reader.readAsDataURL(file)
-      setShowAttachMenu(false)
+    } else {
+      alert('Please upload an image (PNG, JPG, GIF) or PDF file.')
+      return
     }
+    
+    setShowAttachMenu(false)
   }
 
   const triggerFileInput = (accept: string) => {

@@ -34,6 +34,7 @@ interface FieldExtraction {
   allowOther?: boolean
   otherLabel?: string
   otherPlaceholder?: string
+  pageNumber?: number
 }
 
 interface ChatPanelProps {
@@ -52,13 +53,16 @@ interface ChatPanelProps {
   publishedFormId: string | null
   error: string
   
-  // Screenshot functionality props
+  // File upload functionality props
   uploadedImage: string | null
+  uploadedPDF: File | null
   extractedFields: FieldExtraction[]
   isAnalyzing: boolean
   analysisComplete: boolean
   onImageUpload: (imageData: string) => void
+  onPDFUpload: (file: File) => void
   onAnalyzeImage: (additionalContext?: string) => void
+  onAnalyzePDF: (file: File, additionalContext?: string) => void
   onFieldsValidated: (fields: FieldExtraction[]) => void
   onResetAnalysis: () => void
 }
@@ -79,11 +83,14 @@ export default function ChatPanel({
   publishedFormId,
   error,
   uploadedImage,
+  uploadedPDF,
   extractedFields,
   isAnalyzing,
   analysisComplete,
   onImageUpload,
+  onPDFUpload,
   onAnalyzeImage,
+  onAnalyzePDF,
   onFieldsValidated,
   onResetAnalysis
 }: ChatPanelProps) {
@@ -97,13 +104,15 @@ export default function ChatPanel({
       {/* Chat History - Takes up available space */}
       <ChatHistory chatHistory={chatHistory} />
       
-      {/* Analysis Review - Shows during screenshot workflow */}
+      {/* Analysis Review - Shows during screenshot/PDF workflow */}
       <AnalysisReview
         uploadedImage={uploadedImage}
+        uploadedPDF={uploadedPDF}
         extractedFields={extractedFields}
         isAnalyzing={isAnalyzing}
         analysisComplete={analysisComplete}
         onAnalyzeImage={onAnalyzeImage}
+        onAnalyzePDF={onAnalyzePDF}
         onFieldsValidated={onFieldsValidated}
         onResetAnalysis={onResetAnalysis}
       />
@@ -111,7 +120,9 @@ export default function ChatPanel({
       {/* File Upload - Shows when no upload workflow active */}
       <FileUpload
         onImageUpload={onImageUpload}
+        onPDFUpload={onPDFUpload}
         uploadedImage={uploadedImage}
+        uploadedPDF={uploadedPDF}
         analysisComplete={analysisComplete}
       />
       
@@ -131,6 +142,7 @@ export default function ChatPanel({
         publishedFormId={publishedFormId}
         error={error}
         uploadedImage={uploadedImage}
+        uploadedPDF={uploadedPDF}
         analysisComplete={analysisComplete}
       />
     </div>

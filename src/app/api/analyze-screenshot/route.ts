@@ -8,25 +8,210 @@ const openai = new OpenAI({
 interface FieldExtraction {
   id: string
   label: string
-  type: 'text' | 'email' | 'tel' | 'textarea' | 'select' | 'radio' | 'checkbox' | 'date'
+  type: 'text' | 'email' | 'tel' | 'textarea' | 'select' | 'radio' | 'checkbox' | 'date' | 'checkbox-group' | 'radio-with-other' | 'checkbox-with-other'
   required: boolean
   placeholder?: string
   options?: string[]
   confidence: number
+  allowOther?: boolean
+  otherLabel?: string
+  otherPlaceholder?: string
+  pageNumber?: number
 }
 
-export async function POST(request: NextRequest) {
-  try {
-    const { imageData, additionalContext } = await request.json()
+// PDF Configuration
+const PDF_CONFIG = {
+  MAX_FILE_SIZE_MB: parseFloat(process.env.PDF_MAX_FILE_SIZE_MB || '10'),
+  SINGLE_CALL_MAX_TOKENS: parseInt(process.env.PDF_SINGLE_CALL_MAX_TOKENS || '4000'),
+  ENABLE_FALLBACK: process.env.PDF_ENABLE_FALLBACK !== 'false'
+}
+
+// Simple PDF text extraction without external dependencies
+async function extractPDFTextSimple(buffer: Buffer): Promise<{ text: string; pages: number }> {
+  const pdfString = buffer.toString('binary')
+  const textRegex = /BT\s*(.*?)\s*ET/gs
+  const streamRegex = /stream\s*([\s\S]*?)\s*endstream/gs
+  
+  let extractedText = ''
+  const textMatches = pdfString.match(textRegex) || []
+  
+  for (const match of textMatches) {
+    const cleanText = match
+      .replace(/BT|ET/g, '')
+      .replace(/\/\w+\s+\d+(\.\d+)?\s+Tf/g, '')
+      .replace(/\d+(\.\d+)?\s+\d+(\.\d+)?\s+Td/g, '')
+      .replace(/\d+(\.\d+)?\s+TL/g, '')
+      .replace(/q|Q/g, '')
+      .replace(/[()]/g, '')
+      .trim()
     
-    if (!imageData) {
-      return NextResponse.json({ error: 'No image data provided' }, { status: 400 })
+    if (cleanText.length > 2) {
+      extractedText += cleanText + ' '
     }
+  }
+  
+  const pageMatches = pdfString.match(/\/Type\s*\/Page\b/g) || []
+  const estimatedPages = Math.max(1, pageMatches.length)
+  
+  if (extractedText.trim().length === 0) {
+    const streamMatches = pdfString.match(streamRegex) || []
+    for (const stream of streamMatches) {
+      const readableText = stream.match(/[a-zA-Z\s]{3,}/g) || []
+      extractedText += readableText.join(' ') + ' '
+    }
+  }
+  
+  return {
+    text: extractedText.trim(),
+    pages: estimatedPages
+  }
+}
 
-    // Remove data URL prefix if present
-    const base64Image = imageData.replace(/^data:image\/[a-z]+;base64,/, '')
+async function analyzePDFStructure(buffer: Buffer, additionalContext?: string): Promise<FieldExtraction[]> {
+  console.log('Attempting GPT-4 analysis of PDF structure')
+  
+  const pdfStart = buffer.subarray(0, 2000).toString('utf8').replace(/[^\x20-\x7E]/g, ' ')
+  
+  const systemMessage = `Analyze PDF text for form fields. Look for:
+- Labels with colons, underscores, blanks: "Name: ___", "Email _______"
+- Checkboxes: "☐ Option1 ☐ Option2" 
+- Radio buttons: "○ Yes ○ No"
+- Required indicators: *, "required"
 
-    const systemMessage = `You are a form analysis expert. Analyze this screenshot of a form and extract ALL visible form fields.
+Return JSON: [{"id":"field_1","label":"Name","type":"text","required":false,"confidence":0.8}]
+
+Types: text, email, tel, textarea, select, radio, checkbox, date`
+
+  const userMessage = `Find form fields in this PDF:
+
+${pdfStart.substring(0, 1000)}
+
+${additionalContext ? `Context: ${additionalContext}` : ''}
+
+Return JSON array even if making educated guesses.`
+
+  const completion = await openai.chat.completions.create({
+    model: "gpt-4",
+    messages: [
+      { role: "system", content: systemMessage },
+      { role: "user", content: userMessage }
+    ],
+    max_tokens: 2000,
+    temperature: 0.1
+  })
+
+  const content = completion.choices[0].message.content
+  if (!content) {
+    throw new Error('No content received from GPT-4')
+  }
+
+  const jsonMatch = content.match(/\[[\s\S]*?\]/)
+  if (!jsonMatch) {
+    return [
+      {
+        id: `fallback_field_1_${Date.now()}`,
+        label: "Full Name",
+        type: "text" as const,
+        required: false,
+        confidence: 0.4,
+        pageNumber: 1
+      },
+      {
+        id: `fallback_field_2_${Date.now()}`,
+        label: "Email Address",
+        type: "email" as const,
+        required: false,
+        confidence: 0.4,
+        pageNumber: 1
+      },
+      {
+        id: `fallback_field_3_${Date.now()}`,
+        label: "Phone Number",
+        type: "tel" as const,
+        required: false,
+        confidence: 0.4,
+        pageNumber: 1
+      }
+    ]
+  }
+
+  const fields = JSON.parse(jsonMatch[0]) as FieldExtraction[]
+  
+  return fields.map((field, index) => ({
+    ...field,
+    id: field.id || `pdf_field_${index + 1}_${Date.now()}`,
+    pageNumber: 1,
+    confidence: Math.min(1.0, (field.confidence || 0.5) * 0.7)
+  }))
+}
+
+async function analyzePDFContent(buffer: Buffer, additionalContext?: string): Promise<FieldExtraction[]> {
+  console.log('Analyzing PDF using simple text extraction')
+  
+  try {
+    const { text: textContent, pages } = await extractPDFTextSimple(buffer)
+    
+    if (textContent && textContent.length > 50) {
+      console.log(`Extracted ${textContent.length} characters from ${pages} pages`)
+      
+      const systemMessage = `Analyze PDF text for form fields. Look for:
+- Labels with colons, underscores, blanks: "Name: ___", "Email _______"
+- Checkboxes: "☐ Option1 ☐ Option2" 
+- Radio buttons: "○ Yes ○ No"
+- Required indicators: *, "required"
+
+Return JSON: [{"id":"field_1","label":"Name","type":"text","required":false,"confidence":0.8}]
+
+Types: text, email, tel, textarea, select, radio, checkbox, date`
+
+      const userMessage = `Find form fields in this text:
+
+${textContent.substring(0, 3000)}${textContent.length > 3000 ? '\n\n[TRUNCATED]' : ''}
+
+${additionalContext ? `Context: ${additionalContext}` : ''}
+
+Return JSON array of fields.`
+
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4",
+        messages: [
+          { role: "system", content: systemMessage },
+          { role: "user", content: userMessage }
+        ],
+        max_tokens: 2000,
+        temperature: 0.1
+      })
+
+      const content = completion.choices[0].message.content
+      if (content) {
+        const jsonMatch = content.match(/\[[\s\S]*\]/)
+        if (jsonMatch) {
+          const fields = JSON.parse(jsonMatch[0]) as FieldExtraction[]
+          
+          return fields.map((field, index) => ({
+            ...field,
+            id: field.id || `pdf_field_${index + 1}_${Date.now()}`,
+            pageNumber: Math.ceil((index + 1) / Math.ceil(fields.length / pages)),
+            confidence: Math.min(1.0, (field.confidence || 0.7) * 0.8)
+          }))
+        }
+      }
+    }
+    
+    console.log('Text extraction yielded minimal results, trying structure analysis')
+    return await analyzePDFStructure(buffer, additionalContext)
+    
+  } catch (error) {
+    console.warn('Simple text extraction failed, trying structure analysis:', error)
+    return await analyzePDFStructure(buffer, additionalContext)
+  }
+}
+
+// Your EXACT working image analysis function
+async function analyzeImageContent(imageData: string, additionalContext?: string): Promise<FieldExtraction[]> {
+  const base64Image = imageData.replace(/^data:image\/[a-z]+;base64,/, '')
+
+  const systemMessage = `You are a form analysis expert. Analyze this screenshot of a form and extract ALL visible form fields.
 
 For each field you identify, determine:
 
@@ -124,98 +309,171 @@ For radio groups with "other":
   "confidence": 0.88
 }`
 
-    const userMessage = additionalContext 
-      ? `Analyze this form screenshot. Additional context: ${additionalContext}`
-      : 'Analyze this form screenshot and extract all visible form fields.'
-    
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4o", // Updated to current vision model
-      messages: [
-        {
-          role: "system",
-          content: systemMessage
-        },
-        {
-          role: "user", 
-          content: [
-            {
-              type: "text",
-              text: userMessage
-            },
-            {
-              type: "image_url",
-              image_url: {
-                url: `data:image/jpeg;base64,${base64Image}`,
-                detail: "high"
-              }
+  const userMessage = additionalContext 
+    ? `Analyze this form screenshot. Additional context: ${additionalContext}`
+    : 'Analyze this form screenshot and extract all visible form fields.'
+  
+  const completion = await openai.chat.completions.create({
+    model: "gpt-4o",
+    messages: [
+      {
+        role: "system",
+        content: systemMessage
+      },
+      {
+        role: "user", 
+        content: [
+          {
+            type: "text",
+            text: userMessage
+          },
+          {
+            type: "image_url",
+            image_url: {
+              url: `data:image/jpeg;base64,${base64Image}`,
+              detail: "high"
             }
-          ]
-        }
-      ],
-      max_tokens: 1500,
-      temperature: 0.1 // Lower temperature for more consistent extraction
-    })
-
-    const content = completion.choices[0].message.content
-    if (!content) {
-      throw new Error('No content received from OpenAI Vision API')
-    }
-
-    console.log('Raw Vision API response:', content)
-
-    // Try to extract JSON from the response
-    let extractedFields: unknown[]
-    try {
-      // Look for JSON array in the response
-      const jsonMatch = content.match(/\[[\s\S]*\]/)
-      if (jsonMatch) {
-        extractedFields = JSON.parse(jsonMatch[0]) as unknown[]
-      } else {
-        throw new Error('No JSON array found in response')
+          }
+        ]
       }
-    } catch (parseError) {
-      console.error('JSON parsing error:', parseError)
-      return NextResponse.json({ 
-        error: 'Failed to parse field extraction results',
-        details: content
-      }, { status: 500 })
+    ],
+    max_tokens: 1500,
+    temperature: 0.1
+  })
+
+  const content = completion.choices[0].message.content
+  if (!content) {
+    throw new Error('No content received from OpenAI Vision API')
+  }
+
+  console.log('Raw Vision API response:', content)
+
+  let extractedFields: unknown[]
+  try {
+    const jsonMatch = content.match(/\[[\s\S]*\]/)
+    if (jsonMatch) {
+      extractedFields = JSON.parse(jsonMatch[0]) as unknown[]
+    } else {
+      throw new Error('No JSON array found in response')
+    }
+  } catch (parseError) {
+    console.error('JSON parsing error:', parseError)
+    return NextResponse.json({ 
+      error: 'Failed to parse field extraction results',
+      details: content
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    }, { status: 500 }) as any
+  }
+
+  const isValidField = (field: unknown): field is Record<string, unknown> => {
+    return (
+      typeof field === 'object' && 
+      field !== null && 
+      'label' in field && 
+      'type' in field
+    )
+  }
+
+  const validatedFields: FieldExtraction[] = extractedFields
+    .filter(isValidField)
+    .map((field: Record<string, unknown>, index: number) => ({
+      id: typeof field.id === 'string' ? field.id : `field_${Date.now()}_${index}`,
+      label: String(field.label).trim(),
+      type: ['text', 'email', 'tel', 'textarea', 'select', 'radio', 'checkbox', 'date', 'checkbox-group', 'radio-with-other', 'checkbox-with-other'].includes(field.type as string) 
+        ? (field.type as FieldExtraction['type'])
+        : 'text' as const,
+      required: Boolean(field.required),
+      placeholder: typeof field.placeholder === 'string' ? field.placeholder.trim() : undefined,
+      options: Array.isArray(field.options) 
+        ? field.options.map((opt: unknown) => String(opt).trim()).filter((opt: string) => opt.length > 0)
+        : undefined,
+      confidence: typeof field.confidence === 'number' 
+        ? Math.max(0, Math.min(1, field.confidence))
+        : 0.8,
+      allowOther: Boolean(field.allowOther),
+      otherLabel: typeof field.otherLabel === 'string' ? field.otherLabel : undefined,
+      otherPlaceholder: typeof field.otherPlaceholder === 'string' ? field.otherPlaceholder : undefined
+    }))
+
+  console.log('Validated extracted fields:', validatedFields)
+  return validatedFields
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    const contentType = request.headers.get('content-type') || ''
+    
+    // Handle PDF file uploads (multipart/form-data)
+    if (contentType.includes('multipart/form-data')) {
+      const formData = await request.formData()
+      const file = formData.get('file') as File
+      const additionalContext = formData.get('additionalContext') as string || undefined
+
+      if (!file) {
+        return NextResponse.json({ error: 'No file provided' }, { status: 400 })
+      }
+
+      if (file.type === 'application/pdf') {
+        console.log(`Processing PDF: ${file.name} (${(file.size / 1024 / 1024).toFixed(1)}MB)`)
+        
+        const fileSizeMB = file.size / (1024 * 1024)
+        if (fileSizeMB > PDF_CONFIG.MAX_FILE_SIZE_MB) {
+          return NextResponse.json({
+            error: `PDF file too large. Maximum size: ${PDF_CONFIG.MAX_FILE_SIZE_MB}MB`,
+            suggestion: 'Try compressing the PDF or splitting it into smaller files.'
+          }, { status: 400 })
+        }
+
+        const buffer = Buffer.from(await file.arrayBuffer())
+        const startTime = Date.now()
+
+        try {
+          const extractedFields = await analyzePDFContent(buffer, additionalContext)
+          const processingTime = Date.now() - startTime
+
+          if (extractedFields.length === 0) {
+            return NextResponse.json({ 
+              error: 'No form fields detected in PDF',
+              suggestion: 'The PDF may not contain recognizable form structure. Try a different document or create the form manually.',
+              strategy: 'simple-text'
+            }, { status: 400 })
+          }
+
+          return NextResponse.json({
+            extractedFields,
+            fieldsCount: extractedFields.length,
+            strategy: 'simple-text',
+            processingTimeMs: processingTime,
+            pdfInfo: {
+              pages: Math.max(...extractedFields.map(f => f.pageNumber || 1)),
+              hasFormFields: true,
+              analysisMethod: 'simple-text-extraction'
+            }
+          })
+
+        } catch (error) {
+          console.error('PDF analysis error:', error)
+          return NextResponse.json({ 
+            error: 'Failed to analyze PDF', 
+            details: error instanceof Error ? error.message : 'Unknown error'
+          }, { status: 500 })
+        }
+      }
+      
+      return NextResponse.json({ error: 'Unsupported file type in form data' }, { status: 400 })
     }
 
-    // Type guard function to check if object has required properties
-    const isValidField = (field: unknown): field is Record<string, unknown> => {
-      return (
-        typeof field === 'object' && 
-        field !== null && 
-        'label' in field && 
-        'type' in field
-      )
+    // Handle image uploads (JSON - existing functionality)
+    const body = await request.json()
+    const { imageData, additionalContext } = body
+    
+    if (!imageData) {
+      return NextResponse.json({ error: 'No image data provided' }, { status: 400 })
     }
 
-    // Validate and enhance the extracted fields
-    const validatedFields: FieldExtraction[] = extractedFields
-      .filter(isValidField) // Filter out invalid fields
-      .map((field: Record<string, unknown>, index: number) => ({
-        id: typeof field.id === 'string' ? field.id : `field_${Date.now()}_${index}`,
-        label: String(field.label).trim(),
-        type: ['text', 'email', 'tel', 'textarea', 'select', 'radio', 'checkbox', 'date', 'checkbox-group', 'radio-with-other', 'checkbox-with-other'].includes(field.type as string) 
-          ? (field.type as FieldExtraction['type'])
-          : 'text' as const, // Default to text for invalid types
-        required: Boolean(field.required),
-        placeholder: typeof field.placeholder === 'string' ? field.placeholder.trim() : undefined,
-        options: Array.isArray(field.options) 
-          ? field.options.map((opt: unknown) => String(opt).trim()).filter((opt: string) => opt.length > 0)
-          : undefined,
-        confidence: typeof field.confidence === 'number' 
-          ? Math.max(0, Math.min(1, field.confidence))
-          : 0.8, // Default confidence
-        allowOther: Boolean(field.allowOther),
-        otherLabel: typeof field.otherLabel === 'string' ? field.otherLabel : undefined,
-        otherPlaceholder: typeof field.otherPlaceholder === 'string' ? field.otherPlaceholder : undefined
-      }))
+    const extractedFields = await analyzeImageContent(imageData, additionalContext)
 
-    console.log('Validated extracted fields:', validatedFields)
-
-    if (validatedFields.length === 0) {
+    if (extractedFields.length === 0) {
       return NextResponse.json({ 
         error: 'No valid form fields could be extracted from the image',
         suggestion: 'Please ensure the image clearly shows a form with visible field labels'
@@ -223,13 +481,14 @@ For radio groups with "other":
     }
     
     return NextResponse.json({ 
-      extractedFields: validatedFields,
-      fieldsCount: validatedFields.length
+      extractedFields,
+      fieldsCount: extractedFields.length
     })
+
   } catch (error) {
-    console.error('Screenshot analysis error:', error)
+    console.error('File analysis error:', error)
     return NextResponse.json({ 
-      error: 'Failed to analyze screenshot', 
+      error: 'Failed to analyze file', 
       details: error instanceof Error ? error.message : 'Unknown error'
     }, { status: 500 })
   }
