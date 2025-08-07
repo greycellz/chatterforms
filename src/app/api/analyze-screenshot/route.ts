@@ -29,8 +29,9 @@ const PDF_CONFIG = {
 // Simple PDF text extraction without external dependencies
 async function extractPDFTextSimple(buffer: Buffer): Promise<{ text: string; pages: number }> {
   const pdfString = buffer.toString('binary')
-  const textRegex = /BT\s*(.*?)\s*ET/gs
-  const streamRegex = /stream\s*([\s\S]*?)\s*endstream/gs
+  // ES2017 compatible regex - replace /gs flags with global flag and manual dotAll handling
+  const textRegex = /BT\s*([\s\S]*?)\s*ET/g
+  const streamRegex = /stream\s*([\s\S]*?)\s*endstream/g
   
   let extractedText = ''
   const textMatches = pdfString.match(textRegex) || []
