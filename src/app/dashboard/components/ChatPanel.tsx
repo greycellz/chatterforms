@@ -2,40 +2,7 @@ import ChatHistory from './ChatHistory'
 import FileUpload from './FileUpload'
 import AnalysisReview from './AnalysisReview'
 import ChatInput from './ChatInput'
-
-interface FormField {
-  id: string
-  type: string
-  label: string
-  required: boolean
-  placeholder?: string
-  options?: string[]
-}
-
-interface FormSchema {
-  title: string
-  fields: FormField[]
-  formId?: string
-}
-
-interface ChatMessage {
-  role: 'user' | 'assistant'
-  content: string
-}
-
-interface FieldExtraction {
-  id: string
-  label: string
-  type: 'text' | 'email' | 'tel' | 'textarea' | 'select' | 'radio' | 'checkbox' | 'date' | 'checkbox-group' | 'radio-with-other' | 'checkbox-with-other'
-  required: boolean
-  placeholder?: string
-  options?: string[]
-  confidence: number
-  allowOther?: boolean
-  otherLabel?: string
-  otherPlaceholder?: string
-  pageNumber?: number
-}
+import { FormField, FormSchema, ChatMessage, FieldExtraction, PDFPageSelectionResponse } from '../types'
 
 interface ChatPanelProps {
   description: string
@@ -62,9 +29,13 @@ interface ChatPanelProps {
   onImageUpload: (imageData: string) => void
   onPDFUpload: (file: File) => void
   onAnalyzeImage: (additionalContext?: string) => void
-  onAnalyzePDF: (file: File, additionalContext?: string) => void
+  onAnalyzePDF: (file: File, additionalContext?: string, pageSelection?: { pages: number[], selectAll?: boolean }) => void
   onFieldsValidated: (fields: FieldExtraction[]) => void
   onResetAnalysis: () => void
+  
+  // PDF page selection props
+  pdfPageSelection?: PDFPageSelectionResponse | null
+  onPageSelectionComplete?: (pageSelection: { pages: number[], selectAll?: boolean }) => void
 }
 
 export default function ChatPanel({
@@ -92,7 +63,9 @@ export default function ChatPanel({
   onAnalyzeImage,
   onAnalyzePDF,
   onFieldsValidated,
-  onResetAnalysis
+  onResetAnalysis,
+  pdfPageSelection,
+  onPageSelectionComplete
 }: ChatPanelProps) {
   return (
     <div className="w-1/3 bg-yellow-50 border-r border-gray-200 flex flex-col h-full">
@@ -115,6 +88,8 @@ export default function ChatPanel({
         onAnalyzePDF={onAnalyzePDF}
         onFieldsValidated={onFieldsValidated}
         onResetAnalysis={onResetAnalysis}
+        pdfPageSelection={pdfPageSelection}
+        onPageSelectionComplete={onPageSelectionComplete}
       />
       
       {/* File Upload - Shows when no upload workflow active */}

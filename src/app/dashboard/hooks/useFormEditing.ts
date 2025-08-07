@@ -1,28 +1,5 @@
 import { useState, useEffect } from 'react'
-import { SizeType, SizeConfig, StylingConfig } from '../components/SizeUtilities'
-
-interface FormField {
-  id: string
-  type: string
-  label: string
-  required: boolean
-  placeholder?: string
-  options?: string[]
-  size?: SizeType
-}
-
-interface FormSchema {
-  title: string
-  fields: FormField[]
-  styling?: {
-    globalFontSize?: SizeType
-    fieldSizes?: Record<string, SizeType>
-    fontFamily?: string
-    fontColor?: string
-    backgroundColor?: string
-    buttonColor?: string
-  }
-}
+import { SizeType, SizeConfig, StylingConfig, FormField, FormSchema } from '../types'
 
 interface PendingChanges {
   title?: string

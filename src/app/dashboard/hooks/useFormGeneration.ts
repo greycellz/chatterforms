@@ -1,39 +1,5 @@
 import { useState } from 'react'
-
-interface FormField {
-  id: string
-  type: string
-  label: string
-  required: boolean
-  placeholder?: string
-  options?: string[]
-}
-
-interface FormSchema {
-  title: string
-  fields: FormField[]
-  formId?: string
-}
-
-interface ChatMessage {
-  role: 'user' | 'assistant'
-  content: string
-}
-
-interface FieldExtraction {
-  id: string
-  label: string
-  type: 'text' | 'email' | 'tel' | 'textarea' | 'select' | 'radio' | 'checkbox' | 'date' | 'checkbox-group' | 'radio-with-other' | 'checkbox-with-other'
-  required: boolean
-  placeholder?: string
-  options?: string[]
-  confidence: number
-  additionalContext?: string
-  allowOther?: boolean
-  otherLabel?: string
-  otherPlaceholder?: string
-  pageNumber?: number
-}
+import { FormField, FormSchema, ChatMessage, FieldExtraction, PDFPageSelectionResponse } from '../types'
 
 export function useFormGeneration() {
   const [formSchema, setFormSchema] = useState<FormSchema | null>(null)
@@ -50,6 +16,9 @@ export function useFormGeneration() {
   const [extractedFields, setExtractedFields] = useState<FieldExtraction[]>([])
   const [isAnalyzing, setIsAnalyzing] = useState(false)
   const [analysisComplete, setAnalysisComplete] = useState(false)
+
+  // New PDF page selection state
+  const [pdfPageSelection, setPdfPageSelection] = useState<PDFPageSelectionResponse | null>(null)
 
   const generateForm = async (
     description: string, 
@@ -166,20 +135,30 @@ export function useFormGeneration() {
     }
   }
 
-  const analyzePDF = async (file: File, additionalContext?: string) => {
+  const analyzePDF = async (
+    file: File, 
+    additionalContext?: string, 
+    pageSelection?: { pages: number[], selectAll?: boolean }
+  ) => {
     setIsAnalyzing(true)
     setError('')
+    setPdfPageSelection(null)
 
     try {
-      const formData = new FormData()
-      formData.append('file', file)
-      if (additionalContext) {
-        formData.append('additionalContext', additionalContext)
-      }
+      // Convert file to base64
+      const arrayBuffer = await file.arrayBuffer()
+      const base64 = Buffer.from(arrayBuffer).toString('base64')
 
-      const response = await fetch('/api/analyze-screenshot', {
+      const response = await fetch('/api/analyze-pdf', {
         method: 'POST',
-        body: formData,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          pdfBuffer: base64,
+          additionalContext,
+          pageSelection
+        }),
       })
 
       const data = await response.json()
@@ -188,15 +167,33 @@ export function useFormGeneration() {
         throw new Error(data.error || 'Failed to analyze PDF')
       }
 
+      // Check if page selection is needed
+      if (data.needsPageSelection) {
+        setPdfPageSelection(data)
+        setIsAnalyzing(false)
+        
+        setChatHistory(prev => [
+          ...prev,
+          { role: 'user', content: `Uploaded PDF "${file.name}" for analysis${additionalContext ? ` with context: ${additionalContext}` : ''}` },
+          { role: 'assistant', content: `PDF has ${data.totalPages} pages. Please select which pages to analyze.` }
+        ])
+        
+        return null // No fields yet, waiting for page selection
+      }
+
+      // Analysis completed
       setExtractedFields(data.extractedFields)
       setAnalysisComplete(true)
       
+      const processedPagesText = data.processedPages ? 
+        ` (pages ${data.processedPages.join(', ')})` : ''
+      
       setChatHistory(prev => [
         ...prev,
-        { role: 'user', content: `Uploaded PDF "${file.name}" for analysis${additionalContext ? ` with context: ${additionalContext}` : ''}` },
+        { role: 'user', content: `Uploaded PDF "${file.name}" for analysis${additionalContext ? ` with context: ${additionalContext}` : ''}${processedPagesText}` },
         { 
           role: 'assistant', 
-          content: `Analyzed PDF using ${data.strategy} method and extracted ${data.extractedFields.length} fields. Please review before generating.`
+          content: `Analyzed PDF using ${data.processingMethod} and extracted ${data.extractedFields.length} fields from ${data.processedPages?.length || 'selected'} pages. Please review before generating.`
         }
       ])
 
@@ -206,8 +203,17 @@ export function useFormGeneration() {
       setError(errorMessage)
       throw err
     } finally {
-      setIsAnalyzing(false)
+      if (!pdfPageSelection) {
+        setIsAnalyzing(false)
+      }
     }
+  }
+
+  const handlePageSelectionComplete = async (pageSelection: { pages: number[], selectAll?: boolean }) => {
+    if (!uploadedPDF || !pdfPageSelection) return
+
+    // Continue analysis with selected pages
+    await analyzePDF(uploadedPDF, '', pageSelection)
   }
 
   const generateFormFromFields = async (validatedFields: FieldExtraction[]) => {
@@ -277,6 +283,7 @@ export function useFormGeneration() {
     setUploadedPDF(null) // Clear PDF if image is uploaded
     setExtractedFields([])
     setAnalysisComplete(false)
+    setPdfPageSelection(null)
     setError('')
   }
 
@@ -285,6 +292,7 @@ export function useFormGeneration() {
     setUploadedImage(null) // Clear image if PDF is uploaded
     setExtractedFields([])
     setAnalysisComplete(false)
+    setPdfPageSelection(null)
     setError('')
   }
 
@@ -294,6 +302,7 @@ export function useFormGeneration() {
     setExtractedFields([])
     setAnalysisComplete(false)
     setIsAnalyzing(false)
+    setPdfPageSelection(null)
     setError('')
   }
 
@@ -323,6 +332,7 @@ export function useFormGeneration() {
     extractedFields,
     isAnalyzing,
     analysisComplete,
+    pdfPageSelection,
 
     // Form actions
     generateForm,
@@ -337,6 +347,7 @@ export function useFormGeneration() {
     generateFormFromFields,
     handleImageUpload,
     handlePDFUpload,
+    handlePageSelectionComplete,
     resetAnalysis
   }
 }

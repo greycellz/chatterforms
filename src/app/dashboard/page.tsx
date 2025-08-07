@@ -5,21 +5,7 @@ import { useFormEditing } from './hooks/useFormEditing'
 import { useFormGeneration } from './hooks/useFormGeneration'
 import ChatPanel from './components/ChatPanel'
 import FormPreview from './components/FormPreview'
-
-interface FieldExtraction {
-  id: string
-  label: string
-  type: 'text' | 'email' | 'tel' | 'textarea' | 'select' | 'radio' | 'checkbox' | 'date' | 'checkbox-group' | 'radio-with-other' | 'checkbox-with-other'
-  required: boolean
-  placeholder?: string
-  options?: string[]
-  confidence: number
-  additionalContext?: string
-  allowOther?: boolean
-  otherLabel?: string
-  otherPlaceholder?: string
-  pageNumber?: number
-}
+import { FieldExtraction } from './types'
 
 export default function Dashboard() {
   const [description, setDescription] = useState('')
@@ -38,6 +24,7 @@ export default function Dashboard() {
     extractedFields,
     isAnalyzing,
     analysisComplete,
+    pdfPageSelection,
     generateForm,
     publishForm,
     updateFormSchema,
@@ -47,6 +34,7 @@ export default function Dashboard() {
     generateFormFromFields,
     handleImageUpload,
     handlePDFUpload,
+    handlePageSelectionComplete,
     resetAnalysis
   } = useFormGeneration()
 
@@ -188,6 +176,8 @@ export default function Dashboard() {
         onAnalyzePDF={handleAnalyzePDF}
         onFieldsValidated={handleFieldsValidated}
         onResetAnalysis={resetAnalysis}
+        pdfPageSelection={pdfPageSelection}
+        onPageSelectionComplete={handlePageSelectionComplete}
       />
 
       <FormPreview
