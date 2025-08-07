@@ -2,7 +2,7 @@ import ChatHistory from './ChatHistory'
 import FileUpload from './FileUpload'
 import AnalysisReview from './AnalysisReview'
 import ChatInput from './ChatInput'
-import { FormField, FormSchema, ChatMessage, FieldExtraction, PDFPageSelectionResponse } from '../types'
+import { FormSchema, ChatMessage, FieldExtraction, PDFPageSelectionResponse } from '../types'
 
 interface ChatPanelProps {
   description: string
@@ -23,13 +23,16 @@ interface ChatPanelProps {
   // File upload functionality props
   uploadedImage: string | null
   uploadedPDF: File | null
+  uploadedURL: string | null
   extractedFields: FieldExtraction[]
   isAnalyzing: boolean
   analysisComplete: boolean
   onImageUpload: (imageData: string) => void
   onPDFUpload: (file: File) => void
+  onURLSubmit: (url: string) => void
   onAnalyzeImage: (additionalContext?: string) => void
   onAnalyzePDF: (file: File, additionalContext?: string, pageSelection?: { pages: number[], selectAll?: boolean }) => void
+  onAnalyzeURL: (url: string, additionalContext?: string) => void
   onFieldsValidated: (fields: FieldExtraction[]) => void
   onResetAnalysis: () => void
   
@@ -55,13 +58,16 @@ export default function ChatPanel({
   error,
   uploadedImage,
   uploadedPDF,
+  uploadedURL,
   extractedFields,
   isAnalyzing,
   analysisComplete,
   onImageUpload,
   onPDFUpload,
+  onURLSubmit,
   onAnalyzeImage,
   onAnalyzePDF,
+  onAnalyzeURL,
   onFieldsValidated,
   onResetAnalysis,
   pdfPageSelection,
@@ -77,15 +83,17 @@ export default function ChatPanel({
       {/* Chat History - Takes up available space */}
       <ChatHistory chatHistory={chatHistory} />
       
-      {/* Analysis Review - Shows during screenshot/PDF workflow */}
+      {/* Analysis Review - Shows during screenshot/PDF/URL workflow */}
       <AnalysisReview
         uploadedImage={uploadedImage}
         uploadedPDF={uploadedPDF}
+        uploadedURL={uploadedURL}
         extractedFields={extractedFields}
         isAnalyzing={isAnalyzing}
         analysisComplete={analysisComplete}
         onAnalyzeImage={onAnalyzeImage}
         onAnalyzePDF={onAnalyzePDF}
+        onAnalyzeURL={onAnalyzeURL}
         onFieldsValidated={onFieldsValidated}
         onResetAnalysis={onResetAnalysis}
         pdfPageSelection={pdfPageSelection}
@@ -96,8 +104,10 @@ export default function ChatPanel({
       <FileUpload
         onImageUpload={onImageUpload}
         onPDFUpload={onPDFUpload}
+        onURLSubmit={onURLSubmit}
         uploadedImage={uploadedImage}
         uploadedPDF={uploadedPDF}
+        uploadedURL={uploadedURL}
         analysisComplete={analysisComplete}
       />
       
@@ -118,6 +128,7 @@ export default function ChatPanel({
         error={error}
         uploadedImage={uploadedImage}
         uploadedPDF={uploadedPDF}
+        uploadedURL={uploadedURL}
         analysisComplete={analysisComplete}
       />
     </div>

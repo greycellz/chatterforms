@@ -21,6 +21,7 @@ export default function Dashboard() {
     customButtonText,
     uploadedImage,
     uploadedPDF,
+    uploadedURL, // New URL state
     extractedFields,
     isAnalyzing,
     analysisComplete,
@@ -31,9 +32,11 @@ export default function Dashboard() {
     updateButtonText,
     analyzeScreenshot,
     analyzePDF,
+    analyzeURL, // New URL analyzer
     generateFormFromFields,
     handleImageUpload,
     handlePDFUpload,
+    handleURLUpload, // New URL handler
     handlePageSelectionComplete,
     resetAnalysis
   } = useFormGeneration()
@@ -136,6 +139,14 @@ export default function Dashboard() {
     }
   }
 
+  const handleAnalyzeURL = async (url: string, additionalContext?: string) => {
+    try {
+      await analyzeURL(url, additionalContext)
+    } catch {
+      // Error is handled in the hook
+    }
+  }
+
   const handleFieldsValidated = async (validatedFields: FieldExtraction[]) => {
     try {
       await generateFormFromFields(validatedFields)
@@ -155,7 +166,7 @@ export default function Dashboard() {
         isLoading={isLoading}
         onGenerateForm={handleGenerateForm}
         onUpdateForm={handleUpdateForm}
-        chatHistory={chatHistory}
+        chatHistory={chatHistory} // ✅ This was missing!
         hasUnsavedChanges={hasUnsavedChanges}
         onSaveChanges={handleSaveChanges}
         onDiscardChanges={discardChanges}
@@ -167,13 +178,16 @@ export default function Dashboard() {
         // File analysis props
         uploadedImage={uploadedImage}
         uploadedPDF={uploadedPDF}
+        uploadedURL={uploadedURL} // Pass URL state
         extractedFields={extractedFields}
         isAnalyzing={isAnalyzing}
         analysisComplete={analysisComplete}
         onImageUpload={handleImageUpload}
         onPDFUpload={handlePDFUpload}
+        onURLSubmit={handleURLUpload} // Pass URL handler
         onAnalyzeImage={handleAnalyzeImage}
         onAnalyzePDF={handleAnalyzePDF}
+        onAnalyzeURL={handleAnalyzeURL} // Pass URL analyzer
         onFieldsValidated={handleFieldsValidated}
         onResetAnalysis={resetAnalysis}
         pdfPageSelection={pdfPageSelection}

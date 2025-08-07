@@ -13,6 +13,7 @@ export function useFormGeneration() {
   // File analysis states
   const [uploadedImage, setUploadedImage] = useState<string | null>(null)
   const [uploadedPDF, setUploadedPDF] = useState<File | null>(null)
+  const [uploadedURL, setUploadedURL] = useState<string | null>(null) // New URL state
   const [extractedFields, setExtractedFields] = useState<FieldExtraction[]>([])
   const [isAnalyzing, setIsAnalyzing] = useState(false)
   const [analysisComplete, setAnalysisComplete] = useState(false)
@@ -65,13 +66,13 @@ export function useFormGeneration() {
       
       // Enhanced chat history for different sources
       const userMessage = extractedFields 
-        ? `Generated form from ${uploadedPDF ? 'PDF document' : 'screenshot'} with ${extractedFields.length} fields${description ? ` and instructions: ${description}` : ''}`
+        ? `Generated form from ${uploadedPDF ? 'PDF document' : uploadedURL ? 'URL' : 'screenshot'} with ${extractedFields.length} fields${description ? ` and instructions: ${description}` : ''}`
         : description
       
       const assistantMessage = isEdit 
         ? 'Form updated!' 
         : extractedFields 
-          ? `Form created from ${uploadedPDF ? 'PDF' : 'screenshot'}! Found ${extractedFields.length} fields.`
+          ? `Form created from ${uploadedPDF ? 'PDF' : uploadedURL ? 'URL' : 'screenshot'}! Found ${extractedFields.length} fields.`
           : 'Form created!'
       
       setChatHistory(prev => [
@@ -123,6 +124,47 @@ export function useFormGeneration() {
         ...prev,
         { role: 'user', content: `Uploaded screenshot for analysis${additionalContext ? ` with context: ${additionalContext}` : ''}` },
         { role: 'assistant', content: `Extracted ${data.extractedFields.length} fields from screenshot. Please review and edit as needed.` }
+      ])
+
+      return data.extractedFields
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Something went wrong'
+      setError(errorMessage)
+      throw err
+    } finally {
+      setIsAnalyzing(false)
+    }
+  }
+
+  const analyzeURL = async (url: string, additionalContext?: string) => {
+    setIsAnalyzing(true)
+    setError('')
+
+    try {
+      const response = await fetch('/api/analyze-url', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          url,
+          additionalContext
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to analyze URL')
+      }
+
+      setExtractedFields(data.extractedFields)
+      setAnalysisComplete(true)
+      
+      setChatHistory(prev => [
+        ...prev,
+        { role: 'user', content: `Uploaded URL for analysis: ${url.length > 50 ? url.substring(0, 50) + '...' : url}${additionalContext ? ` with context: ${additionalContext}` : ''}` },
+        { role: 'assistant', content: `Extracted ${data.extractedFields.length} fields from URL using ${data.method}. Please review and edit as needed.` }
       ])
 
       return data.extractedFields
@@ -221,7 +263,9 @@ export function useFormGeneration() {
     
     const sourceInfo = uploadedPDF 
       ? `PDF document "${uploadedPDF.name}"`
-      : 'screenshot'
+      : uploadedURL
+        ? `URL "${uploadedURL}"`
+        : 'screenshot'
     
     const description = `Create a form based on fields extracted from ${sourceInfo}: ${validatedFields.map(field => {
       let fieldDesc = `${field.label} (${field.type}${field.required ? ', required' : ', optional'})`
@@ -281,6 +325,7 @@ export function useFormGeneration() {
   const handleImageUpload = (imageData: string) => {
     setUploadedImage(imageData)
     setUploadedPDF(null) // Clear PDF if image is uploaded
+    setUploadedURL(null) // Clear URL if image is uploaded
     setExtractedFields([])
     setAnalysisComplete(false)
     setPdfPageSelection(null)
@@ -290,6 +335,17 @@ export function useFormGeneration() {
   const handlePDFUpload = (file: File) => {
     setUploadedPDF(file)
     setUploadedImage(null) // Clear image if PDF is uploaded
+    setUploadedURL(null) // Clear URL if PDF is uploaded
+    setExtractedFields([])
+    setAnalysisComplete(false)
+    setPdfPageSelection(null)
+    setError('')
+  }
+
+  const handleURLUpload = (url: string) => {
+    setUploadedURL(url)
+    setUploadedImage(null) // Clear image if URL is uploaded
+    setUploadedPDF(null) // Clear PDF if URL is uploaded
     setExtractedFields([])
     setAnalysisComplete(false)
     setPdfPageSelection(null)
@@ -299,6 +355,7 @@ export function useFormGeneration() {
   const resetAnalysis = () => {
     setUploadedImage(null)
     setUploadedPDF(null)
+    setUploadedURL(null) // Reset URL
     setExtractedFields([])
     setAnalysisComplete(false)
     setIsAnalyzing(false)
@@ -329,6 +386,7 @@ export function useFormGeneration() {
     // File analysis state
     uploadedImage,
     uploadedPDF,
+    uploadedURL, // New URL state
     extractedFields,
     isAnalyzing,
     analysisComplete,
@@ -344,9 +402,11 @@ export function useFormGeneration() {
     // File analysis actions
     analyzeScreenshot,
     analyzePDF,
+    analyzeURL, // New URL analysis action
     generateFormFromFields,
     handleImageUpload,
     handlePDFUpload,
+    handleURLUpload, // New URL upload handler
     handlePageSelectionComplete,
     resetAnalysis
   }

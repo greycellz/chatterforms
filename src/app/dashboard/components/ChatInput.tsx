@@ -31,6 +31,7 @@ interface ChatInputProps {
   // Hide input when in upload workflow
   uploadedImage: string | null
   uploadedPDF: File | null
+  uploadedURL: string | null // Add URL prop
   analysisComplete: boolean
 }
 
@@ -50,6 +51,7 @@ export default function ChatInput({
   error,
   uploadedImage,
   uploadedPDF,
+  uploadedURL, // Add URL prop
   analysisComplete
 }: ChatInputProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
@@ -73,7 +75,7 @@ export default function ChatInput({
   return (
     <div className="p-4 space-y-4 border-t border-gray-200 bg-yellow-50">
       {/* Main textarea with keyboard shortcut support - Hide during upload workflow */}
-      {!uploadedImage && !uploadedPDF && !analysisComplete && (
+      {!uploadedImage && !uploadedPDF && !uploadedURL && !analysisComplete && (
         <div className="space-y-2">
           <textarea 
             ref={textareaRef}
@@ -94,7 +96,7 @@ export default function ChatInput({
       )}
 
       {/* Generate/Update Button */}
-      {(!uploadedImage && !uploadedPDF && !analysisComplete) && (
+      {(!uploadedImage && !uploadedPDF && !uploadedURL && !analysisComplete) && (
         <button 
           onClick={formSchema ? onUpdateForm : onGenerateForm}
           disabled={isLoading || !description.trim()}
