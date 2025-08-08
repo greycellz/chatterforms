@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import puppeteer from 'puppeteer'
 
 interface FieldExtraction {
   id: string
@@ -14,6 +13,9 @@ interface FieldExtraction {
   otherPlaceholder?: string
   pageNumber?: number
 }
+
+// Railway service configuration
+const PUPPETEER_SERVICE_URL = process.env.PUPPETEER_SERVICE_URL || 'https://my-poppler-api-production.up.railway.app'
 
 // Validate URL format and accessibility
 function validateUrl(url: string): { isValid: boolean; normalizedUrl?: string; error?: string } {
@@ -33,111 +35,61 @@ function validateUrl(url: string): { isValid: boolean; normalizedUrl?: string; e
   }
 }
 
-// Primary Method: Puppeteer screenshot + GPT-4O Vision
-async function analyzeUrlWithPuppeteer(url: string, additionalContext?: string): Promise<FieldExtraction[]> {
-  console.log('🎯 Using Puppeteer + Vision for URL analysis (most reliable method)')
+// Call Railway service for screenshot capture
+async function captureScreenshotWithRailway(url: string, additionalContext?: string): Promise<{
+  screenshot: string
+  metadata: any
+  urlHash: string
+}> {
+  console.log('🔗 Calling Railway service for screenshot capture')
   
-  let browser
   try {
-    // Launch browser with optimized settings
-    browser = await puppeteer.launch({
-      headless: true,
-      args: [
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage',
-        '--disable-accelerated-2d-canvas',
-        '--no-first-run',
-        '--no-zygote',
-        '--single-process',
-        '--disable-gpu',
-        '--disable-extensions',
-        '--disable-default-apps',
-        '--disable-background-timer-throttling',
-        '--disable-backgrounding-occluded-windows',
-        '--disable-renderer-backgrounding'
-      ]
-    })
-
-    const page = await browser.newPage()
-    
-    // Set realistic viewport and user agent
-    await page.setViewport({ width: 1280, height: 800 })
-    await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36')
-    
-    // Set extra headers to appear more like a real browser
-    await page.setExtraHTTPHeaders({
-      'Accept-Language': 'en-US,en;q=0.9'
-    })
-
-    console.log(`📄 Navigating to URL: ${url}`)
-    
-    // Navigate to URL with extended timeout and wait conditions
-    await page.goto(url, { 
-      waitUntil: 'networkidle0', // Wait until no network requests for 500ms
-      timeout: 45000 // 45 second timeout
-    })
-
-    // Wait for potential dynamic content and form rendering
-    console.log('⏳ Waiting for dynamic content to load...')
-    await new Promise(resolve => setTimeout(resolve, 4000)) // 4 second wait
-
-    // Try to scroll down to ensure all form elements are loaded
-    await page.evaluate(() => {
-      return new Promise((resolve) => {
-        let totalHeight = 0
-        const distance = 100
-        const timer = setInterval(() => {
-          const scrollHeight = document.body.scrollHeight
-          window.scrollBy(0, distance)
-          totalHeight += distance
-
-          if (totalHeight >= scrollHeight) {
-            clearInterval(timer)
-            // Scroll back to top
-            window.scrollTo(0, 0)
-            setTimeout(resolve, 1000) // Wait 1 second after scrolling back to top
-          }
-        }, 100)
+    const response = await fetch(`${PUPPETEER_SERVICE_URL}/screenshot`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        url,
+        options: {
+          viewport: { width: 1280, height: 800 },
+          waitTime: 4000,
+          fullPage: true
+        }
       })
     })
 
-    console.log('📸 Taking screenshot of the form...')
-    
-    // Take full page screenshot
-    const screenshot = await page.screenshot({ 
-      fullPage: true,
-      type: 'png'
-      // Note: quality option only works with 'jpeg', not 'png'
-    })
-
-    // Convert to base64
-    const base64Screenshot = `data:image/png;base64,${Buffer.from(screenshot).toString('base64')}`
-
-    console.log('🤖 Analyzing screenshot with AI Vision...')
-    
-    // Analyze the screenshot with Vision AI
-    return await analyzeScreenshotWithVision(base64Screenshot, additionalContext, url)
-    
-  } catch (error) {
-    console.error('Puppeteer error:', error)
-    throw new Error(`Failed to capture or analyze webpage: ${error instanceof Error ? error.message : 'Unknown error'}`)
-  } finally {
-    if (browser) {
-      await browser.close()
-      console.log('🔒 Browser closed')
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}))
+      throw new Error(`Railway service error: ${response.status} - ${errorData.error || 'Unknown error'}`)
     }
+
+    const data = await response.json()
+    
+    if (!data.success) {
+      throw new Error(data.error || 'Screenshot capture failed')
+    }
+
+    console.log(`✅ Screenshot captured via Railway: ${data.screenshot.cached ? 'from cache' : 'newly captured'}`)
+    
+    return {
+      screenshot: data.screenshot.url,
+      metadata: data.metadata,
+      urlHash: data.urlHash
+    }
+
+  } catch (error) {
+    console.error('❌ Railway service error:', error)
+    throw new Error(`Failed to capture screenshot: ${error instanceof Error ? error.message : 'Unknown error'}`)
   }
 }
 
-// Vision analysis using OpenAI GPT-4O
-async function analyzeScreenshotWithVision(imageData: string, additionalContext?: string, sourceUrl?: string): Promise<FieldExtraction[]> {
+// Analyze screenshot using OpenAI GPT-4O Vision API
+async function analyzeScreenshotWithVision(imageUrl: string, additionalContext?: string, sourceUrl?: string): Promise<FieldExtraction[]> {
   const openaiApiKey = process.env.OPENAI_API_KEY
   if (!openaiApiKey) {
     throw new Error('OpenAI API key not configured')
   }
-
-  const base64Image = imageData.replace(/^data:image\/[a-z]+;base64,/, '')
 
   const systemMessage = `You are a form analysis expert. Analyze this screenshot of a web form and extract ALL visible form fields with high accuracy.
 
@@ -197,7 +149,7 @@ Return ONLY a JSON array with this exact structure:
     "type": "field_type",
     "required": true_or_false,
     "placeholder": "placeholder text if visible",
-    "options": ["option1", "option2"] // only for select/radio/checkbox fields,
+    "options": ["option1", "option2"], // only for select/radio/checkbox fields,
     "confidence": 0.95
   }
 ]
@@ -232,7 +184,7 @@ Please extract all visible form fields with their exact labels, types, and optio
               {
                 type: "image_url",
                 image_url: {
-                  url: `data:image/png;base64,${base64Image}`,
+                  url: imageUrl,
                   detail: "high"
                 }
               }
@@ -342,9 +294,40 @@ Please extract all visible form fields with their exact labels, types, and optio
   }
 }
 
+// Main URL analysis function using Railway service
+async function analyzeUrlWithRailway(url: string, additionalContext?: string): Promise<FieldExtraction[]> {
+  console.log('🎯 Using Railway Puppeteer service for URL analysis')
+  
+  try {
+    // Step 1: Capture screenshot via Railway service
+    const { screenshot, metadata, urlHash } = await captureScreenshotWithRailway(url, additionalContext)
+    
+    console.log(`📸 Screenshot captured: ${screenshot}`)
+    console.log(`📊 Metadata:`, { 
+      pageTitle: metadata.pageTitle, 
+      loadTime: metadata.loadTime,
+      cached: metadata.cached 
+    })
+    
+    // Step 2: Analyze screenshot with Vision API
+    const extractedFields = await analyzeScreenshotWithVision(screenshot, additionalContext, url)
+    
+    console.log(`✅ Analysis complete: ${extractedFields.length} fields found`)
+    
+    // Step 3: Optional cleanup of screenshot (you can decide when to do this)
+    // We'll let the Railway service handle automatic cleanup after 30 minutes
+    
+    return extractedFields
+    
+  } catch (error) {
+    console.error('❌ Railway URL analysis failed:', error)
+    throw error
+  }
+}
+
 // Main API route handler
 export async function POST(request: NextRequest) {
-  console.log('🚀 Starting URL analysis with Puppeteer-first approach')
+  console.log('🚀 Starting URL analysis with Railway Puppeteer service')
   
   try {
     const { url, additionalContext } = await request.json()
@@ -366,21 +349,21 @@ export async function POST(request: NextRequest) {
     console.log(`🔗 Analyzing form at URL: ${normalizedUrl}`)
 
     let extractedFields: FieldExtraction[]
-    const method = 'chatterforms-vision'
+    const method = 'railway-puppeteer-vision'
     const startTime = Date.now()
 
     try {
-      // Use Puppeteer + Vision approach (most reliable)
-      extractedFields = await analyzeUrlWithPuppeteer(normalizedUrl, additionalContext)
+      // Use Railway Puppeteer service
+      extractedFields = await analyzeUrlWithRailway(normalizedUrl, additionalContext)
       const processingTime = Date.now() - startTime
       console.log(`✅ Analysis completed in ${processingTime}ms: ${extractedFields.length} fields found`)
       
-    } catch (puppeteerError) {
-      console.error('❌ Puppeteer + Vision failed:', puppeteerError)
+    } catch (railwayError) {
+      console.error('❌ Railway service failed:', railwayError)
       
       return NextResponse.json({ 
         error: 'Unable to analyze URL',
-        details: puppeteerError instanceof Error ? puppeteerError.message : 'Unknown error',
+        details: railwayError instanceof Error ? railwayError.message : 'Unknown error',
         suggestion: 'The form may be behind authentication, require JavaScript interaction, or be inaccessible.',
         troubleshooting: [
           'Check if the URL requires login or authentication',
@@ -393,7 +376,11 @@ export async function POST(request: NextRequest) {
           'Use the "Attach Form Screenshot" option instead',
           'Copy the form fields manually and describe them in the chat',
           'Check if the form has a simpler direct link'
-        ]
+        ],
+        serviceStatus: {
+          railwayService: 'failed',
+          fallbackAvailable: false
+        }
       }, { status: 500 })
     }
 
@@ -430,12 +417,17 @@ export async function POST(request: NextRequest) {
       url: normalizedUrl,
       method,
       processingTimeMs: processingTime,
-      message: `Successfully extracted ${extractedFields.length} fields from URL using reliable screenshot analysis`,
-      methodology: 'This method takes a screenshot of the live form and analyzes it with AI vision for maximum accuracy',
+      message: `Successfully extracted ${extractedFields.length} fields from URL using Railway screenshot service`,
+      methodology: 'This method captures a screenshot via Railway Puppeteer service and analyzes it with AI vision for maximum accuracy',
       confidenceRange: {
         min: Math.min(...extractedFields.map(f => f.confidence)),
         max: Math.max(...extractedFields.map(f => f.confidence)),
         average: extractedFields.reduce((sum, f) => sum + f.confidence, 0) / extractedFields.length
+      },
+      serviceInfo: {
+        screenshotService: 'railway-puppeteer',
+        visionService: 'openai-gpt4o',
+        cacheEnabled: true
       }
     })
 
