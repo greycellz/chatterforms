@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { FormField, FormSchema, ChatMessage, FieldExtraction, PDFPageSelectionResponse } from '../types'
+import { FormSchema, ChatMessage, FieldExtraction, PDFPageSelectionResponse } from '../types'
 
 export function useFormGeneration() {
   const [formSchema, setFormSchema] = useState<FormSchema | null>(null)

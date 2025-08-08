@@ -14,6 +14,15 @@ interface FieldExtraction {
   pageNumber?: number
 }
 
+// Add proper interface for metadata
+interface ScreenshotMetadata {
+  finalUrl: string
+  pageTitle?: string
+  loadTime?: number
+  cached?: boolean
+  viewport?: { width: number; height: number }
+}
+
 // Railway service configuration
 const PUPPETEER_SERVICE_URL = process.env.PUPPETEER_SERVICE_URL || 'https://my-poppler-api-production.up.railway.app'
 
@@ -30,15 +39,15 @@ function validateUrl(url: string): { isValid: boolean; normalizedUrl?: string; e
     }
     
     return { isValid: true, normalizedUrl }
-  } catch (error) {
+  } catch {
     return { isValid: false, error: 'Invalid URL format' }
   }
 }
 
 // Call Railway service for screenshot capture
-async function captureScreenshotWithRailway(url: string, additionalContext?: string): Promise<{
+async function captureScreenshotWithRailway(url: string): Promise<{
   screenshot: string
-  metadata: any
+  metadata: ScreenshotMetadata
   urlHash: string
 }> {
   console.log('🔗 Calling Railway service for screenshot capture')
@@ -74,7 +83,7 @@ async function captureScreenshotWithRailway(url: string, additionalContext?: str
     
     return {
       screenshot: data.screenshot.url,
-      metadata: data.metadata,
+      metadata: data.metadata as ScreenshotMetadata,
       urlHash: data.urlHash
     }
 
@@ -300,7 +309,7 @@ async function analyzeUrlWithRailway(url: string, additionalContext?: string): P
   
   try {
     // Step 1: Capture screenshot via Railway service
-    const { screenshot, metadata, urlHash } = await captureScreenshotWithRailway(url, additionalContext)
+    const { screenshot, metadata } = await captureScreenshotWithRailway(url)
     
     console.log(`📸 Screenshot captured: ${screenshot}`)
     console.log(`📊 Metadata:`, { 
@@ -313,9 +322,6 @@ async function analyzeUrlWithRailway(url: string, additionalContext?: string): P
     const extractedFields = await analyzeScreenshotWithVision(screenshot, additionalContext, url)
     
     console.log(`✅ Analysis complete: ${extractedFields.length} fields found`)
-    
-    // Step 3: Optional cleanup of screenshot (you can decide when to do this)
-    // We'll let the Railway service handle automatic cleanup after 30 minutes
     
     return extractedFields
     

@@ -36,7 +36,7 @@ interface PopplerResponse {
   details?: string
 }
 
-interface PageSelection {
+interface _PageSelection {
   pages: number[]
   selectAll?: boolean
 }
