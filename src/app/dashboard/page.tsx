@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { useFormEditing } from './hooks/useFormEditing'
 import { useFormGeneration } from './hooks/useFormGeneration'
@@ -31,7 +31,17 @@ const base64ToFile = (base64: string, filename: string, mimeType: string, isPDF 
   }
 }
 
-export default function Dashboard() {
+// Loading fallback component
+function DashboardLoading() {
+  return (
+    <div className="h-screen flex items-center justify-center">
+      <div className="text-lg">Loading dashboard...</div>
+    </div>
+  )
+}
+
+// Separate component that uses useSearchParams
+function DashboardContent() {
   const [description, setDescription] = useState('')
   const [hasProcessedLandingParams, setHasProcessedLandingParams] = useState(false)
   const [isFromLanding, setIsFromLanding] = useState(false) // NEW: Track if this is from landing
@@ -322,5 +332,14 @@ export default function Dashboard() {
         submitButtonText={getEffectiveButtonText()}
       />
     </div>
+  )
+}
+
+// Main component with Suspense boundary
+export default function Dashboard() {
+  return (
+    <Suspense fallback={<DashboardLoading />}>
+      <DashboardContent />
+    </Suspense>
   )
 }
