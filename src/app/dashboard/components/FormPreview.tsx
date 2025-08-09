@@ -44,7 +44,7 @@ interface FormPreviewProps {
 // Loading form animation with new styling
 const LoadingFormAnimation = ({ stylingConfig }: { stylingConfig: StylingConfig }) => (
   <div 
-    className="form-preview-card"
+    className="form-preview-card loading-animation"
     style={{ 
       background: stylingConfig.backgroundColor,
       fontFamily: stylingConfig.fontFamily,
@@ -56,7 +56,7 @@ const LoadingFormAnimation = ({ stylingConfig }: { stylingConfig: StylingConfig 
       <div className="loading-container" style={{ marginBottom: '32px' }}>
         <div className="loading-content">
           <div className="loading-spinner" />
-          <span style={{ color: 'rgba(255, 255, 255, 0.9)' }}>
+          <span style={{ color: 'rgba(139, 92, 246, 0.9)' }}>
             Generating your form...
           </span>
         </div>
@@ -70,7 +70,7 @@ const LoadingFormAnimation = ({ stylingConfig }: { stylingConfig: StylingConfig 
         <div style={{ 
           width: '200px', 
           height: '32px', 
-          background: 'rgba(255, 255, 255, 0.2)', 
+          background: 'rgba(139, 92, 246, 0.1)', 
           borderRadius: '8px',
           animation: 'pulse 1.5s ease-in-out infinite'
         }} />
@@ -94,7 +94,7 @@ const LoadingFormAnimation = ({ stylingConfig }: { stylingConfig: StylingConfig 
             <div style={{ 
               width: `${120 + (index * 20)}px`, 
               height: '16px', 
-              background: 'rgba(255, 255, 255, 0.15)', 
+              background: 'rgba(139, 92, 246, 0.15)', 
               borderRadius: '4px',
               marginBottom: '8px',
               animation: 'pulse 1.5s ease-in-out infinite'
@@ -102,9 +102,9 @@ const LoadingFormAnimation = ({ stylingConfig }: { stylingConfig: StylingConfig 
             <div style={{ 
               width: '100%', 
               height: '40px', 
-              background: 'rgba(255, 255, 255, 0.1)', 
+              background: 'rgba(139, 92, 246, 0.1)', 
               borderRadius: '8px',
-              border: '1px solid rgba(255, 255, 255, 0.2)',
+              border: '1px solid rgba(139, 92, 246, 0.2)',
               animation: 'pulse 1.5s ease-in-out infinite'
             }} />
           </div>
@@ -179,7 +179,14 @@ export default function FormPreview({
         
         {/* Actual Form Preview */}
         {!isLoading && (
-          <div className="form-preview-card">
+          <div 
+            className="form-preview-card style-transition"
+            style={{ 
+              background: stylingConfig.backgroundColor, // ← FIXED: Apply background here
+              fontFamily: stylingConfig.fontFamily,
+              color: stylingConfig.fontColor
+            }}
+          >
             <div className="form-content">
               {formSchema ? (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
@@ -231,11 +238,12 @@ export default function FormPreview({
                   />
                 </div>
               ) : (
-                // Empty state
+                // Empty state with proper styling inheritance
                 <div style={{ 
                   textAlign: 'center', 
                   padding: '80px 40px',
-                  color: '#64748b'
+                  color: stylingConfig.fontColor,
+                  opacity: 0.7
                 }}>
                   <div style={{ fontSize: '64px', marginBottom: '24px', opacity: 0.5 }}>
                     📋
@@ -243,13 +251,14 @@ export default function FormPreview({
                   <h3 style={{ 
                     fontSize: '20px', 
                     fontWeight: '600', 
-                    color: '#1e293b', 
+                    color: stylingConfig.fontColor,
                     marginBottom: '12px' 
                   }}>
                     Ready to create your form
                   </h3>
                   <p style={{ 
-                    color: '#64748b', 
+                    color: stylingConfig.fontColor,
+                    opacity: 0.6,
                     maxWidth: '400px', 
                     margin: '0 auto',
                     lineHeight: 1.6
@@ -262,6 +271,30 @@ export default function FormPreview({
           </div>
         )}
       </div>
+      
+      {/* Add CSS for transitions */}
+      <style jsx>{`
+        .style-transition {
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .loading-animation .loading-dot {
+          width: 6px;
+          height: 6px;
+          background: rgba(139, 92, 246, 0.7);
+          border-radius: 50%;
+          animation: pulse 1.5s ease-in-out infinite;
+        }
+        
+        .loading-animation .loading-dot:nth-child(1) { animation-delay: 0s; }
+        .loading-animation .loading-dot:nth-child(2) { animation-delay: 0.2s; }
+        .loading-animation .loading-dot:nth-child(3) { animation-delay: 0.4s; }
+        
+        @keyframes pulse {
+          0%, 60%, 100% { opacity: 0.3; transform: scale(0.8); }
+          30% { opacity: 1; transform: scale(1); }
+        }
+      `}</style>
     </div>
   )
 }

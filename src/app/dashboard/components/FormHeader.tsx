@@ -1,5 +1,5 @@
 import EditableText from './EditableText'
-import StylingPanel from './StylingPanel'
+import ImprovedStylingPanel from './ImprovedStylingPanel'
 import { getTextSizeClasses, SizeType, SizeConfig, StylingConfig } from '../components/SizeUtilities'
 import { useState } from 'react'
 
@@ -32,64 +32,21 @@ export default function FormHeader({
   onSizeChange,
   onStylingChange
 }: FormHeaderProps) {
-  const [isExpanded, setIsExpanded] = useState(false)
-
   return (
     <div className="space-y-4">
-      {/* Collapsible Controls Panel */}
-      <div className="bg-gray-50 bg-opacity-95 rounded-lg border">
-        {/* Header with Toggle */}
-        <button
-          onClick={() => setIsExpanded(!isExpanded)}
-          className="w-full p-3 flex items-center justify-between hover:bg-gray-100 hover:bg-opacity-50 transition-colors rounded-lg"
-        >
-          <div className="flex items-center space-x-2">
-            <span className="text-sm font-medium text-gray-700">Global Settings</span>
-            {hasUnsavedChanges && (
-              <span className="text-xs text-orange-600 bg-orange-50 px-2 py-0.5 rounded">
-                Unsaved changes
-              </span>
-            )}
-          </div>
-          <div className="flex items-center space-x-2">
-            <span className="text-xs text-gray-500">
-              {isExpanded ? 'Click to collapse' : 'Click to expand styling options'}
-            </span>
-            <svg 
-              className={`w-4 h-4 text-gray-500 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
-              fill="none" 
-              stroke="currentColor" 
-              viewBox="0 0 24 24"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-            </svg>
-          </div>
-        </button>
-        
-        {/* Expandable Content */}
-        {isExpanded && (
-          <div className="px-4 pb-4">
-            <StylingPanel
-              fontFamily={stylingConfig.fontFamily}
-              fontColor={stylingConfig.fontColor}
-              backgroundColor={stylingConfig.backgroundColor}
-              buttonColor={stylingConfig.buttonColor}
-              globalFontSize={sizeConfig.globalFontSize}
-              onFontFamilyChange={(fontFamily) => onStylingChange({ fontFamily })}
-              onFontColorChange={(fontColor) => onStylingChange({ fontColor })}
-              onBackgroundColorChange={(backgroundColor) => onStylingChange({ backgroundColor })}
-              onButtonColorChange={(buttonColor) => onStylingChange({ buttonColor })}
-              onSizeChange={onSizeChange}
-            />
-            
-            {hasUnsavedChanges && (
-              <div className="text-xs text-orange-600 mt-3 text-center">
-                ⚠️ Changes need to be saved and republished
-              </div>
-            )}
-          </div>
-        )}
-      </div>
+      {/* Improved Settings Panel */}
+      <ImprovedStylingPanel
+        fontFamily={stylingConfig.fontFamily}
+        fontColor={stylingConfig.fontColor}
+        backgroundColor={stylingConfig.backgroundColor}
+        buttonColor={stylingConfig.buttonColor}
+        globalFontSize={sizeConfig.globalFontSize}
+        onFontFamilyChange={(fontFamily) => onStylingChange({ fontFamily })}
+        onFontColorChange={(fontColor) => onStylingChange({ fontColor })}
+        onBackgroundColorChange={(backgroundColor) => onStylingChange({ backgroundColor })}
+        onButtonColorChange={(buttonColor) => onStylingChange({ buttonColor })}
+        onSizeChange={onSizeChange}
+      />
       
       {/* Editable Form Title */}
       <EditableText
@@ -107,6 +64,16 @@ export default function FormHeader({
           color: stylingConfig.fontColor
         }}
       />
+      
+      {/* Unsaved Changes Indicator */}
+      {hasUnsavedChanges && (
+        <div className="text-xs text-orange-600 bg-orange-50 border border-orange-200 px-3 py-2 rounded-lg flex items-center space-x-2">
+          <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-2.694-.833-3.464 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" />
+          </svg>
+          <span>You have unsaved styling changes. Save or publish to apply them.</span>
+        </div>
+      )}
     </div>
   )
 }

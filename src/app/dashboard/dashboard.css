@@ -233,8 +233,6 @@
   }
 }
 
-/* Remove file upload container - now integrated into chat input */
-
 /* Chat input area - Sticky positioning with better height */
 .chat-input-container {
   position: sticky;
@@ -366,12 +364,12 @@
 }
 
 /* Upload hints below input */
-.input-hints {
+.upload-hints {
   margin-top: 12px;
   text-align: center;
 }
 
-.input-hints-text {
+.upload-hints-text {
   color: rgba(255, 255, 255, 0.7);
   font-size: 11px;
   font-weight: 400;
@@ -556,7 +554,7 @@
   letter-spacing: -0.01em;
 }
 
-/* 3D Form Preview Card */
+/* 3D Form Preview Card with smooth transitions */
 .form-preview-container {
   flex: 1;
   padding: 40px;
@@ -575,14 +573,14 @@
   max-width: 800px;
   position: relative;
   
-  /* 3D Effect */
+  /* Enhanced 3D Effect with smooth transitions */
   box-shadow: 
     0 25px 50px rgba(0, 0, 0, 0.15),
     0 15px 35px rgba(0, 0, 0, 0.1),
     0 5px 15px rgba(0, 0, 0, 0.05);
   
   transform: perspective(1000px) rotateX(2deg);
-  transition: all 0.4s ease;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .form-preview-card:hover {
@@ -591,6 +589,15 @@
     0 35px 70px rgba(0, 0, 0, 0.2),
     0 25px 50px rgba(0, 0, 0, 0.15),
     0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* Enhanced transition effects for style changes */
+.style-transition {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.style-transition * {
+  transition: color 0.3s ease, background-color 0.3s ease, border-color 0.3s ease;
 }
 
 /* Glassmorphic overlay for 3D effect */
@@ -607,6 +614,7 @@
     rgba(0, 0, 0, 0.02) 100%);
   border-radius: 18px;
   pointer-events: none;
+  transition: opacity 0.3s ease;
 }
 
 /* Form content styling */
@@ -617,8 +625,8 @@
 
 /* Loading states with glassmorphic design */
 .loading-container {
-  background: rgba(255, 255, 255, 0.12);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(139, 92, 246, 0.12);
+  border: 1px solid rgba(139, 92, 246, 0.2);
   border-radius: 16px;
   padding: 24px;
   backdrop-filter: blur(15px);
@@ -629,14 +637,14 @@
   display: flex;
   align-items: center;
   gap: 16px;
-  color: rgba(255, 255, 255, 0.9);
+  color: rgba(139, 92, 246, 0.9);
 }
 
 .loading-spinner {
   width: 20px;
   height: 20px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-top: 2px solid white;
+  border: 2px solid rgba(139, 92, 246, 0.3);
+  border-top: 2px solid rgba(139, 92, 246, 0.8);
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -654,7 +662,7 @@
 .loading-dot {
   width: 6px;
   height: 6px;
-  background: rgba(255, 255, 255, 0.7);
+  background: rgba(139, 92, 246, 0.7);
   border-radius: 50%;
   animation: pulse 1.5s ease-in-out infinite;
 }
@@ -672,7 +680,7 @@
 .progress-bar {
   width: 100%;
   height: 3px;
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(139, 92, 246, 0.2);
   border-radius: 2px;
   overflow: hidden;
   margin-top: 12px;
@@ -681,9 +689,9 @@
 .progress-fill {
   height: 100%;
   background: linear-gradient(90deg, 
-    rgba(255, 255, 255, 0.8) 0%, 
-    rgba(255, 255, 255, 0.6) 50%, 
-    rgba(255, 255, 255, 0.8) 100%);
+    rgba(139, 92, 246, 0.8) 0%, 
+    rgba(139, 92, 246, 0.6) 50%, 
+    rgba(139, 92, 246, 0.8) 100%);
   border-radius: 2px;
   animation: progressFlow 2s ease-in-out infinite;
 }
@@ -715,6 +723,35 @@
   background: rgba(239, 68, 68, 0.1);
 }
 
+.status-title {
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.status-url {
+  display: inline-block;
+  background: rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.95);
+  padding: 8px 12px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  word-break: break-all;
+  transition: all 0.2s ease;
+}
+
+.status-url:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-1px);
+}
+
+.status-note {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.7);
+  margin-top: 8px;
+}
+
 @keyframes statusSlideIn {
   from {
     opacity: 0;
@@ -724,6 +761,174 @@
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+/* New styles for improved settings panel */
+.settings-panel {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 20px;
+  box-shadow: 
+    0 25px 50px rgba(0, 0, 0, 0.15),
+    0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.settings-trigger {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.settings-trigger:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(139, 92, 246, 0.2);
+}
+
+/* Animation for settings panel expansion */
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-slideInDown {
+  animation: slideInDown 0.2s ease-out;
+}
+
+/* Theme preview cards */
+.theme-card {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.theme-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* Range slider enhancements */
+.enhanced-range {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 8px;
+  border-radius: 4px;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.enhanced-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+  cursor: pointer;
+  border: 3px solid #ffffff;
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+  transition: all 0.2s ease;
+}
+
+.enhanced-range::-webkit-slider-thumb:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 16px rgba(139, 92, 246, 0.6);
+}
+
+.enhanced-range::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+  cursor: pointer;
+  border: 3px solid #ffffff;
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+  transition: all 0.2s ease;
+}
+
+.enhanced-range::-moz-range-thumb:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 16px rgba(139, 92, 246, 0.6);
+}
+
+/* Color picker enhancements */
+.color-swatch {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+
+.color-swatch::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, 
+    transparent 40%, 
+    rgba(255, 255, 255, 0.3) 50%, 
+    transparent 60%);
+  transform: translateX(-100%);
+  transition: transform 0.3s ease;
+}
+
+.color-swatch:hover::after {
+  transform: translateX(100%);
+}
+
+/* Upload card styles for landing page integration */
+.upload-card {
+  background: rgba(255, 255, 255, 0.12);
+  border: 2px dashed rgba(255, 255, 255, 0.3);
+  border-radius: 20px;
+  padding: 40px 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(15px);
+  margin: 20px;
+}
+
+.upload-card:hover {
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+}
+
+.upload-icon {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+  transition: all 0.3s ease;
+}
+
+.upload-icon:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
+}
+
+.upload-icon svg {
+  width: 24px;
+  height: 24px;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.upload-text {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.5;
 }
 
 /* Responsive design */
@@ -775,6 +980,28 @@
   .form-preview-card:hover {
     transform: translateY(-2px);
   }
+  
+  /* Mobile adjustments for settings panel */
+  .settings-panel {
+    width: calc(100vw - 2rem);
+    max-width: 380px;
+    right: 1rem;
+  }
+  
+  .upload-card {
+    margin: 16px;
+    padding: 30px 16px;
+  }
+  
+  .upload-icon {
+    width: 50px;
+    height: 50px;
+    margin-bottom: 16px;
+  }
+  
+  .upload-text {
+    font-size: 14px;
+  }
 }
 
 /* Custom scrollbar for chat history */
@@ -813,4 +1040,214 @@
 
 .form-preview-container::-webkit-scrollbar-thumb:hover {
   background: rgba(0, 0, 0, 0.3);
+}
+
+/* Accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+  .form-preview-card,
+  .style-transition,
+  .settings-trigger,
+  .theme-card,
+  .upload-card {
+    transition: none;
+  }
+  
+  .dashboard-particle {
+    animation: none;
+  }
+  
+  .loading-spinner,
+  .progress-fill {
+    animation: none;
+  }
+  
+  .messageSlideIn,
+  .statusSlideIn {
+    animation: none;
+  }
+}
+
+/* Focus states for accessibility */
+.settings-trigger:focus-visible {
+  outline: 2px solid #8b5cf6;
+  outline-offset: 2px;
+}
+
+.theme-card:focus-visible {
+  outline: 2px solid #8b5cf6;
+  outline-offset: 2px;
+}
+
+.upload-card:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.8);
+  outline-offset: 2px;
+}
+
+.dashboard-btn:focus-visible {
+  outline: 2px solid #8b5cf6;
+  outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .form-preview-card {
+    border-width: 3px;
+    border-color: #000000;
+  }
+  
+  .settings-panel {
+    border-width: 2px;
+    border-color: #000000;
+  }
+  
+  .chat-bubble {
+    border-width: 2px;
+    border-color: rgba(255, 255, 255, 0.5);
+  }
+}
+
+/* Print styles */
+@media print {
+  .dashboard-bg-animation,
+  .chat-panel,
+  .form-preview-header {
+    display: none;
+  }
+  
+  .form-preview-panel {
+    width: 100%;
+    height: auto;
+    background: white;
+  }
+  
+  .form-preview-card {
+    box-shadow: none;
+    border: 2px solid #000;
+    transform: none;
+  }
+}
+
+/* Dark mode support (future enhancement) */
+@media (prefers-color-scheme: dark) {
+  .form-preview-card {
+    background: #1f2937;
+    border-color: #374151;
+    color: #f9fafb;
+  }
+  
+  .form-preview-title {
+    color: #f9fafb;
+  }
+}
+
+/* Animation utilities */
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.animate-slideUp {
+  animation: slideUp 0.3s ease-out;
+}
+
+.animate-scaleIn {
+  animation: scaleIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Utility classes for better component styling */
+.glassmorphic {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.gradient-border {
+  position: relative;
+  background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+  border-radius: 12px;
+}
+
+.gradient-border::before {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  background: inherit;
+  border-radius: 10px;
+}
+
+/* Enhanced loading states */
+.loading-skeleton {
+  background: linear-gradient(90deg, 
+    rgba(255, 255, 255, 0.1) 0%, 
+    rgba(255, 255, 255, 0.2) 50%, 
+    rgba(255, 255, 255, 0.1) 100%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s ease-in-out infinite;
+}
+
+@keyframes skeleton-loading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Success and error notification styles */
+.notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 16px 20px;
+  border-radius: 12px;
+  backdrop-filter: blur(15px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  z-index: 100;
+  animation: notificationSlide 0.3s ease-out;
+}
+
+.notification.success {
+  background: rgba(34, 197, 94, 0.9);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  color: white;
+}
+
+.notification.error {
+  background: rgba(239, 68, 68, 0.9);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: white;
+}
+
+@keyframes notificationSlide {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
