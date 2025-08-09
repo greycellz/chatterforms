@@ -1,16 +1,43 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { useFormEditing } from './hooks/useFormEditing'
 import { useFormGeneration } from './hooks/useFormGeneration'
 import ChatPanel from './components/ChatPanel'
 import FormPreview from './components/FormPreview'
 import { FieldExtraction } from './types'
 
+// Helper to convert base64 back to File - FIXED for PDF
+const base64ToFile = (base64: string, filename: string, mimeType: string, isPDF = false): File => {
+  if (isPDF) {
+    // For PDFs, base64 is clean without data URL prefix
+    const byteCharacters = atob(base64)
+    const byteNumbers = new Array(byteCharacters.length)
+    for (let i = 0; i < byteCharacters.length; i++) {
+      byteNumbers[i] = byteCharacters.charCodeAt(i)
+    }
+    const byteArray = new Uint8Array(byteNumbers)
+    return new File([byteArray], filename, { type: mimeType })
+  } else {
+    // For images, base64 includes data URL prefix
+    const byteCharacters = atob(base64.split(',')[1])
+    const byteNumbers = new Array(byteCharacters.length)
+    for (let i = 0; i < byteCharacters.length; i++) {
+      byteNumbers[i] = byteCharacters.charCodeAt(i)
+    }
+    const byteArray = new Uint8Array(byteNumbers)
+    return new File([byteArray], filename, { type: mimeType })
+  }
+}
+
 export default function Dashboard() {
   const [description, setDescription] = useState('')
+  const [hasProcessedLandingParams, setHasProcessedLandingParams] = useState(false)
+  const [isFromLanding, setIsFromLanding] = useState(false) // NEW: Track if this is from landing
+  const searchParams = useSearchParams()
 
-  // Enhanced hook with PDF functionality
+  // Enhanced hook with all functionality
   const {
     formSchema,
     isLoading,
@@ -21,7 +48,7 @@ export default function Dashboard() {
     customButtonText,
     uploadedImage,
     uploadedPDF,
-    uploadedURL, // New URL state
+    uploadedURL,
     extractedFields,
     isAnalyzing,
     analysisComplete,
@@ -32,11 +59,11 @@ export default function Dashboard() {
     updateButtonText,
     analyzeScreenshot,
     analyzePDF,
-    analyzeURL, // New URL analyzer
+    analyzeURL,
     generateFormFromFields,
     handleImageUpload,
     handlePDFUpload,
-    handleURLUpload, // New URL handler
+    handleURLUpload,
     handlePageSelectionComplete,
     resetAnalysis
   } = useFormGeneration()
@@ -60,13 +87,89 @@ export default function Dashboard() {
     getEffectiveFormSchema
   } = useFormEditing(formSchema)
 
+  // Process landing page parameters ONCE
+  useEffect(() => {
+    if (hasProcessedLandingParams) return
+
+    const input = searchParams.get('input')
+    const mode = searchParams.get('mode')
+    const filename = searchParams.get('filename')
+    const url = searchParams.get('url')
+    
+    // Mark as processed immediately to prevent loops
+    setHasProcessedLandingParams(true)
+
+    const processLandingInput = async () => {
+      try {
+        setIsFromLanding(true) // Mark that this is from landing page
+        
+        if (input) {
+          // Text input flow - Skip chat history, generateForm will handle it
+          console.log('Processing text input from landing:', input)
+          setDescription(input)
+          await generateForm(input, null, false)
+          
+        } else if (mode === 'url' && url) {
+          // URL analysis flow - Skip chat history, analyzeURL will handle it
+          console.log('Processing URL from landing:', url)
+          handleURLUpload(url)
+          await analyzeURL(url)
+          
+        } else if (mode && filename) {
+          // File upload flow - Skip chat history, analysis functions will handle it
+          const storedFile = sessionStorage.getItem('uploadedFile')
+          if (storedFile) {
+            const fileData = JSON.parse(storedFile)
+            sessionStorage.removeItem('uploadedFile') // Clean up immediately
+            
+            console.log(`Processing ${mode} from landing:`, filename)
+            
+            if (mode === 'image') {
+              handleImageUpload(fileData.data)
+              await analyzeScreenshot(fileData.data)
+            } else if (mode === 'pdf') {
+              // Convert base64 back to File object with correct format
+              const file = base64ToFile(fileData.data, fileData.name, fileData.type, fileData.isPDF)
+              handlePDFUpload(file)
+              await analyzePDF(file)
+            }
+          }
+        }
+        
+        // Reset flag after processing
+        setTimeout(() => setIsFromLanding(false), 1000)
+        
+      } catch (error) {
+        console.error('Error processing landing input:', error)
+        setIsFromLanding(false)
+      }
+    }
+
+    // Only process if we have landing parameters
+    if (input || mode) {
+      processLandingInput()
+    }
+  }, [
+    searchParams, 
+    hasProcessedLandingParams,
+    generateForm,
+    analyzeURL,
+    analyzeScreenshot,
+    analyzePDF,
+    handleImageUpload,
+    handlePDFUpload,
+    handleURLUpload
+  ])
+
   // Get the current effective button text (pending changes take priority)
   const getEffectiveButtonText = () => {
     return pendingChanges.submitButtonText || customButtonText
   }
 
-  // Handler functions
+  // Handler functions - Skip chat duplicates when coming from landing
   const handleGenerateForm = async () => {
+    if (isFromLanding) return // Prevent manual generation when processing landing params
+    
     try {
       await generateForm(description, null, false)
       // Clear pending changes after successful generation
@@ -78,6 +181,8 @@ export default function Dashboard() {
   }
 
   const handleUpdateForm = async () => {
+    if (isFromLanding) return // Prevent manual update when processing landing params
+    
     try {
       const effectiveForm = getEffectiveFormSchema()
       const currentButtonText = getEffectiveButtonText()
@@ -120,9 +225,9 @@ export default function Dashboard() {
     }
   }
 
-  // File analysis handlers
+  // File analysis handlers - Skip duplicates when from landing
   const handleAnalyzeImage = async (additionalContext?: string) => {
-    if (!uploadedImage) return
+    if (!uploadedImage || isFromLanding) return
     
     try {
       await analyzeScreenshot(uploadedImage, additionalContext)
@@ -132,6 +237,8 @@ export default function Dashboard() {
   }
 
   const handleAnalyzePDF = async (file: File, additionalContext?: string) => {
+    if (isFromLanding) return
+    
     try {
       await analyzePDF(file, additionalContext)
     } catch {
@@ -140,6 +247,8 @@ export default function Dashboard() {
   }
 
   const handleAnalyzeURL = async (url: string, additionalContext?: string) => {
+    if (isFromLanding) return
+    
     try {
       await analyzeURL(url, additionalContext)
     } catch {
@@ -166,7 +275,7 @@ export default function Dashboard() {
         isLoading={isLoading}
         onGenerateForm={handleGenerateForm}
         onUpdateForm={handleUpdateForm}
-        chatHistory={chatHistory} // ✅ This was missing!
+        chatHistory={chatHistory}
         hasUnsavedChanges={hasUnsavedChanges}
         onSaveChanges={handleSaveChanges}
         onDiscardChanges={discardChanges}
@@ -178,16 +287,16 @@ export default function Dashboard() {
         // File analysis props
         uploadedImage={uploadedImage}
         uploadedPDF={uploadedPDF}
-        uploadedURL={uploadedURL} // Pass URL state
+        uploadedURL={uploadedURL}
         extractedFields={extractedFields}
         isAnalyzing={isAnalyzing}
         analysisComplete={analysisComplete}
         onImageUpload={handleImageUpload}
         onPDFUpload={handlePDFUpload}
-        onURLSubmit={handleURLUpload} // Pass URL handler
+        onURLSubmit={handleURLUpload}
         onAnalyzeImage={handleAnalyzeImage}
         onAnalyzePDF={handleAnalyzePDF}
-        onAnalyzeURL={handleAnalyzeURL} // Pass URL analyzer
+        onAnalyzeURL={handleAnalyzeURL}
         onFieldsValidated={handleFieldsValidated}
         onResetAnalysis={resetAnalysis}
         pdfPageSelection={pdfPageSelection}
