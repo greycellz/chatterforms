@@ -1,0 +1,816 @@
+/* Dashboard Page Styles - Consistent with Landing Page Theme */
+
+/* Reset and base styles for dashboard */
+.dashboard-container * {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.dashboard-container {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  min-height: 100vh;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Animated background particles - more subtle for dashboard */
+.dashboard-bg-animation {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.3;
+}
+
+.dashboard-particle {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  animation: dashboardFloat 8s ease-in-out infinite;
+}
+
+.dashboard-particle:nth-child(1) { left: 5%; animation-delay: 0s; }
+.dashboard-particle:nth-child(2) { left: 15%; animation-delay: 1.5s; }
+.dashboard-particle:nth-child(3) { left: 25%; animation-delay: 3s; }
+.dashboard-particle:nth-child(4) { left: 35%; animation-delay: 4.5s; }
+.dashboard-particle:nth-child(5) { left: 45%; animation-delay: 6s; }
+.dashboard-particle:nth-child(6) { left: 55%; animation-delay: 1s; }
+.dashboard-particle:nth-child(7) { left: 65%; animation-delay: 2.5s; }
+.dashboard-particle:nth-child(8) { left: 75%; animation-delay: 4s; }
+.dashboard-particle:nth-child(9) { left: 85%; animation-delay: 5.5s; }
+.dashboard-particle:nth-child(10) { left: 95%; animation-delay: 7s; }
+
+@keyframes dashboardFloat {
+  0%, 100% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+  10% { opacity: 0.6; }
+  90% { opacity: 0.6; }
+  100% { transform: translateY(-50px) rotate(180deg); opacity: 0; }
+}
+
+/* Main dashboard layout */
+.dashboard-layout {
+  position: relative;
+  z-index: 10;
+  height: 100vh;
+  display: flex;
+}
+
+/* Left Chat Panel - Purple gradient with glassmorphic elements */
+.chat-panel {
+  width: 33.333%;
+  background: rgba(255, 255, 255, 0.08);
+  border-right: 1px solid rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(20px);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.chat-panel::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+  pointer-events: none;
+}
+
+/* Chat panel sections with better spacing */
+.chat-header {
+  padding: 32px 32px 24px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  position: relative;
+  z-index: 2;
+}
+
+.chat-header h2 {
+  font-size: 22px;
+  font-weight: 700;
+  color: white;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.chat-header::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 20%;
+  right: 20%;
+  height: 1px;
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    rgba(255, 255, 255, 0.3) 50%, 
+    transparent 100%);
+}
+
+/* Chat history area with proper scrolling and fade */
+.chat-history-container {
+  flex: 1;
+  position: relative;
+  min-height: 0;
+  padding-bottom: 200px; /* Account for input container height */
+}
+
+.chat-history {
+  height: 100%;
+  overflow-y: auto;
+  padding: 24px 28px;
+  position: relative;
+  z-index: 2;
+  scroll-behavior: smooth;
+}
+
+/* Fade effect at bottom of chat */
+.chat-history::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 40px;
+  background: linear-gradient(transparent 0%, rgba(99, 102, 241, 0.3) 100%);
+  pointer-events: none;
+  z-index: 3;
+}
+
+/* Add section dividers */
+.file-upload-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 20%;
+  right: 20%;
+  height: 1px;
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    rgba(255, 255, 255, 0.2) 50%, 
+    transparent 100%);
+}
+
+.chat-input-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 20%;
+  right: 20%;
+  height: 1px;
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    rgba(255, 255, 255, 0.2) 50%, 
+    transparent 100%);
+}
+
+/* Chat message bubbles - glassmorphic design */
+.chat-message {
+  margin-bottom: 16px;
+  animation: messageSlideIn 0.4s ease-out;
+}
+
+.chat-message.user {
+  margin-left: 20px;
+}
+
+.chat-message.assistant {
+  margin-right: 20px;
+}
+
+.chat-bubble {
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 18px;
+  padding: 16px 20px;
+  backdrop-filter: blur(15px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.chat-bubble:hover {
+  background: rgba(255, 255, 255, 0.18);
+  transform: translateY(-1px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+}
+
+.chat-message.user .chat-bubble {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.chat-role {
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.7);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+
+.chat-content {
+  color: rgba(255, 255, 255, 0.95);
+  font-size: 14px;
+  line-height: 1.5;
+  font-weight: 400;
+}
+
+@keyframes messageSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Remove file upload container - now integrated into chat input */
+
+/* Chat input area - Sticky positioning with better height */
+.chat-input-container {
+  position: sticky;
+  bottom: 0;
+  padding: 20px 28px 32px;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.95) 0%, rgba(139, 92, 246, 0.95) 100%);
+  backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  z-index: 10;
+}
+
+.input-card {
+  background: rgba(255, 255, 255, 0.97);
+  border: none;
+  border-radius: 20px;
+  padding: 28px;
+  backdrop-filter: blur(20px);
+  transition: all 0.3s ease;
+  box-shadow: 
+    0 25px 50px rgba(0, 0, 0, 0.15),
+    0 10px 20px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  position: relative;
+}
+
+.input-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 35px 70px rgba(0, 0, 0, 0.2),
+    0 15px 30px rgba(0, 0, 0, 0.15);
+}
+
+.input-card:focus-within {
+  box-shadow: 
+    0 35px 70px rgba(0, 0, 0, 0.2),
+    0 15px 30px rgba(0, 0, 0, 0.15),
+    0 0 0 3px rgba(139, 92, 246, 0.3);
+}
+
+/* Input wrapper with attachment button */
+.input-wrapper {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  position: relative;
+}
+
+.chat-textarea {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #1f2937;
+  font-size: 20px;
+  font-family: inherit;
+  resize: none;
+  min-height: 32px;
+  max-height: 200px; /* Increased from 120px */
+  line-height: 1.5;
+  font-weight: 500;
+  overflow-y: auto;
+}
+
+.chat-textarea::placeholder {
+  color: #9ca3af;
+  font-weight: 400;
+}
+
+/* Hints outside textarea */
+.input-hints {
+  margin-top: 12px;
+  padding: 0 4px;
+}
+
+.input-hints-text {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.4;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.input-hints-text button {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.95);
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: inherit;
+  font-family: inherit;
+  font-weight: 600;
+  transition: color 0.2s ease;
+}
+
+.input-hints-text button:hover {
+  color: white;
+}
+
+/* Attachment button - same as landing page */
+.attach-btn {
+  background: #f3f4f6;
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.attach-btn:hover {
+  background: #e5e7eb;
+  transform: scale(1.05);
+}
+
+.attach-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.attach-btn svg {
+  width: 20px;
+  height: 20px;
+  color: #6b7280;
+}
+
+/* Upload hints below input */
+.input-hints {
+  margin-top: 12px;
+  text-align: center;
+}
+
+.input-hints-text {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 1.4;
+}
+
+/* Buttons with enhanced styling */
+.dashboard-btn {
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: white;
+  padding: 14px 28px;
+  border-radius: 14px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.dashboard-btn:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.2);
+  border-color: rgba(255, 255, 255, 0.35);
+}
+
+.dashboard-btn:active {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* Secondary button styling for Update Form */
+.dashboard-btn.secondary {
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: rgba(255, 255, 255, 0.9);
+  padding: 12px 24px;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.dashboard-btn.secondary:hover {
+  background: rgba(255, 255, 255, 0.22);
+  border-color: rgba(255, 255, 255, 0.35);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* Hero Generate/Update Published Button - Keep primary styling */
+.dashboard-btn.primary {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  padding: 20px 40px;
+  font-size: 18px;
+  font-weight: 700;
+  border-radius: 16px;
+  position: relative;
+  overflow: hidden;
+  color: white;
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.3),
+    0 4px 16px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* Purple gradient border */
+.dashboard-btn.primary::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+  border-radius: 16px;
+  z-index: -1;
+  margin: -2px;
+}
+
+/* Shimmer effect */
+.dashboard-btn.primary::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    rgba(139, 92, 246, 0.3) 50%, 
+    transparent 100%);
+  transition: left 0.6s ease;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.dashboard-btn.primary:hover {
+  transform: translateY(-3px);
+  box-shadow: 
+    0 15px 45px rgba(0, 0, 0, 0.4),
+    0 8px 25px rgba(139, 92, 246, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.dashboard-btn.primary:hover::after {
+  left: 100%;
+}
+
+.dashboard-btn.primary:active {
+  transform: translateY(-1px);
+}
+
+/* Button content positioning */
+.dashboard-btn.primary .button-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Keyboard shortcut styling integrated into button */
+.dashboard-btn.primary .shortcut-hint {
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.1);
+  padding: 4px 8px;
+  border-radius: 6px;
+  margin-left: 8px;
+}
+
+.dashboard-btn:disabled,
+.dashboard-btn.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.dashboard-btn:disabled:hover,
+.dashboard-btn.disabled:hover {
+  transform: none;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Right Form Preview Panel - Enhanced */
+.form-preview-panel {
+  flex: 1;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+
+.form-preview-header {
+  padding: 24px 40px 16px;
+  background: rgba(255, 255, 255, 0.8);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.form-preview-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+/* 3D Form Preview Card */
+.form-preview-container {
+  flex: 1;
+  padding: 40px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  overflow-y: auto;
+}
+
+.form-preview-card {
+  background: #ffffff;
+  border: 2px solid #1e293b;
+  border-radius: 20px;
+  padding: 40px;
+  width: 100%;
+  max-width: 800px;
+  position: relative;
+  
+  /* 3D Effect */
+  box-shadow: 
+    0 25px 50px rgba(0, 0, 0, 0.15),
+    0 15px 35px rgba(0, 0, 0, 0.1),
+    0 5px 15px rgba(0, 0, 0, 0.05);
+  
+  transform: perspective(1000px) rotateX(2deg);
+  transition: all 0.4s ease;
+}
+
+.form-preview-card:hover {
+  transform: perspective(1000px) rotateX(0deg) translateY(-5px);
+  box-shadow: 
+    0 35px 70px rgba(0, 0, 0, 0.2),
+    0 25px 50px rgba(0, 0, 0, 0.15),
+    0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* Glassmorphic overlay for 3D effect */
+.form-preview-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.1) 0%, 
+    rgba(255, 255, 255, 0.05) 50%, 
+    rgba(0, 0, 0, 0.02) 100%);
+  border-radius: 18px;
+  pointer-events: none;
+}
+
+/* Form content styling */
+.form-content {
+  position: relative;
+  z-index: 2;
+}
+
+/* Loading states with glassmorphic design */
+.loading-container {
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
+  padding: 24px;
+  backdrop-filter: blur(15px);
+  margin-bottom: 20px;
+}
+
+.loading-content {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.loading-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top: 2px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-dots {
+  display: flex;
+  gap: 4px;
+}
+
+.loading-dot {
+  width: 6px;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 50%;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.loading-dot:nth-child(1) { animation-delay: 0s; }
+.loading-dot:nth-child(2) { animation-delay: 0.2s; }
+.loading-dot:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes pulse {
+  0%, 60%, 100% { opacity: 0.3; transform: scale(0.8); }
+  30% { opacity: 1; transform: scale(1); }
+}
+
+/* Progress indicators */
+.progress-bar {
+  width: 100%;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-top: 12px;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, 
+    rgba(255, 255, 255, 0.8) 0%, 
+    rgba(255, 255, 255, 0.6) 50%, 
+    rgba(255, 255, 255, 0.8) 100%);
+  border-radius: 2px;
+  animation: progressFlow 2s ease-in-out infinite;
+}
+
+@keyframes progressFlow {
+  0% { width: 0%; }
+  50% { width: 70%; }
+  100% { width: 100%; }
+}
+
+/* Success/Error states */
+.status-card {
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
+  padding: 20px;
+  backdrop-filter: blur(15px);
+  text-align: center;
+  animation: statusSlideIn 0.4s ease-out;
+}
+
+.status-card.success {
+  border-color: rgba(34, 197, 94, 0.3);
+  background: rgba(34, 197, 94, 0.1);
+}
+
+.status-card.error {
+  border-color: rgba(239, 68, 68, 0.3);
+  background: rgba(239, 68, 68, 0.1);
+}
+
+@keyframes statusSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive design */
+@media (max-width: 1024px) {
+  .dashboard-layout {
+    flex-direction: column;
+  }
+  
+  .chat-panel {
+    width: 100%;
+    height: 40vh;
+    border-right: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  }
+  
+  .form-preview-panel {
+    height: 60vh;
+  }
+  
+  .form-preview-container {
+    padding: 20px;
+  }
+  
+  .form-preview-card {
+    padding: 24px;
+  }
+}
+
+@media (max-width: 768px) {
+  .chat-header,
+  .file-upload-container,
+  .chat-input-container {
+    padding: 20px;
+  }
+  
+  .form-preview-header {
+    padding: 20px;
+  }
+  
+  .form-preview-container {
+    padding: 16px;
+  }
+  
+  .form-preview-card {
+    padding: 20px;
+    transform: none;
+  }
+  
+  .form-preview-card:hover {
+    transform: translateY(-2px);
+  }
+}
+
+/* Custom scrollbar for chat history */
+.chat-history::-webkit-scrollbar {
+  width: 6px;
+}
+
+.chat-history::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+
+.chat-history::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 3px;
+}
+
+.chat-history::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* Form preview scrollbar */
+.form-preview-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.form-preview-container::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 4px;
+}
+
+.form-preview-container::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+.form-preview-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.3);
+}

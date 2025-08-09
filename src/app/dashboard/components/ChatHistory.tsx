@@ -13,12 +13,15 @@ export default function ChatHistory({ chatHistory }: ChatHistoryProps) {
   const chatContainerRef = useRef<HTMLDivElement>(null)
   const [isAtBottom, setIsAtBottom] = useState(true)
 
-  // Auto-scroll to bottom when new messages arrive, but only if user was already at bottom
+  // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
-    if (isAtBottom && chatContainerRef.current) {
-      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight
+    if (chatContainerRef.current) {
+      const container = chatContainerRef.current
+      // Always scroll to bottom when new messages arrive
+      container.scrollTop = container.scrollHeight
+      setIsAtBottom(true)
     }
-  }, [chatHistory, isAtBottom])
+  }, [chatHistory])
 
   // Check if user is at bottom of chat
   const handleChatScroll = () => {
@@ -38,58 +41,77 @@ export default function ChatHistory({ chatHistory }: ChatHistoryProps) {
   }
 
   if (chatHistory.length === 0) {
-    return null
+    return (
+      <div className="chat-history">
+        <div className="status-card">
+          <div style={{ fontSize: '24px', marginBottom: '12px' }}>✨</div>
+          <div style={{ color: 'rgba(255, 255, 255, 0.9)', fontSize: '14px', fontWeight: '500' }}>
+            Start by describing your form or uploading a file
+          </div>
+          <div style={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '12px', marginTop: '8px' }}>
+            Your conversation will appear here
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (
-    <div className="flex-1 flex flex-col min-h-0">
-      <div className="p-4 pb-2">
-        <h3 className="text-sm font-medium text-gray-700 mb-2">Chat History</h3>
+    <div className="chat-history-container">
+      {/* Scrollable Messages Container */}
+      <div 
+        ref={chatContainerRef}
+        onScroll={handleChatScroll}
+        className="chat-history"
+      >
+        {chatHistory.map((message, idx) => (
+          <div
+            key={idx}
+            className={`chat-message ${message.role}`}
+          >
+            <div className="chat-bubble">
+              <div className="chat-role">
+                {message.role === 'user' ? 'You' : 'AI Assistant'}
+              </div>
+              <div className="chat-content">{message.content}</div>
+            </div>
+          </div>
+        ))}
       </div>
       
-      <div className="flex-1 relative">
-        {/* Scrollable Messages Container */}
-        <div 
-          ref={chatContainerRef}
-          onScroll={handleChatScroll}
-          className="absolute inset-0 overflow-y-auto px-4 pb-2 space-y-3"
-          style={{ scrollBehavior: 'smooth' }}
+      {/* Scroll to Bottom Button - Only show when not at bottom and has messages */}
+      {!isAtBottom && chatHistory.length > 3 && (
+        <button
+          onClick={scrollToBottom}
+          className="dashboard-btn"
+          style={{
+            position: 'absolute',
+            bottom: '20px',
+            right: '20px',
+            width: '40px',
+            height: '40px',
+            borderRadius: '50%',
+            padding: '0',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 10,
+            background: 'rgba(255, 255, 255, 0.2)',
+            border: '1px solid rgba(255, 255, 255, 0.3)'
+          }}
+          title="Scroll to bottom"
         >
-          {chatHistory.map((message, idx) => (
-            <div
-              key={idx}
-              className={`p-3 rounded-lg text-sm shadow-sm ${
-                message.role === 'user'
-                  ? 'bg-blue-100 text-blue-800 ml-4'
-                  : 'bg-green-100 text-green-800 mr-4'
-              }`}
-            >
-              <div className="font-medium text-xs mb-1 opacity-75">
-                {message.role === 'user' ? 'You' : 'AI'}
-              </div>
-              <div className="leading-relaxed">{message.content}</div>
-            </div>
-          ))}
-        </div>
-        
-        {/* Scroll to Bottom Button - Only show when not at bottom */}
-        {!isAtBottom && (
-          <button
-            onClick={scrollToBottom}
-            className="absolute bottom-4 right-4 w-10 h-10 bg-white border border-gray-300 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center text-gray-600 hover:text-gray-800 z-10"
-            title="Scroll to bottom"
+          <svg 
+            width="16" 
+            height="16" 
+            fill="none" 
+            stroke="currentColor" 
+            viewBox="0 0 24 24"
           >
-            <svg 
-              className="w-5 h-5" 
-              fill="none" 
-              stroke="currentColor" 
-              viewBox="0 0 24 24"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-            </svg>
-          </button>
-        )}
-      </div>
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+          </svg>
+        </button>
+      )}
     </div>
   )
 }

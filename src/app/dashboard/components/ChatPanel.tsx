@@ -1,5 +1,4 @@
 import ChatHistory from './ChatHistory'
-import FileUpload from './FileUpload'
 import AnalysisReview from './AnalysisReview'
 import ChatInput from './ChatInput'
 import { FormSchema, ChatMessage, FieldExtraction, PDFPageSelectionResponse } from '../types'
@@ -74,14 +73,16 @@ export default function ChatPanel({
   onPageSelectionComplete
 }: ChatPanelProps) {
   return (
-    <div className="w-1/3 bg-yellow-50 border-r border-gray-200 flex flex-col h-full">
+    <div className="chat-panel">
       {/* Header */}
-      <div className="p-4 border-b border-gray-200">
-        <h2 className="text-lg font-semibold text-gray-900">Describe your form</h2>
+      <div className="chat-header">
+        <h2>Describe your form</h2>
       </div>
       
       {/* Chat History - Takes up available space */}
-      <ChatHistory chatHistory={chatHistory} />
+      <div className="chat-history-container">
+        <ChatHistory chatHistory={chatHistory} />
+      </div>
       
       {/* Analysis Review - Shows during screenshot/PDF/URL workflow */}
       <AnalysisReview
@@ -100,37 +101,31 @@ export default function ChatPanel({
         onPageSelectionComplete={onPageSelectionComplete}
       />
       
-      {/* File Upload - Shows when no upload workflow active */}
-      <FileUpload
-        onImageUpload={onImageUpload}
-        onPDFUpload={onPDFUpload}
-        onURLSubmit={onURLSubmit}
-        uploadedImage={uploadedImage}
-        uploadedPDF={uploadedPDF}
-        uploadedURL={uploadedURL}
-        analysisComplete={analysisComplete}
-      />
-      
-      {/* Chat Input - Always at bottom */}
-      <ChatInput
-        description={description}
-        onDescriptionChange={onDescriptionChange}
-        formSchema={formSchema}
-        isLoading={isLoading}
-        onGenerateForm={onGenerateForm}
-        onUpdateForm={onUpdateForm}
-        hasUnsavedChanges={hasUnsavedChanges}
-        onSaveChanges={onSaveChanges}
-        onDiscardChanges={onDiscardChanges}
-        onPublishForm={onPublishForm}
-        isPublishing={isPublishing}
-        publishedFormId={publishedFormId}
-        error={error}
-        uploadedImage={uploadedImage}
-        uploadedPDF={uploadedPDF}
-        uploadedURL={uploadedURL}
-        analysisComplete={analysisComplete}
-      />
+      {/* Chat Input with integrated upload - Always at bottom */}
+      <div className="chat-input-container">
+        <ChatInput
+          description={description}
+          onDescriptionChange={onDescriptionChange}
+          formSchema={formSchema}
+          isLoading={isLoading}
+          onGenerateForm={onGenerateForm}
+          onUpdateForm={onUpdateForm}
+          hasUnsavedChanges={hasUnsavedChanges}
+          onSaveChanges={onSaveChanges}
+          onDiscardChanges={onDiscardChanges}
+          onPublishForm={onPublishForm}
+          isPublishing={isPublishing}
+          publishedFormId={publishedFormId}
+          error={error}
+          uploadedImage={uploadedImage}
+          uploadedPDF={uploadedPDF}
+          uploadedURL={uploadedURL}
+          analysisComplete={analysisComplete}
+          onImageUpload={onImageUpload}
+          onPDFUpload={onPDFUpload}
+          onURLSubmit={onURLSubmit}
+        />
+      </div>
     </div>
   )
 }

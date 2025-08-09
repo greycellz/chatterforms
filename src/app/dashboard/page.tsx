@@ -7,6 +7,7 @@ import { useFormGeneration } from './hooks/useFormGeneration'
 import ChatPanel from './components/ChatPanel'
 import FormPreview from './components/FormPreview'
 import { FieldExtraction } from './types'
+import './dashboard.css'
 
 // Helper to convert base64 back to File - FIXED for PDF
 const base64ToFile = (base64: string, filename: string, mimeType: string, isPDF = false): File => {
@@ -34,8 +35,43 @@ const base64ToFile = (base64: string, filename: string, mimeType: string, isPDF 
 // Loading fallback component
 function DashboardLoading() {
   return (
-    <div className="h-screen flex items-center justify-center">
-      <div className="text-lg">Loading dashboard...</div>
+    <div className="dashboard-container">
+      <div className="dashboard-bg-animation">
+        {Array.from({ length: 10 }, (_, i) => (
+          <div key={i} className="dashboard-particle" />
+        ))}
+      </div>
+      <div className="dashboard-layout">
+        <div className="chat-panel">
+          <div className="chat-header">
+            <h2>Loading Dashboard...</h2>
+          </div>
+          <div className="loading-container">
+            <div className="loading-content">
+              <div className="loading-spinner" />
+              <span>Initializing workspace...</span>
+            </div>
+            <div className="progress-bar">
+              <div className="progress-fill" />
+            </div>
+          </div>
+        </div>
+        <div className="form-preview-panel">
+          <div className="form-preview-header">
+            <h1 className="form-preview-title">Form Preview</h1>
+          </div>
+          <div className="form-preview-container">
+            <div className="form-preview-card">
+              <div className="form-content">
+                <div style={{ textAlign: 'center', padding: '40px', color: '#64748b' }}>
+                  <div style={{ fontSize: '48px', marginBottom: '16px', opacity: 0.5 }}>⏳</div>
+                  <div>Setting up your workspace...</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }
@@ -44,7 +80,7 @@ function DashboardLoading() {
 function DashboardContent() {
   const [description, setDescription] = useState('')
   const [hasProcessedLandingParams, setHasProcessedLandingParams] = useState(false)
-  const [isFromLanding, setIsFromLanding] = useState(false) // NEW: Track if this is from landing
+  const [isFromLanding, setIsFromLanding] = useState(false)
   const searchParams = useSearchParams()
 
   // Enhanced hook with all functionality
@@ -277,60 +313,69 @@ function DashboardContent() {
   }
 
   return (
-    <div className="h-screen flex">
-      <ChatPanel
-        description={description}
-        onDescriptionChange={setDescription}
-        formSchema={formSchema}
-        isLoading={isLoading}
-        onGenerateForm={handleGenerateForm}
-        onUpdateForm={handleUpdateForm}
-        chatHistory={chatHistory}
-        hasUnsavedChanges={hasUnsavedChanges}
-        onSaveChanges={handleSaveChanges}
-        onDiscardChanges={discardChanges}
-        onPublishForm={handlePublishForm}
-        isPublishing={isPublishing}
-        publishedFormId={publishedFormId}
-        error={error}
-        
-        // File analysis props
-        uploadedImage={uploadedImage}
-        uploadedPDF={uploadedPDF}
-        uploadedURL={uploadedURL}
-        extractedFields={extractedFields}
-        isAnalyzing={isAnalyzing}
-        analysisComplete={analysisComplete}
-        onImageUpload={handleImageUpload}
-        onPDFUpload={handlePDFUpload}
-        onURLSubmit={handleURLUpload}
-        onAnalyzeImage={handleAnalyzeImage}
-        onAnalyzePDF={handleAnalyzePDF}
-        onAnalyzeURL={handleAnalyzeURL}
-        onFieldsValidated={handleFieldsValidated}
-        onResetAnalysis={resetAnalysis}
-        pdfPageSelection={pdfPageSelection}
-        onPageSelectionComplete={handlePageSelectionComplete}
-      />
+    <div className="dashboard-container">
+      {/* Animated background particles */}
+      <div className="dashboard-bg-animation">
+        {Array.from({ length: 10 }, (_, i) => (
+          <div key={i} className="dashboard-particle" />
+        ))}
+      </div>
 
-      <FormPreview
-        formSchema={formSchema}
-        effectiveFormSchema={getEffectiveFormSchema()}
-        isLoading={isLoading}
-        hasUnsavedChanges={hasUnsavedChanges}
-        editingField={editingField}
-        editValue={editValue}
-        onEditValueChange={setEditValue}
-        onStartEditing={startEditing}
-        onSaveEdit={saveEdit}
-        onCancelEdit={cancelEdit}
-        onToggleRequired={toggleRequired}
-        sizeConfig={sizeConfig}
-        stylingConfig={stylingConfig}
-        onSizeChange={handleSizeChange}
-        onStylingChange={handleStylingChange}
-        submitButtonText={getEffectiveButtonText()}
-      />
+      <div className="dashboard-layout">
+        <ChatPanel
+          description={description}
+          onDescriptionChange={setDescription}
+          formSchema={formSchema}
+          isLoading={isLoading}
+          onGenerateForm={handleGenerateForm}
+          onUpdateForm={handleUpdateForm}
+          chatHistory={chatHistory}
+          hasUnsavedChanges={hasUnsavedChanges}
+          onSaveChanges={handleSaveChanges}
+          onDiscardChanges={discardChanges}
+          onPublishForm={handlePublishForm}
+          isPublishing={isPublishing}
+          publishedFormId={publishedFormId}
+          error={error}
+          
+          // File analysis props
+          uploadedImage={uploadedImage}
+          uploadedPDF={uploadedPDF}
+          uploadedURL={uploadedURL}
+          extractedFields={extractedFields}
+          isAnalyzing={isAnalyzing}
+          analysisComplete={analysisComplete}
+          onImageUpload={handleImageUpload}
+          onPDFUpload={handlePDFUpload}
+          onURLSubmit={handleURLUpload}
+          onAnalyzeImage={handleAnalyzeImage}
+          onAnalyzePDF={handleAnalyzePDF}
+          onAnalyzeURL={handleAnalyzeURL}
+          onFieldsValidated={handleFieldsValidated}
+          onResetAnalysis={resetAnalysis}
+          pdfPageSelection={pdfPageSelection}
+          onPageSelectionComplete={handlePageSelectionComplete}
+        />
+
+        <FormPreview
+          formSchema={formSchema}
+          effectiveFormSchema={getEffectiveFormSchema()}
+          isLoading={isLoading}
+          hasUnsavedChanges={hasUnsavedChanges}
+          editingField={editingField}
+          editValue={editValue}
+          onEditValueChange={setEditValue}
+          onStartEditing={startEditing}
+          onSaveEdit={saveEdit}
+          onCancelEdit={cancelEdit}
+          onToggleRequired={toggleRequired}
+          sizeConfig={sizeConfig}
+          stylingConfig={stylingConfig}
+          onSizeChange={handleSizeChange}
+          onStylingChange={handleStylingChange}
+          submitButtonText={getEffectiveButtonText()}
+        />
+      </div>
     </div>
   )
 }
