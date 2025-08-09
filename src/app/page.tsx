@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import './landing.css'
+import Link from 'next/link'
 
 const TYPING_EXAMPLES = [
   "Create a patient intake form with contact info and medical history...",
@@ -240,9 +241,9 @@ export default function Home() {
       <div className="page-container">
         {/* Navigation */}
         <nav className="nav">
-          <a href="/" className="logo">
+          <Link href="/" className="logo">
             ChatterForms
-          </a>
+          </Link>
           <div className="nav-links">
             <a href="#features">Features</a>
             <a href="#examples">Examples</a>
