@@ -1,0 +1,94 @@
+/* Base Dashboard Styles - Core layout and container styles */
+
+/* Reset and base styles for dashboard */
+.dashboard-container * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  .dashboard-container {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    min-height: 100vh;
+    overflow: hidden;
+    position: relative;
+  }
+  
+  /* Main dashboard layout */
+  .dashboard-layout {
+    position: relative;
+    z-index: 10;
+    height: 100vh;
+    display: flex;
+  }
+  
+  /* Responsive design */
+  @media (max-width: 1024px) {
+    .dashboard-layout {
+      flex-direction: column;
+    }
+  }
+  
+  /* Accessibility improvements */
+  @media (prefers-reduced-motion: reduce) {
+    .form-preview-card,
+    .style-transition,
+    .settings-trigger,
+    .theme-card,
+    .upload-card {
+      transition: none;
+    }
+  }
+  
+  /* High contrast mode support */
+  @media (prefers-contrast: high) {
+    .form-preview-card {
+      border-width: 3px;
+      border-color: #000000;
+    }
+    
+    .settings-panel {
+      border-width: 2px;
+      border-color: #000000;
+    }
+    
+    .chat-bubble {
+      border-width: 2px;
+      border-color: rgba(255, 255, 255, 0.5);
+    }
+  }
+  
+  /* Print styles */
+  @media print {
+    .dashboard-bg-animation,
+    .chat-panel,
+    .form-preview-header {
+      display: none;
+    }
+    
+    .form-preview-panel {
+      width: 100%;
+      height: auto;
+      background: white;
+    }
+    
+    .form-preview-card {
+      box-shadow: none;
+      border: 2px solid #000;
+      transform: none;
+    }
+  }
+  
+  /* Dark mode support (future enhancement) */
+  @media (prefers-color-scheme: dark) {
+    .form-preview-card {
+      background: #1f2937;
+      border-color: #374151;
+      color: #f9fafb;
+    }
+    
+    .form-preview-title {
+      color: #f9fafb;
+    }
+  }

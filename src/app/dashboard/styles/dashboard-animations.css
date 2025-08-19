@@ -1,0 +1,210 @@
+/* Dashboard Animations & Effects */
+
+/* Animated background particles - more subtle for dashboard */
+.dashboard-bg-animation {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0.3;
+  }
+  
+  .dashboard-particle {
+    position: absolute;
+    width: 3px;
+    height: 3px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    animation: dashboardFloat 8s ease-in-out infinite;
+  }
+  
+  .dashboard-particle:nth-child(1) { left: 5%; animation-delay: 0s; }
+  .dashboard-particle:nth-child(2) { left: 15%; animation-delay: 1.5s; }
+  .dashboard-particle:nth-child(3) { left: 25%; animation-delay: 3s; }
+  .dashboard-particle:nth-child(4) { left: 35%; animation-delay: 4.5s; }
+  .dashboard-particle:nth-child(5) { left: 45%; animation-delay: 6s; }
+  .dashboard-particle:nth-child(6) { left: 55%; animation-delay: 1s; }
+  .dashboard-particle:nth-child(7) { left: 65%; animation-delay: 2.5s; }
+  .dashboard-particle:nth-child(8) { left: 75%; animation-delay: 4s; }
+  .dashboard-particle:nth-child(9) { left: 85%; animation-delay: 5.5s; }
+  .dashboard-particle:nth-child(10) { left: 95%; animation-delay: 7s; }
+  
+  @keyframes dashboardFloat {
+    0%, 100% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+    10% { opacity: 0.6; }
+    90% { opacity: 0.6; }
+    100% { transform: translateY(-50px) rotate(180deg); opacity: 0; }
+  }
+  
+  /* Loading spinner */
+  .loading-spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(139, 92, 246, 0.3);
+    border-top: 2px solid rgba(139, 92, 246, 0.8);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  /* Loading dots */
+  .loading-dots {
+    display: flex;
+    gap: 4px;
+  }
+  
+  .loading-dot {
+    width: 6px;
+    height: 6px;
+    background: rgba(139, 92, 246, 0.7);
+    border-radius: 50%;
+    animation: pulse 1.5s ease-in-out infinite;
+  }
+  
+  .loading-dot:nth-child(1) { animation-delay: 0s; }
+  .loading-dot:nth-child(2) { animation-delay: 0.2s; }
+  .loading-dot:nth-child(3) { animation-delay: 0.4s; }
+  
+  @keyframes pulse {
+    0%, 60%, 100% { opacity: 0.3; transform: scale(0.8); }
+    30% { opacity: 1; transform: scale(1); }
+  }
+  
+  /* Progress indicators */
+  .progress-bar {
+    width: 100%;
+    height: 3px;
+    background: rgba(139, 92, 246, 0.2);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-top: 12px;
+  }
+  
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, 
+      rgba(139, 92, 246, 0.8) 0%, 
+      rgba(139, 92, 246, 0.6) 50%, 
+      rgba(139, 92, 246, 0.8) 100%);
+    border-radius: 2px;
+    animation: progressFlow 2s ease-in-out infinite;
+  }
+  
+  @keyframes progressFlow {
+    0% { width: 0%; }
+    50% { width: 70%; }
+    100% { width: 100%; }
+  }
+  
+  /* Message animations */
+  @keyframes messageSlideIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  /* Status animations */
+  @keyframes statusSlideIn {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  /* Settings panel animations */
+  @keyframes slideInDown {
+    from {
+      opacity: 0;
+      transform: translateY(-10px) scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+  
+  .animate-slideInDown {
+    animation: slideInDown 0.2s ease-out;
+  }
+  
+  /* General utility animations */
+  .animate-fadeIn {
+    animation: fadeIn 0.3s ease-out;
+  }
+  
+  .animate-slideUp {
+    animation: slideUp 0.3s ease-out;
+  }
+  
+  .animate-scaleIn {
+    animation: scaleIn 0.2s ease-out;
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  @keyframes scaleIn {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+  
+  /* Enhanced transition effects for style changes */
+  .style-transition {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .style-transition * {
+    transition: color 0.3s ease, background-color 0.3s ease, border-color 0.3s ease;
+  }
+  
+  /* Disable animations for users who prefer reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    .dashboard-particle {
+      animation: none;
+    }
+    
+    .loading-spinner,
+    .progress-fill {
+      animation: none;
+    }
+    
+    .messageSlideIn,
+    .statusSlideIn {
+      animation: none;
+    }
+  }

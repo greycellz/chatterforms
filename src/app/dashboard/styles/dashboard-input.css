@@ -1,0 +1,358 @@
+/* Input & Button Styles - Enhanced input area and button components */
+
+/* Chat input area - Sticky positioning with better height */
+.chat-input-container {
+    position: sticky;
+    bottom: 0;
+    padding: 20px 28px 32px;
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.95) 0%, rgba(139, 92, 246, 0.95) 100%);
+    backdrop-filter: blur(20px);
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+    z-index: 10;
+  }
+  
+  .input-card {
+    background: rgba(255, 255, 255, 0.97);
+    border: none;
+    border-radius: 20px;
+    padding: 28px;
+    backdrop-filter: blur(20px);
+    transition: all 0.3s ease;
+    box-shadow: 
+      0 25px 50px rgba(0, 0, 0, 0.15),
+      0 10px 20px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    position: relative;
+  }
+  
+  .input-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 
+      0 35px 70px rgba(0, 0, 0, 0.2),
+      0 15px 30px rgba(0, 0, 0, 0.15);
+  }
+  
+  .input-card:focus-within {
+    box-shadow: 
+      0 35px 70px rgba(0, 0, 0, 0.2),
+      0 15px 30px rgba(0, 0, 0, 0.15),
+      0 0 0 3px rgba(139, 92, 246, 0.3);
+  }
+  
+  /* Input wrapper with attachment button */
+  .input-wrapper {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    position: relative;
+  }
+  
+  .chat-textarea {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: #1f2937;
+    font-size: 20px;
+    font-family: inherit;
+    resize: none;
+    min-height: 32px;
+    max-height: 200px; /* Increased from 120px */
+    line-height: 1.5;
+    font-weight: 500;
+    overflow-y: auto;
+  }
+  
+  .chat-textarea::placeholder {
+    color: #9ca3af;
+    font-weight: 400;
+  }
+  
+  /* Hints outside textarea */
+  .input-hints {
+    margin-top: 12px;
+    padding: 0 4px;
+  }
+  
+  .input-hints-text {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.4;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  }
+  
+  .input-hints-text button {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.95);
+    text-decoration: underline;
+    cursor: pointer;
+    font-size: inherit;
+    font-family: inherit;
+    font-weight: 600;
+    transition: color 0.2s ease;
+  }
+  
+  .input-hints-text button:hover {
+    color: white;
+  }
+  
+  /* Attachment button */
+  .attach-btn {
+    background: #f3f4f6;
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    position: relative;
+    flex-shrink: 0;
+  }
+  
+  .attach-btn:hover {
+    background: #e5e7eb;
+    transform: scale(1.05);
+  }
+  
+  .attach-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  
+  .attach-btn svg {
+    width: 20px;
+    height: 20px;
+    color: #6b7280;
+  }
+  
+  /* Upload hints below input */
+  .upload-hints {
+    margin-top: 12px;
+    text-align: center;
+  }
+  
+  .upload-hints-text {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 11px;
+    font-weight: 400;
+    line-height: 1.4;
+  }
+  
+  /* Button Styles */
+  .dashboard-btn {
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    color: white;
+    padding: 14px 28px;
+    border-radius: 14px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  }
+  
+  .dashboard-btn:hover {
+    background: rgba(255, 255, 255, 0.25);
+    transform: translateY(-2px);
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.2);
+    border-color: rgba(255, 255, 255, 0.35);
+  }
+  
+  .dashboard-btn:active {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  }
+  
+  /* Secondary button styling */
+  .dashboard-btn.secondary {
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    color: rgba(255, 255, 255, 0.9);
+    padding: 12px 24px;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 12px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  }
+  
+  .dashboard-btn.secondary:hover {
+    background: rgba(255, 255, 255, 0.22);
+    border-color: rgba(255, 255, 255, 0.35);
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  }
+  
+  /* Primary button - Enhanced hero button */
+  .dashboard-btn.primary {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    border: 2px solid transparent;
+    background-clip: padding-box;
+    padding: 20px 40px;
+    font-size: 18px;
+    font-weight: 700;
+    border-radius: 16px;
+    position: relative;
+    overflow: hidden;
+    color: white;
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.3),
+      0 4px 16px rgba(0, 0, 0, 0.2),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+  
+  /* Purple gradient border */
+  .dashboard-btn.primary::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+    border-radius: 16px;
+    z-index: -1;
+    margin: -2px;
+  }
+  
+  /* Shimmer effect */
+  .dashboard-btn.primary::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, 
+      transparent 0%, 
+      rgba(139, 92, 246, 0.3) 50%, 
+      transparent 100%);
+    transition: left 0.6s ease;
+    z-index: 1;
+    pointer-events: none;
+  }
+  
+  .dashboard-btn.primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 
+      0 15px 45px rgba(0, 0, 0, 0.4),
+      0 8px 25px rgba(139, 92, 246, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  }
+  
+  .dashboard-btn.primary:hover::after {
+    left: 100%;
+  }
+  
+  .dashboard-btn.primary:active {
+    transform: translateY(-1px);
+  }
+  
+  /* Button content positioning */
+  .dashboard-btn.primary .button-content {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  
+  /* Keyboard shortcut styling integrated into button */
+  .dashboard-btn.primary .shortcut-hint {
+    font-size: 12px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.7);
+    background: rgba(255, 255, 255, 0.1);
+    padding: 4px 8px;
+    border-radius: 6px;
+    margin-left: 8px;
+  }
+  
+  /* Disabled button states */
+  .dashboard-btn:disabled,
+  .dashboard-btn.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  }
+  
+  .dashboard-btn:disabled:hover,
+  .dashboard-btn.disabled:hover {
+    transform: none;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Upload card styles */
+  .upload-card {
+    background: rgba(255, 255, 255, 0.12);
+    border: 2px dashed rgba(255, 255, 255, 0.3);
+    border-radius: 20px;
+    padding: 40px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(15px);
+    margin: 20px;
+  }
+  
+  .upload-card:hover {
+    background: rgba(255, 255, 255, 0.18);
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+  }
+  
+  .upload-icon {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    transition: all 0.3s ease;
+  }
+  
+  .upload-icon:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.1);
+  }
+  
+  .upload-icon svg {
+    width: 24px;
+    height: 24px;
+    color: rgba(255, 255, 255, 0.9);
+  }
+  
+  .upload-text {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 1.5;
+  }
+  
+  /* Focus states for accessibility */
+  .dashboard-btn:focus-visible {
+    outline: 2px solid #8b5cf6;
+    outline-offset: 2px;
+  }
+  
+  .upload-card:focus-visible {
+    outline: 2px solid rgba(255, 255, 255, 0.8);
+    outline-offset: 2px;
+  }

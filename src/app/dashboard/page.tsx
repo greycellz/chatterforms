@@ -207,6 +207,33 @@ function DashboardContent() {
     handleURLUpload
   ])
 
+  // 🎯 NEW: Handle example selection from empty state
+  const handleExampleSelect = async (examplePrompt: string) => {
+    console.log('🎯 Example selected:', examplePrompt)
+    
+    // Debug alert to confirm the function is being called
+    alert(`Example clicked: ${examplePrompt.substring(0, 50)}...`)
+    
+    try {
+      console.log('📝 Setting description:', examplePrompt)
+      // Set the description in the input
+      setDescription(examplePrompt)
+      
+      console.log('⚡ Starting form generation...')
+      // Automatically generate the form
+      await generateForm(examplePrompt, null, false)
+      
+      console.log('✅ Form generation complete, clearing description')
+      // Clear the description after successful generation
+      setDescription('')
+      
+    } catch (error) {
+      console.error('❌ Error generating form from example:', error)
+      alert(`Error: ${error}`)
+      // Keep the description so user can try again or modify
+    }
+  }
+
   // Get the current effective button text (pending changes take priority)
   const getEffectiveButtonText = () => {
     return pendingChanges.submitButtonText || customButtonText
@@ -321,6 +348,27 @@ function DashboardContent() {
         ))}
       </div>
 
+      {/* 🧪 DEBUG: Temporary test button */}
+      {process.env.NODE_ENV === 'development' && (
+        <button 
+          onClick={() => handleExampleSelect("Create a simple contact form with name, email, and message fields")}
+          style={{
+            position: 'fixed',
+            top: '10px',
+            right: '10px',
+            background: 'red',
+            color: 'white',
+            padding: '10px',
+            borderRadius: '5px',
+            border: 'none',
+            cursor: 'pointer',
+            zIndex: 9999
+          }}
+        >
+          🧪 Test Example
+        </button>
+      )}
+
       <div className="dashboard-layout">
         <ChatPanel
           description={description}
@@ -374,6 +422,7 @@ function DashboardContent() {
           onSizeChange={handleSizeChange}
           onStylingChange={handleStylingChange}
           submitButtonText={getEffectiveButtonText()}
+          onExampleSelect={handleExampleSelect}
         />
       </div>
     </div>
