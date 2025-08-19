@@ -28,6 +28,10 @@
 /* Settings - Enhanced settings panel and controls */
 @import './styles/dashboard-settings.css';
 
+/* Settings - Enhanced settings panel and controls */
+@import './styles/dashboard-chat-panel-fixes.css';
+
+
 /* Optional: Custom CSS variables for theming */
 :root {
   /* Color palette */

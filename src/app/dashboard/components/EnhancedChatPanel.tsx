@@ -3,7 +3,10 @@ import AnalysisReview from './AnalysisReview'
 import CompactChatInput from './CompactChatInput'
 import { FormSchema, ChatMessage, FieldExtraction, PDFPageSelectionResponse } from '../types'
 
-interface ChatPanelProps {
+// Import the styles
+import '../styles/compact-chat-input.css'
+
+interface EnhancedChatPanelProps {
   description: string
   onDescriptionChange: (value: string) => void
   formSchema: FormSchema | null
@@ -40,7 +43,7 @@ interface ChatPanelProps {
   onPageSelectionComplete?: (pageSelection: { pages: number[], selectAll?: boolean }) => void
 }
 
-export default function ChatPanel({
+export default function EnhancedChatPanel({
   description,
   onDescriptionChange,
   formSchema,
@@ -71,7 +74,7 @@ export default function ChatPanel({
   onResetAnalysis,
   pdfPageSelection,
   onPageSelectionComplete
-}: ChatPanelProps) {
+}: EnhancedChatPanelProps) {
   return (
     <div className="chat-panel-enhanced">
       {/* Compact Header */}

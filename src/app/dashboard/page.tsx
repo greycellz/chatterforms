@@ -1,14 +1,20 @@
+// Update your src/app/dashboard/page.tsx to use the enhanced components
+
 'use client'
 
 import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { useFormEditing } from './hooks/useFormEditing'
 import { useFormGeneration } from './hooks/useFormGeneration'
-import ChatPanel from './components/ChatPanel'
+// Import the enhanced components
+import EnhancedChatPanel from './components/EnhancedChatPanel'
 import FormPreview from './components/FormPreview'
 import { FieldExtraction } from './types'
 import './dashboard.css'
+// Import the compact input styles
+import './styles/compact-chat-input.css'
 
+import TestChatPanel from './components/TestChatPanel'
 // Helper to convert base64 back to File - FIXED for PDF
 const base64ToFile = (base64: string, filename: string, mimeType: string, isPDF = false): File => {
   if (isPDF) {
@@ -42,8 +48,8 @@ function DashboardLoading() {
         ))}
       </div>
       <div className="dashboard-layout">
-        <div className="chat-panel">
-          <div className="chat-header">
+        <div className="chat-panel-enhanced">
+          <div className="chat-header-compact">
             <h2>Loading Dashboard...</h2>
           </div>
           <div className="loading-container">
@@ -211,9 +217,6 @@ function DashboardContent() {
   const handleExampleSelect = async (examplePrompt: string) => {
     console.log('🎯 Example selected:', examplePrompt)
     
-    // Debug alert to confirm the function is being called
-    alert(`Example clicked: ${examplePrompt.substring(0, 50)}...`)
-    
     try {
       console.log('📝 Setting description:', examplePrompt)
       // Set the description in the input
@@ -229,7 +232,6 @@ function DashboardContent() {
       
     } catch (error) {
       console.error('❌ Error generating form from example:', error)
-      alert(`Error: ${error}`)
       // Keep the description so user can try again or modify
     }
   }
@@ -348,29 +350,9 @@ function DashboardContent() {
         ))}
       </div>
 
-      {/* 🧪 DEBUG: Temporary test button */}
-      {process.env.NODE_ENV === 'development' && (
-        <button 
-          onClick={() => handleExampleSelect("Create a simple contact form with name, email, and message fields")}
-          style={{
-            position: 'fixed',
-            top: '10px',
-            right: '10px',
-            background: 'red',
-            color: 'white',
-            padding: '10px',
-            borderRadius: '5px',
-            border: 'none',
-            cursor: 'pointer',
-            zIndex: 9999
-          }}
-        >
-          🧪 Test Example
-        </button>
-      )}
-
       <div className="dashboard-layout">
-        <ChatPanel
+        {/* Use the Enhanced Chat Panel */}
+        <EnhancedChatPanel
           description={description}
           onDescriptionChange={setDescription}
           formSchema={formSchema}
