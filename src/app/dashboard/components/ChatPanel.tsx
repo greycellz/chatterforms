@@ -110,9 +110,9 @@ export default function ChatPanel({
           isLoading={isLoading}
           onGenerateForm={onGenerateForm}
           onUpdateForm={onUpdateForm}
-          hasUnsavedChanges={hasUnsavedChanges}
-          onSaveChanges={onSaveChanges}
-          onDiscardChanges={onDiscardChanges}
+          //hasUnsavedChanges={hasUnsavedChanges}
+          //onSaveChanges={onSaveChanges}
+          //onDiscardChanges={onDiscardChanges}
           onPublishForm={onPublishForm}
           isPublishing={isPublishing}
           publishedFormId={publishedFormId}

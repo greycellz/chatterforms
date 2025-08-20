@@ -15,7 +15,7 @@ import './styles/dashboard-critical.css'          // NEW: High-specificity overr
 
 // Import the enhanced components
 import EnhancedChatPanel from './components/EnhancedChatPanel'
-import FormPreview from './components/FormPreview'
+import FormPreview from './components/EnhancedFormPreview'
 import { FieldExtraction } from './types'
 // Import the compact input styles
 
@@ -409,9 +409,11 @@ function DashboardContent() {
           onSizeChange={handleSizeChange}
           onStylingChange={handleStylingChange}
           submitButtonText={getEffectiveButtonText()}
-          onExampleSelect={handleExampleSelect}
-        />
-      </div>
+          onSaveChanges={handleSaveChanges}  // NEW
+          onDiscardChanges={discardChanges}  // NEW
+          onExampleSelect={handleExampleSelect}  // NEW (optional)
+        />      
+        </div>
     </div>
   )
 }

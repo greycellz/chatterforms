@@ -1,0 +1,405 @@
+/* CompactChatInput.module.css */
+/* High-specificity CSS Modules to override all global styles */
+
+.compactInputContainer {
+    padding: 16px 20px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+  }
+  
+  /* Primary Input Section */
+  .primaryInputSection {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+  }
+  
+  .compactInputCard {
+    background: rgba(255, 255, 255, 0.97) !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    border-radius: 16px !important;
+    padding: 16px !important;
+    backdrop-filter: blur(20px) !important;
+    transition: all 0.2s ease !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1) !important;
+  }
+  
+  .compactInputCard:focus-within {
+    border-color: rgba(139, 92, 246, 0.5) !important;
+    box-shadow: 
+      0 12px 32px rgba(0, 0, 0, 0.15),
+      0 0 0 3px rgba(139, 92, 246, 0.1) !important;
+  }
+  
+  .inputRow {
+    display: flex !important;
+    align-items: flex-start !important;
+    gap: 12px !important;
+  }
+  
+  /* CRITICAL: Large font size for input */
+  .compactTextarea {
+    flex: 1 !important;
+    background: transparent !important;
+    border: none !important;
+    outline: none !important;
+    color: #1f2937 !important;
+    font-size: 22px !important; /* INCREASED from 16px */
+    font-family: inherit !important;
+    resize: none !important;
+    min-height: 24px !important;
+    max-height: 80px !important;
+    line-height: 1.5 !important; /* Better line height */
+    font-weight: 500 !important;
+    overflow-y: auto !important;
+  }
+  
+  .compactTextarea::placeholder {
+    color: #9ca3af !important;
+    font-weight: 400 !important;
+    font-size: 18px !important; /* Match input font size */
+  }
+  
+  /* Primary Action Button */
+  .primaryActionBtn {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
+    color: white !important;
+    border: none !important;
+    padding: 8px 16px !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    font-size: 14px !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    white-space: nowrap !important;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3) !important;
+  }
+  
+  .primaryActionBtn:hover {
+    transform: translateY(-1px) !important;
+    box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4) !important;
+  }
+  
+  .primaryActionBtn:disabled {
+    opacity: 0.6 !important;
+    cursor: not-allowed !important;
+    transform: none !important;
+  }
+  
+  /* Smart Hints */
+  .smartHints {
+    margin-top: 8px !important;
+    padding: 8px 12px !important;
+    background: rgba(139, 92, 246, 0.1) !important;
+    border-radius: 8px !important;
+    border: 1px solid rgba(139, 92, 246, 0.2) !important;
+  }
+  
+  .hintText {
+    font-size: 13px !important; /* Slightly larger */
+    color: #1f2937 !important;
+    font-weight: 500 !important;
+  }
+  
+  /* Keyboard Hint */
+  .keyboardHint {
+    font-size: 12px !important; /* Slightly larger */
+    color: rgba(255, 255, 255, 0.7) !important;
+    text-align: center !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 4px !important;
+  }
+  
+  .keyboardHint kbd {
+    background: rgba(255, 255, 255, 0.2) !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    border-radius: 4px !important;
+    padding: 2px 6px !important;
+    font-size: 11px !important;
+    font-family: monospace !important;
+  }
+  
+  /* Secondary Actions */
+  .secondaryActions {
+    position: relative !important;
+  }
+  
+  .toggleActionsBtn {
+    background: transparent !important;
+    color: rgba(255, 255, 255, 0.7) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    padding: 8px 12px !important;
+    border-radius: 8px !important;
+    font-size: 13px !important; /* Slightly larger */
+    font-weight: 500 !important;
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    transition: all 0.2s ease !important;
+    width: 100% !important;
+    justify-content: center !important;
+  }
+  
+  .toggleActionsBtn:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+    border-color: rgba(255, 255, 255, 0.3) !important;
+  }
+  
+  .actionsPanel {
+    position: absolute !important;
+    bottom: 100% !important;
+    left: 0 !important;
+    right: 0 !important;
+    background: rgba(255, 255, 255, 0.95) !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    border-radius: 12px !important;
+    padding: 8px !important;
+    margin-bottom: 8px !important;
+    backdrop-filter: blur(20px) !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 4px !important;
+    z-index: 10 !important;
+  }
+  
+  .actionItem {
+    background: transparent !important;
+    color: #374151 !important;
+    border: none !important;
+    padding: 10px 12px !important;
+    border-radius: 8px !important;
+    font-size: 14px !important; /* Larger font */
+    font-weight: 500 !important;
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    transition: all 0.2s ease !important;
+    text-align: left !important;
+  }
+  
+  .actionItem:hover {
+    background: rgba(139, 92, 246, 0.1) !important;
+    color: #1f2937 !important;
+  }
+  
+  .actionItem.publishAction {
+    background: rgba(34, 197, 94, 0.1) !important;
+    color: #059669 !important;
+    border: 1px solid rgba(34, 197, 94, 0.2) !important;
+  }
+  
+  .actionItem.publishAction:hover {
+    background: rgba(34, 197, 94, 0.15) !important;
+  }
+  
+  .actionIcon {
+    font-size: 16px !important; /* Larger icons */
+  }
+  
+  /* URL Input Section */
+  .urlInputSection {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+  }
+  
+  .urlHeader {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+  }
+  
+  .urlTitle {
+    font-size: 15px !important; /* Larger */
+    font-weight: 600 !important;
+    color: rgba(255, 255, 255, 0.9) !important;
+  }
+  
+  .urlCancel {
+    background: none !important;
+    border: none !important;
+    color: rgba(255, 255, 255, 0.7) !important;
+    cursor: pointer !important;
+    font-size: 13px !important; /* Larger */
+    padding: 4px 8px !important;
+    border-radius: 4px !important;
+    transition: all 0.2s ease !important;
+  }
+  
+  .urlCancel:hover {
+    color: rgba(255, 255, 255, 0.9) !important;
+    background: rgba(255, 255, 255, 0.1) !important;
+  }
+  
+  .urlInputCard {
+    background: rgba(255, 255, 255, 0.97) !important;
+    border-radius: 12px !important;
+    padding: 12px !important;
+    backdrop-filter: blur(20px) !important;
+  }
+  
+  .urlInput {
+    width: 100% !important;
+    background: transparent !important;
+    border: none !important;
+    outline: none !important;
+    color: #1f2937 !important;
+    font-size: 16px !important; /* Larger */
+    font-family: inherit !important;
+  }
+  
+  .urlInput::placeholder {
+    color: #9ca3af !important;
+    font-size: 16px !important;
+  }
+  
+  .urlSubmitBtn {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
+    border: none !important;
+    color: white !important;
+    padding: 10px 16px !important;
+    border-radius: 10px !important;
+    font-size: 14px !important; /* Larger */
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3) !important;
+  }
+  
+  .urlSubmitBtn:hover {
+    transform: translateY(-1px) !important;
+    box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4) !important;
+  }
+  
+  .urlSubmitBtn:disabled {
+    opacity: 0.5 !important;
+    cursor: not-allowed !important;
+    transform: none !important;
+  }
+  
+  /* Form URL Display */
+  .formUrlDisplay {
+    background: rgba(34, 197, 94, 0.1) !important;
+    border: 1px solid rgba(34, 197, 94, 0.3) !important;
+    border-radius: 10px !important;
+    padding: 10px 12px !important;
+    backdrop-filter: blur(15px) !important;
+  }
+  
+  .urlStatus {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    margin-bottom: 4px !important;
+  }
+  
+  .statusIcon {
+    font-size: 13px !important;
+  }
+  
+  .statusText {
+    font-size: 12px !important; /* Slightly larger */
+    font-weight: 600 !important;
+    color: rgba(34, 197, 94, 0.9) !important;
+  }
+  
+  .formUrlLink {
+    display: block !important;
+    color: rgba(255, 255, 255, 0.95) !important;
+    text-decoration: none !important;
+    font-family: 'Courier New', monospace !important;
+    font-size: 12px !important; /* Slightly larger */
+    background: rgba(255, 255, 255, 0.15) !important;
+    padding: 6px 8px !important;
+    border-radius: 6px !important;
+    transition: all 0.2s ease !important;
+  }
+  
+  .formUrlLink:hover {
+    background: rgba(255, 255, 255, 0.25) !important;
+    transform: translateY(-1px) !important;
+  }
+  
+  /* Error Display */
+  .errorDisplay {
+    background: rgba(239, 68, 68, 0.1) !important;
+    border: 1px solid rgba(239, 68, 68, 0.3) !important;
+    border-radius: 10px !important;
+    padding: 10px 12px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    backdrop-filter: blur(15px) !important;
+  }
+  
+  .errorIcon {
+    font-size: 15px !important;
+  }
+  
+  .errorText {
+    font-size: 13px !important; /* Larger */
+    color: rgba(255, 255, 255, 0.9) !important;
+    line-height: 1.4 !important;
+  }
+  
+  /* Loading Spinner */
+  .loadingSpinner {
+    width: 14px !important;
+    height: 14px !important;
+    border: 2px solid rgba(255, 255, 255, 0.3) !important;
+    border-top: 2px solid white !important;
+    border-radius: 50% !important;
+    animation: spin 1s linear infinite !important;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .compactInputContainer {
+      padding: 12px 16px !important;
+    }
+  
+    .compactInputCard {
+      padding: 12px !important;
+    }
+  
+    .compactTextarea {
+      font-size: 17px !important; /* Still large on mobile */
+    }
+  
+    .compactTextarea::placeholder {
+      font-size: 17px !important;
+    }
+  
+    .primaryActionBtn {
+      padding: 6px 12px !important;
+      font-size: 14px !important;
+    }
+  
+    .actionsPanel {
+      position: static !important;
+      margin-bottom: 0 !important;
+      margin-top: 8px !important;
+    }
+  
+    .hintText {
+      font-size: 12px !important;
+    }
+  
+    .keyboardHint {
+      font-size: 11px !important;
+    }
+  }

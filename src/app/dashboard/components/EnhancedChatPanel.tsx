@@ -4,7 +4,7 @@ import CompactChatInput from './CompactChatInput'
 import { FormSchema, ChatMessage, FieldExtraction, PDFPageSelectionResponse } from '../types'
 
 // Import the styles
-import '../styles/compact-chat-input.css'
+//import '../styles/compact-chat-input.css'
 
 interface EnhancedChatPanelProps {
   description: string
@@ -113,9 +113,9 @@ export default function EnhancedChatPanel({
           isLoading={isLoading}
           onGenerateForm={onGenerateForm}
           onUpdateForm={onUpdateForm}
-          hasUnsavedChanges={hasUnsavedChanges}
-          onSaveChanges={onSaveChanges}
-          onDiscardChanges={onDiscardChanges}
+          //hasUnsavedChanges={hasUnsavedChanges}
+          //onSaveChanges={onSaveChanges}
+          //onDiscardChanges={onDiscardChanges}
           onPublishForm={onPublishForm}
           isPublishing={isPublishing}
           publishedFormId={publishedFormId}

@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react'
-import '../styles/compact-chat-input.css'
+// Import CSS Modules instead of regular CSS
+import styles from '../styles/CompactChatInput.module.css'
 
 interface FormSchema {
   title: string
@@ -21,9 +22,6 @@ interface CompactChatInputProps {
   isLoading: boolean
   onGenerateForm: () => void
   onUpdateForm: () => void
-  hasUnsavedChanges: boolean
-  onSaveChanges: () => void
-  onDiscardChanges: () => void
   onPublishForm: () => void
   isPublishing: boolean
   publishedFormId: string | null
@@ -48,9 +46,6 @@ export default function CompactChatInput({
   isLoading,
   onGenerateForm,
   onUpdateForm,
-  hasUnsavedChanges,
-  onSaveChanges,
-  onDiscardChanges,
   onPublishForm,
   isPublishing,
   publishedFormId,
@@ -67,19 +62,44 @@ export default function CompactChatInput({
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [showURLInput, setShowURLInput] = useState(false)
   const [urlValue, setUrlValue] = useState('')
+  const [showSecondaryActions, setShowSecondaryActions] = useState(false)
 
   // Check if this form has been published before
   const hasExistingForm = formSchema?.formId || publishedFormId
   const formUrl = publishedFormId || formSchema?.formId
 
+  // Smart placeholder based on context
+  const getSmartPlaceholder = () => {
+    if (formSchema) {
+      return "What would you like to change or add to your form?"
+    }
+    return "Describe your form in detail - the more specific, the better..."
+  }
+
+  // Contextual hints based on input state
+  const getContextualHints = () => {
+    if (description.length < 10) {
+      return "💡 Be specific about your form requirements for better results"
+    }
+    if (description.length > 50 && !formSchema) {
+      return "✅ Perfect! Your description is detailed enough to generate a great form"
+    }
+    if (formSchema && description.length > 10) {
+      return "⚡ Ready to apply these changes to your form"
+    }
+    return null
+  }
+
   // Handle keyboard shortcuts
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
       e.preventDefault()
-      if (formSchema) {
-        onUpdateForm()
-      } else {
-        onGenerateForm()
+      if (description.trim()) {
+        if (formSchema) {
+          onUpdateForm()
+        } else {
+          onGenerateForm()
+        }
       }
     }
   }
@@ -97,6 +117,7 @@ export default function CompactChatInput({
   // File upload handlers
   const handleAttachClick = () => {
     fileInputRef.current?.click()
+    setShowSecondaryActions(false)
   }
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -130,29 +151,29 @@ export default function CompactChatInput({
   // URL Input state
   if (showURLInput) {
     return (
-      <div className="compact-input-container">
-        <div className="url-input-section">
-          <div className="url-header">
-            <span className="url-title">🔗 Enter Form URL</span>
+      <div className={styles.compactInputContainer}>
+        <div className={styles.urlInputSection}>
+          <div className={styles.urlHeader}>
+            <span className={styles.urlTitle}>🔗 Analyze Form URL</span>
             <button
               onClick={() => {
                 setShowURLInput(false)
                 setUrlValue('')
               }}
-              className="url-cancel"
+              className={styles.urlCancel}
             >
               Cancel
             </button>
           </div>
           
-          <div className="url-input-card">
+          <div className={styles.urlInputCard}>
             <input
               type="url"
               value={urlValue}
               onChange={(e) => setUrlValue(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && handleURLSubmit()}
-              placeholder="https://forms.google.com/..."
-              className="url-input"
+              placeholder="https://forms.google.com/d/xyz... or any form URL"
+              className={styles.urlInput}
               autoFocus
             />
           </div>
@@ -160,9 +181,9 @@ export default function CompactChatInput({
           <button
             onClick={handleURLSubmit}
             disabled={!urlValue.trim()}
-            className="url-submit-btn"
+            className={styles.urlSubmitBtn}
           >
-            Analyze Form URL
+            Analyze URL
           </button>
         </div>
       </div>
@@ -174,136 +195,133 @@ export default function CompactChatInput({
     return null
   }
 
-  const showGenerateButton = !formSchema && description.trim().length > 10 && !isLoading
-  const showUpdateButton = formSchema && description.trim().length > 0 && !isLoading
+  const canTakeAction = description.trim().length > 0 && !isLoading
+  const showGenerateButton = !formSchema && canTakeAction
+  const showUpdateButton = formSchema && canTakeAction
 
   return (
-    <div className="compact-input-container">
-      {/* Main Input Section */}
-      <div className="compact-input-card">
-        <div className="input-row">
-          <textarea 
-            ref={textareaRef}
-            value={description}
-            onChange={handleInputChange}
-            onKeyDown={handleKeyDown}
-            placeholder={
-              formSchema 
-                ? "Describe what you'd like to change..."
-                : "Describe your form..."
-            }
-            className="compact-textarea"
-            rows={1}
-          />
-          
-          <button 
-            type="button"
-            className="compact-attach-btn" 
-            onClick={handleAttachClick}
-            disabled={isLoading}
-            title="Upload image, PDF, or analyze URL"
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66L9.64 16.2a2 2 0 0 1-2.83-2.83l8.49-8.49"/>
-            </svg>
-          </button>
-          
-          <input 
-            ref={fileInputRef}
-            type="file" 
-            style={{ display: 'none' }}
-            accept="image/*,.pdf" 
-            onChange={handleFileChange}
-          />
-        </div>
-
-        {/* Quick Action Buttons Row */}
-        <div className="action-buttons-row">
-          <div className="quick-actions">
-            <button
-              onClick={() => setShowURLInput(true)}
-              className="quick-action-btn"
-            >
-              🔗 URL
-            </button>
+    <div className={styles.compactInputContainer}>
+      {/* Primary Input Section - Always visible and prominent */}
+      <div className={styles.primaryInputSection}>
+        <div className={styles.compactInputCard}>
+          <div className={styles.inputRow}>
+            <textarea 
+              ref={textareaRef}
+              value={description}
+              onChange={handleInputChange}
+              onKeyDown={handleKeyDown}
+              placeholder={getSmartPlaceholder()}
+              className={styles.compactTextarea}
+              rows={1}
+            />
+            
+            {/* Primary Action Button - Only show when ready */}
+            {canTakeAction && (
+              <button 
+                onClick={formSchema ? onUpdateForm : onGenerateForm}
+                disabled={isLoading}
+                className={styles.primaryActionBtn}
+              >
+                {isLoading ? (
+                  <div className={styles.loadingSpinner} />
+                ) : formSchema ? (
+                  <>⚡ Update</>
+                ) : (
+                  <>✨ Generate</>
+                )}
+              </button>
+            )}
           </div>
           
-          {/* Main Action Button */}
-          {showGenerateButton && (
-            <button 
-              onClick={onGenerateForm}
-              disabled={isLoading}
-              className="generate-btn"
-            >
-              {isLoading ? (
-                <div className="loading-spinner" />
-              ) : (
-                <>✨ Generate</>
-              )}
-            </button>
-          )}
-          
-          {showUpdateButton && (
-            <button 
-              onClick={onUpdateForm}
-              disabled={isLoading}
-              className="update-btn"
-            >
-              {isLoading ? (
-                <div className="loading-spinner" />
-              ) : (
-                <>⚡ Update</>
-              )}
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* Status Actions */}
-      {(hasUnsavedChanges || formSchema) && (
-        <div className="status-actions">
-          {hasUnsavedChanges && (
-            <div className="change-actions">
-              <button onClick={onSaveChanges} className="save-btn">
-                💾 Save
-              </button>
-              <button onClick={onDiscardChanges} className="discard-btn">
-                ↩️ Discard
-              </button>
+          {/* Contextual hints */}
+          {getContextualHints() && (
+            <div className={styles.smartHints}>
+              <span className={styles.hintText}>{getContextualHints()}</span>
             </div>
           )}
-
-          {formSchema && (
-            <button 
-              onClick={onPublishForm}
-              disabled={isPublishing}
-              className="publish-btn"
-            >
-              {isPublishing ? (
-                <>
-                  <div className="loading-spinner" />
-                  Publishing...
-                </>
-              ) : (
-                <>🚀 {hasExistingForm ? 'Update Live' : 'Publish'}</>
-              )}
-            </button>
-          )}
         </div>
-      )}
+        
+        {/* Keyboard shortcut hint */}
+        {canTakeAction && (
+          <div className={styles.keyboardHint}>
+            Press <kbd>{navigator.platform.includes('Mac') ? '⌘' : 'Ctrl'}</kbd> + <kbd>Enter</kbd> to {formSchema ? 'update' : 'generate'}
+          </div>
+        )}
+      </div>
 
-      {/* Form URL Display */}
+      {/* Secondary Actions - Cleaner organization */}
+      <div className={styles.secondaryActions}>
+        <button 
+          onClick={() => setShowSecondaryActions(!showSecondaryActions)}
+          className={styles.toggleActionsBtn}
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <circle cx="12" cy="12" r="1"/>
+            <circle cx="19" cy="12" r="1"/>
+            <circle cx="5" cy="12" r="1"/>
+          </svg>
+          More options
+        </button>
+        
+        {showSecondaryActions && (
+          <div className={styles.actionsPanel}>
+            <button
+              onClick={() => {
+                setShowURLInput(true)
+                setShowSecondaryActions(false)
+              }}
+              className={styles.actionItem}
+            >
+              <span className={styles.actionIcon}>🔗</span>
+              <span>Analyze URL</span>
+            </button>
+            
+            <button
+              onClick={handleAttachClick}
+              className={styles.actionItem}
+            >
+              <span className={styles.actionIcon}>📎</span>
+              <span>Upload File</span>
+            </button>
+            
+            {formSchema && (
+              <button
+                onClick={() => {
+                  onPublishForm()
+                  setShowSecondaryActions(false)
+                }}
+                disabled={isPublishing}
+                className={`${styles.actionItem} ${styles.publishAction}`}
+              >
+                <span className={styles.actionIcon}>🚀</span>
+                <span>{isPublishing ? 'Publishing...' : hasExistingForm ? 'Update Live' : 'Publish'}</span>
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Hidden file input */}
+      <input 
+        ref={fileInputRef}
+        type="file" 
+        style={{ display: 'none' }}
+        accept="image/*,.pdf" 
+        onChange={handleFileChange}
+      />
+
+      {/* Form URL Display - Only when published */}
       {formUrl && (
-        <div className="form-url-display">
-          <div className="url-status">
-            <span className="status-icon">✅</span>
-            <span className="status-text">Live at:</span>
+        <div className={styles.formUrlDisplay}>
+          <div className={styles.urlStatus}>
+            <span className={styles.statusIcon}>✅</span>
+            <span className={styles.statusText}>Live at:</span>
           </div>
           <a 
             href={`/forms/${formUrl}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="form-url-link"
+            className={styles.formUrlLink}
           >
             /forms/{formUrl} ↗
           </a>
@@ -312,9 +330,9 @@ export default function CompactChatInput({
       
       {/* Error Display */}
       {error && (
-        <div className="error-display">
-          <span className="error-icon">⚠️</span>
-          <span className="error-text">{error}</span>
+        <div className={styles.errorDisplay}>
+          <span className={styles.errorIcon}>⚠️</span>
+          <span className={styles.errorText}>{error}</span>
         </div>
       )}
     </div>

@@ -75,12 +75,12 @@ export function useFormGeneration() {
           ? `Form created from ${uploadedPDF ? 'PDF' : uploadedURL ? 'URL' : 'screenshot'}! Found ${extractedFields.length} fields.`
           : 'Form created!'
       
-      setChatHistory(prev => [
-        ...prev,
-        { role: 'user', content: userMessage },
-        { role: 'assistant', content: assistantMessage }
-      ])
-      
+        setChatHistory(prev => [
+          ...prev,
+          { role: 'user', content: userMessage, timestamp: Date.now() },
+          { role: 'assistant', content: assistantMessage, timestamp: Date.now() + 500 }
+        ])
+              
       if (extractedFields) {
         resetAnalysis()
       }
@@ -122,8 +122,8 @@ export function useFormGeneration() {
       
       setChatHistory(prev => [
         ...prev,
-        { role: 'user', content: `Uploaded screenshot for analysis${additionalContext ? ` with context: ${additionalContext}` : ''}` },
-        { role: 'assistant', content: `Extracted ${data.extractedFields.length} fields from screenshot. Please review and edit as needed.` }
+        { role: 'user', content: `Uploaded screenshot for analysis${additionalContext ? ` with context: ${additionalContext}` : ''}`, timestamp: Date.now() },
+        { role: 'assistant', content: `Extracted ${data.extractedFields.length} fields from screenshot. Please review and edit as needed.`, timestamp: Date.now() + 500 }
       ])
 
       return data.extractedFields
@@ -163,8 +163,8 @@ export function useFormGeneration() {
       
       setChatHistory(prev => [
         ...prev,
-        { role: 'user', content: `Uploaded URL for analysis: ${url.length > 50 ? url.substring(0, 50) + '...' : url}${additionalContext ? ` with context: ${additionalContext}` : ''}` },
-        { role: 'assistant', content: `Extracted ${data.extractedFields.length} fields from URL using ${data.method}. Please review and edit as needed.` }
+        { role: 'user', content: `Uploaded URL for analysis: ${url.length > 50 ? url.substring(0, 50) + '...' : url}${additionalContext ? ` with context: ${additionalContext}` : ''}`, timestamp: Date.now() },
+        { role: 'assistant', content: `Extracted ${data.extractedFields.length} fields from URL using ${data.method}. Please review and edit as needed.`, timestamp: Date.now() + 500 }
       ])
 
       return data.extractedFields
@@ -230,14 +230,15 @@ export function useFormGeneration() {
       const processedPagesText = data.processedPages ? 
         ` (pages ${data.processedPages.join(', ')})` : ''
       
-      setChatHistory(prev => [
-        ...prev,
-        { role: 'user', content: `Uploaded PDF "${file.name}" for analysis${additionalContext ? ` with context: ${additionalContext}` : ''}${processedPagesText}` },
-        { 
-          role: 'assistant', 
-          content: `Analyzed PDF using ${data.processingMethod} and extracted ${data.extractedFields.length} fields from ${data.processedPages?.length || 'selected'} pages. Please review before generating.`
-        }
-      ])
+        setChatHistory(prev => [
+          ...prev,
+          { role: 'user', content: `Uploaded PDF "${file.name}" for analysis${additionalContext ? ` with context: ${additionalContext}` : ''}${processedPagesText}`, timestamp: Date.now() },
+          { 
+            role: 'assistant', 
+            content: `Analyzed PDF using ${data.processingMethod} and extracted ${data.extractedFields.length} fields from ${data.processedPages?.length || 'selected'} pages. Please review before generating.`,
+            timestamp: Date.now() + 500
+          }
+        ])
 
       return data.extractedFields
     } catch (err) {
