@@ -6,13 +6,18 @@ import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { useFormEditing } from './hooks/useFormEditing'
 import { useFormGeneration } from './hooks/useFormGeneration'
+
+// CSS IMPORTS - Load in this specific order for proper precedence
+import './dashboard.css'                           // Your existing base styles
+import './styles/compact-chat-input.css'          // Your existing compact input styles  
+import './styles/dashboard-chat-panel-fixes.css'  // Your existing chat panel fixes
+import './styles/dashboard-critical.css'          // NEW: High-specificity overrides
+
 // Import the enhanced components
 import EnhancedChatPanel from './components/EnhancedChatPanel'
 import FormPreview from './components/FormPreview'
 import { FieldExtraction } from './types'
-import './dashboard.css'
 // Import the compact input styles
-import './styles/compact-chat-input.css'
 
 import TestChatPanel from './components/TestChatPanel'
 // Helper to convert base64 back to File - FIXED for PDF
