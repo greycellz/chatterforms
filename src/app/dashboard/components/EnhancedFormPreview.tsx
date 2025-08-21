@@ -329,7 +329,7 @@ export default function FormPreview({
 
   return (
     <div className="enhanced-form-preview-panel">
-      {/* Enhanced Header with Save/Discard Controls */}
+      {/* Compact Header with Progress Tracker on Same Line */}
       <div className="enhanced-form-preview-header">
         <div className="header-main-content">
           <div className="header-left">
@@ -341,6 +341,26 @@ export default function FormPreview({
               </div>
             )}
           </div>
+          
+          {/* Progress indicator moved to same line as title */}
+          {formSchema && (
+            <div className="form-progress">
+              <div className="progress-item completed">
+                <div className="progress-dot">✓</div>
+                <span>Generated</span>
+              </div>
+              <div className="progress-connector" />
+              <div className={`progress-item ${hasUnsavedChanges ? 'pending' : 'completed'}`}>
+                <div className="progress-dot">{hasUnsavedChanges ? '⚡' : '✓'}</div>
+                <span>Customized</span>
+              </div>
+              <div className="progress-connector" />
+              <div className={`progress-item ${publishedFormId || formSchema.formId ? 'completed' : 'pending'}`}>
+                <div className="progress-dot">🚀</div>
+                <span>Published</span>
+              </div>
+            </div>
+          )}
           
           {/* Form Actions - Save/Discard moved here from chat input */}
           {hasUnsavedChanges && (
@@ -376,7 +396,7 @@ export default function FormPreview({
           )}
         </div>
         
-        {/* NEW: Publish Section */}
+        {/* Compact Publish Section */}
         <PublishSection
           formSchema={formSchema}
           hasUnsavedChanges={hasUnsavedChanges}
@@ -384,26 +404,6 @@ export default function FormPreview({
           publishedFormId={publishedFormId}
           onPublishForm={onPublishForm}
         />
-        
-        {/* Progress indicator when form exists */}
-        {formSchema && (
-          <div className="form-progress">
-            <div className="progress-item completed">
-              <div className="progress-dot">✓</div>
-              <span>Generated</span>
-            </div>
-            <div className="progress-connector" />
-            <div className={`progress-item ${hasUnsavedChanges ? 'pending' : 'completed'}`}>
-              <div className="progress-dot">{hasUnsavedChanges ? '⚡' : '✓'}</div>
-              <span>Customized</span>
-            </div>
-            <div className="progress-connector" />
-            <div className={`progress-item ${publishedFormId || formSchema.formId ? 'completed' : 'pending'}`}>
-              <div className="progress-dot">🚀</div>
-              <span>Published</span>
-            </div>
-          </div>
-        )}
       </div>
       
       {/* Form Container */}

@@ -10,9 +10,9 @@
     overflow: hidden;
   }
   
-  /* Enhanced Header with Save/Discard Controls */
+  /* Compact Header with Progress Tracker on Same Line */
   .enhanced-form-preview-header {
-    padding: 20px 32px 16px;
+    padding: 16px 32px 12px;
     background: rgba(255, 255, 255, 0.95);
     border-bottom: 1px solid rgba(0, 0, 0, 0.08);
     backdrop-filter: blur(20px);
@@ -24,7 +24,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 16px;
+    margin-bottom: 12px;
   }
   
   .header-left {
@@ -119,16 +119,16 @@
     height: 14px;
   }
 
-  /* UPDATED: Simple Publish Section Layout */
+  /* Compact Publish Section Layout */
   .simple-publish-section {
-    padding: 14px 0;
+    padding: 8px 0;
     border-top: 1px solid rgba(0, 0, 0, 0.06);
     display: flex;
     flex-direction: row;
     align-items: center;
-    justify-content: space-between;  /* Changed from flex-end */
+    justify-content: space-between;
     gap: 12px;
-    margin-top: 8px;
+    margin-top: 4px;
   }
 
   /* Compact Header */
@@ -315,24 +315,22 @@
   
 
   
-  /* Progress indicator */
+  /* Compact Progress indicator - Horizontal layout */
   .form-progress {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 4px;
+    gap: 8px;
     opacity: 0.8;
-    margin-top: 16px;
-    padding-top: 16px;
-    border-top: 1px solid rgba(0, 0, 0, 0.06);
+    margin-left: 24px;
   }
   
   .progress-item {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
-    gap: 4px;
-    font-size: 11px;
+    gap: 6px;
+    font-size: 12px;
     font-weight: 500;
     color: #64748b;
     transition: all 0.3s ease;
@@ -347,15 +345,16 @@
   }
   
   .progress-dot {
-    width: 24px;
-    height: 24px;
+    width: 20px;
+    height: 20px;
     border-radius: 50%;
     background: #e2e8f0;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 12px;
+    font-size: 10px;
     transition: all 0.3s ease;
+    flex-shrink: 0;
   }
   
   .progress-item.completed .progress-dot {
@@ -375,16 +374,16 @@
   }
   
   .progress-connector {
-    width: 32px;
+    width: 16px;
     height: 1px;
     background: #e2e8f0;
-    margin: 0 8px;
+    margin: 0 4px;
   }
   
-  /* Form Container */
+  /* Form Container - More space for form preview */
   .enhanced-form-preview-container {
     flex: 1;
-    padding: 32px 40px 40px;
+    padding: 24px 40px 40px;
     display: flex;
     align-items: flex-start;
     justify-content: center;
