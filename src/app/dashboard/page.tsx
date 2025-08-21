@@ -387,6 +387,7 @@ function DashboardContent() {
           onResetAnalysis={resetAnalysis}
           pdfPageSelection={pdfPageSelection}
           onPageSelectionComplete={handlePageSelectionComplete}
+          onGenerateFormFromFields={generateFormFromFields}
         />
 
         {/* UPDATED: FormPreview with publish functionality */}

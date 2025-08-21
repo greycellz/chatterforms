@@ -47,8 +47,23 @@ export interface FormSchema {
 }
 
 export interface ChatMessage {
-  role: 'user' | 'assistant'
+  role: 'user' | 'assistant' | 'thinking' | 'processing' | 'file' | 'analysisAction' | 'fieldResults'
   content: string
+  timestamp?: number
+  metadata?: {
+    duration?: number
+    steps?: string[]
+    isComplete?: boolean
+    // File message metadata
+    fileType?: 'image' | 'pdf' | 'url'
+    fileName?: string
+    fileData?: string // base64 for images, URL for web pages
+    isUpload?: boolean
+    isAnalysisAction?: boolean
+    // Field results metadata
+    extractedFields?: FieldExtraction[]
+    onGenerateForm?: () => void
+  }
 }
 
 export interface PDFPageInfo {

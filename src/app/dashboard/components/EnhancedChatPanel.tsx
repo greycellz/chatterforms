@@ -39,6 +39,9 @@ interface EnhancedChatPanelProps {
   // PDF page selection props
   pdfPageSelection?: PDFPageSelectionResponse | null
   onPageSelectionComplete?: (pageSelection: { pages: number[], selectAll?: boolean }) => void
+  
+  // Form generation from fields
+  onGenerateFormFromFields?: (fields: FieldExtraction[]) => void
 }
 
 export default function EnhancedChatPanel({
@@ -69,7 +72,8 @@ export default function EnhancedChatPanel({
   onFieldsValidated,
   onResetAnalysis,
   pdfPageSelection,
-  onPageSelectionComplete
+  onPageSelectionComplete,
+  onGenerateFormFromFields
 }: EnhancedChatPanelProps) {
   return (
     <div className="chat-panel-enhanced">
@@ -80,25 +84,21 @@ export default function EnhancedChatPanel({
       
       {/* Chat History - Takes up available space with proper scrolling */}
       <div className="chat-content-area">
-        <ChatHistory chatHistory={chatHistory} />
+        <ChatHistory 
+          chatHistory={chatHistory}
+          // Pass analysis functions to ChatHistory for inline actions
+          onAnalyzeImage={onAnalyzeImage}
+          onAnalyzePDF={onAnalyzePDF}
+          onAnalyzeURL={onAnalyzeURL}
+          uploadedImage={uploadedImage}
+          uploadedPDF={uploadedPDF}
+          uploadedURL={uploadedURL}
+          isAnalyzing={isAnalyzing}
+          analysisComplete={analysisComplete}
+          onGenerateFormFromFields={onGenerateFormFromFields}
+          onResetAnalysis={onResetAnalysis}
+        />
       </div>
-      
-      {/* Analysis Review - Shows during screenshot/PDF/URL workflow */}
-      <AnalysisReview
-        uploadedImage={uploadedImage}
-        uploadedPDF={uploadedPDF}
-        uploadedURL={uploadedURL}
-        extractedFields={extractedFields}
-        isAnalyzing={isAnalyzing}
-        analysisComplete={analysisComplete}
-        onAnalyzeImage={onAnalyzeImage}
-        onAnalyzePDF={onAnalyzePDF}
-        onAnalyzeURL={onAnalyzeURL}
-        onFieldsValidated={onFieldsValidated}
-        onResetAnalysis={onResetAnalysis}
-        pdfPageSelection={pdfPageSelection}
-        onPageSelectionComplete={onPageSelectionComplete}
-      />
       
       {/* Compact Chat Input - Always at bottom */}
       <div className="chat-input-area">

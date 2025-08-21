@@ -61,6 +61,9 @@ export default function CompactChatInput({
 
   // Smart placeholder based on context
   const getSmartPlaceholder = () => {
+    if (analysisComplete && !formSchema) {
+      return "Review the extracted fields above, then describe any changes you'd like..."
+    }
     if (formSchema) {
       return "What would you like to change or add to your form?"
     }
@@ -69,6 +72,9 @@ export default function CompactChatInput({
 
   // Contextual hints based on input state
   const getContextualHints = () => {
+    if (analysisComplete && !formSchema) {
+      return "💡 Review the extracted fields above, then describe any modifications you'd like"
+    }
     if (description.length < 10) {
       return "💡 Be specific about your form requirements for better results"
     }
@@ -181,8 +187,8 @@ export default function CompactChatInput({
     )
   }
 
-  // Hide during upload workflow
-  if (uploadedImage || uploadedPDF || uploadedURL || analysisComplete) {
+  // Hide during upload workflow (but show after analysis is complete)
+  if ((uploadedImage || uploadedPDF || uploadedURL) && !analysisComplete) {
     return null
   }
 

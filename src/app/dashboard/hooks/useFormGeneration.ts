@@ -98,6 +98,22 @@ export function useFormGeneration() {
   const analyzeScreenshot = async (imageData: string, additionalContext?: string) => {
     setIsAnalyzing(true)
     setError('')
+    
+    const startTime = Date.now()
+    
+    // Add thinking message immediately
+    setChatHistory(prev => [
+      ...prev,
+      { 
+        role: 'thinking', 
+        content: 'Analyzing screenshot...',
+        timestamp: startTime,
+        metadata: {
+          duration: 0,
+          steps: ['Processing image', 'Extracting form fields', 'Validating field types']
+        }
+      }
+    ])
 
     try {
       const response = await fetch('/api/analyze-screenshot', {
@@ -117,19 +133,41 @@ export function useFormGeneration() {
         throw new Error(data.error || 'Failed to analyze screenshot')
       }
 
+      const endTime = Date.now()
+      const duration = Math.round((endTime - startTime) / 1000)
+
       setExtractedFields(data.extractedFields)
       setAnalysisComplete(true)
       
-      setChatHistory(prev => [
-        ...prev,
-        { role: 'user', content: `Uploaded screenshot for analysis${additionalContext ? ` with context: ${additionalContext}` : ''}`, timestamp: Date.now() },
-        { role: 'assistant', content: `Extracted ${data.extractedFields.length} fields from screenshot. Please review and edit as needed.`, timestamp: Date.now() + 500 }
-      ])
+      // Replace thinking message with results
+      setChatHistory(prev => {
+        const filtered = prev.filter(msg => msg.role !== 'thinking')
+        return [
+          ...filtered,
+          { 
+            role: 'assistant', 
+            content: `Extracted ${data.extractedFields.length} fields from screenshot in ${duration}s. Please review and edit as needed.`, 
+            timestamp: endTime 
+          },
+          {
+            role: 'fieldResults',
+            content: `Field extraction complete`,
+            timestamp: endTime + 100,
+            metadata: {
+              extractedFields: data.extractedFields
+            }
+          }
+        ]
+      })
 
       return data.extractedFields
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Something went wrong'
       setError(errorMessage)
+      
+      // Remove thinking message on error
+      setChatHistory(prev => prev.filter(msg => msg.role !== 'thinking'))
+      
       throw err
     } finally {
       setIsAnalyzing(false)
@@ -139,6 +177,22 @@ export function useFormGeneration() {
   const analyzeURL = async (url: string, additionalContext?: string) => {
     setIsAnalyzing(true)
     setError('')
+    
+    const startTime = Date.now()
+    
+    // Add thinking message immediately
+    setChatHistory(prev => [
+      ...prev,
+      { 
+        role: 'thinking', 
+        content: 'Analyzing URL...',
+        timestamp: startTime,
+        metadata: {
+          duration: 0,
+          steps: ['Fetching webpage', 'Extracting form fields', 'Validating field types']
+        }
+      }
+    ])
 
     try {
       const response = await fetch('/api/analyze-url', {
@@ -158,19 +212,41 @@ export function useFormGeneration() {
         throw new Error(data.error || 'Failed to analyze URL')
       }
 
+      const endTime = Date.now()
+      const duration = Math.round((endTime - startTime) / 1000)
+
       setExtractedFields(data.extractedFields)
       setAnalysisComplete(true)
       
-      setChatHistory(prev => [
-        ...prev,
-        { role: 'user', content: `Uploaded URL for analysis: ${url.length > 50 ? url.substring(0, 50) + '...' : url}${additionalContext ? ` with context: ${additionalContext}` : ''}`, timestamp: Date.now() },
-        { role: 'assistant', content: `Extracted ${data.extractedFields.length} fields from URL using ${data.method}. Please review and edit as needed.`, timestamp: Date.now() + 500 }
-      ])
+      // Replace thinking message with results
+      setChatHistory(prev => {
+        const filtered = prev.filter(msg => msg.role !== 'thinking')
+        return [
+          ...filtered,
+          { 
+            role: 'assistant', 
+            content: `Extracted ${data.extractedFields.length} fields from URL using ${data.method} in ${duration}s. Please review and edit as needed.`, 
+            timestamp: endTime 
+          },
+          {
+            role: 'fieldResults',
+            content: `Field extraction complete`,
+            timestamp: endTime + 100,
+            metadata: {
+              extractedFields: data.extractedFields
+            }
+          }
+        ]
+      })
 
       return data.extractedFields
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Something went wrong'
       setError(errorMessage)
+      
+      // Remove thinking message on error
+      setChatHistory(prev => prev.filter(msg => msg.role !== 'thinking'))
+      
       throw err
     } finally {
       setIsAnalyzing(false)
@@ -185,6 +261,22 @@ export function useFormGeneration() {
     setIsAnalyzing(true)
     setError('')
     setPdfPageSelection(null)
+    
+    const startTime = Date.now()
+    
+    // Add thinking message immediately
+    setChatHistory(prev => [
+      ...prev,
+      { 
+        role: 'thinking', 
+        content: 'Analyzing PDF...',
+        timestamp: startTime,
+        metadata: {
+          duration: 0,
+          steps: ['Processing PDF', 'Extracting form fields', 'Validating field types']
+        }
+      }
+    ])
 
     try {
       // Convert file to base64
@@ -214,14 +306,20 @@ export function useFormGeneration() {
         setPdfPageSelection(data)
         setIsAnalyzing(false)
         
-        setChatHistory(prev => [
-          ...prev,
-          { role: 'user', content: `Uploaded PDF "${file.name}" for analysis${additionalContext ? ` with context: ${additionalContext}` : ''}` },
-          { role: 'assistant', content: `PDF has ${data.totalPages} pages. Please select which pages to analyze.` }
-        ])
+        // Replace thinking message with page selection request
+        setChatHistory(prev => {
+          const filtered = prev.filter(msg => msg.role !== 'thinking')
+          return [
+            ...filtered,
+            { role: 'assistant', content: `PDF has ${data.totalPages} pages. Please select which pages to analyze.` }
+          ]
+        })
         
         return null // No fields yet, waiting for page selection
       }
+
+      const endTime = Date.now()
+      const duration = Math.round((endTime - startTime) / 1000)
 
       // Analysis completed
       setExtractedFields(data.extractedFields)
@@ -230,20 +328,35 @@ export function useFormGeneration() {
       const processedPagesText = data.processedPages ? 
         ` (pages ${data.processedPages.join(', ')})` : ''
       
-        setChatHistory(prev => [
-          ...prev,
-          { role: 'user', content: `Uploaded PDF "${file.name}" for analysis${additionalContext ? ` with context: ${additionalContext}` : ''}${processedPagesText}`, timestamp: Date.now() },
+      // Replace thinking message with results
+      setChatHistory(prev => {
+        const filtered = prev.filter(msg => msg.role !== 'thinking')
+        return [
+          ...filtered,
           { 
             role: 'assistant', 
-            content: `Analyzed PDF using ${data.processingMethod} and extracted ${data.extractedFields.length} fields from ${data.processedPages?.length || 'selected'} pages. Please review before generating.`,
-            timestamp: Date.now() + 500
+            content: `Analyzed PDF using ${data.processingMethod} and extracted ${data.extractedFields.length} fields from ${data.processedPages?.length || 'selected'} pages in ${duration}s. Please review before generating.`,
+            timestamp: endTime
+          },
+          {
+            role: 'fieldResults',
+            content: `Field extraction complete`,
+            timestamp: endTime + 100,
+            metadata: {
+              extractedFields: data.extractedFields
+            }
           }
-        ])
+        ]
+      })
 
       return data.extractedFields
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Something went wrong'
       setError(errorMessage)
+      
+      // Remove thinking message on error
+      setChatHistory(prev => prev.filter(msg => msg.role !== 'thinking'))
+      
       throw err
     } finally {
       if (!pdfPageSelection) {
@@ -331,6 +444,22 @@ export function useFormGeneration() {
     setAnalysisComplete(false)
     setPdfPageSelection(null)
     setError('')
+    
+    // Add file message to chat history
+    setChatHistory(prev => [
+      ...prev,
+      { 
+        role: 'file', 
+        content: 'Image uploaded',
+        timestamp: Date.now(),
+        metadata: {
+          fileType: 'image',
+          fileName: 'Screenshot',
+          fileData: imageData,
+          isUpload: true
+        }
+      }
+    ])
   }
 
   const handlePDFUpload = (file: File) => {
@@ -341,6 +470,22 @@ export function useFormGeneration() {
     setAnalysisComplete(false)
     setPdfPageSelection(null)
     setError('')
+    
+    // Add file message to chat history
+    setChatHistory(prev => [
+      ...prev,
+      { 
+        role: 'file', 
+        content: 'PDF uploaded',
+        timestamp: Date.now(),
+        metadata: {
+          fileType: 'pdf',
+          fileName: file.name,
+          fileData: file.name, // Just show filename for PDFs
+          isUpload: true
+        }
+      }
+    ])
   }
 
   const handleURLUpload = (url: string) => {
@@ -351,6 +496,22 @@ export function useFormGeneration() {
     setAnalysisComplete(false)
     setPdfPageSelection(null)
     setError('')
+    
+    // Add file message to chat history
+    setChatHistory(prev => [
+      ...prev,
+      { 
+        role: 'file', 
+        content: 'URL uploaded',
+        timestamp: Date.now(),
+        metadata: {
+          fileType: 'url',
+          fileName: url,
+          fileData: url,
+          isUpload: true
+        }
+      }
+    ])
   }
 
   const resetAnalysis = () => {

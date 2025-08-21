@@ -61,7 +61,6 @@
       0 2px 8px rgba(37, 99, 235, 0.15) !important;
   }
   
-  /* Assistant Messages - Light glassmorphic bubbles */
   /* Assistant Messages - Beautiful Dark Orange Gradient */
 .modernChatMessage:global(.assistant) .modernMessageContent {
   background: linear-gradient(135deg, #ea580c 0%, #dc6326 50%, #b91c1c 100%) !important;
@@ -74,6 +73,43 @@
     0 4px 16px rgba(234, 88, 12, 0.25),
     0 2px 8px rgba(220, 38, 38, 0.15) !important;
 }
+
+  /* File Messages - Clean white cards */
+  .modernChatMessage:global(.file) .modernMessageContent {
+    background: rgba(255, 255, 255, 0.95) !important;
+    color: #1f2937 !important;
+    border-radius: 16px !important;
+    padding: 16px !important;
+    box-shadow: 
+      0 4px 16px rgba(0, 0, 0, 0.1),
+      0 2px 8px rgba(0, 0, 0, 0.05) !important;
+    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  }
+
+  /* Analysis Action Messages - Purple gradient cards */
+  .modernChatMessage:global(.analysisAction) .modernMessageContent {
+    background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%) !important;
+    color: white !important;
+    border-radius: 16px !important;
+    padding: 20px !important;
+    box-shadow: 
+      0 4px 16px rgba(139, 92, 246, 0.25),
+      0 2px 8px rgba(139, 92, 246, 0.15) !important;
+    max-width: 80% !important;
+    min-width: 300px !important;
+  }
+
+  /* Field Results Messages - Clean white cards */
+  .modernChatMessage:global(.fieldResults) .modernMessageContent {
+    background: rgba(255, 255, 255, 0.95) !important;
+    color: #1f2937 !important;
+    border-radius: 16px !important;
+    padding: 20px !important;
+    box-shadow: 
+      0 4px 16px rgba(0, 0, 0, 0.1),
+      0 2px 8px rgba(0, 0, 0, 0.05) !important;
+    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  }
   
   /* CRITICAL: Message text with maximum specificity */
   .modernMessageText {
@@ -92,20 +128,359 @@
     text-align: right !important;
     margin-top: 4px !important;
   }
+
+  /* File Message Styles */
+  .modernFileMessage {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+  }
+
+  .modernFileHeader {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+  }
+
+  .modernFileIcon {
+    font-size: 24px !important;
+    width: 40px !important;
+    height: 40px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: rgba(59, 130, 246, 0.1) !important;
+    border-radius: 12px !important;
+  }
+
+  .modernFileInfo {
+    flex: 1 !important;
+  }
+
+  .modernFileName {
+    font-size: 16px !important;
+    font-weight: 600 !important;
+    color: #1f2937 !important;
+    margin-bottom: 2px !important;
+  }
+
+  .modernFileStatus {
+    font-size: 14px !important;
+    color: #6b7280 !important;
+  }
+
+  .modernImagePreview {
+    border-radius: 12px !important;
+    overflow: hidden !important;
+    border: 1px solid rgba(0, 0, 0, 0.1) !important;
+    max-width: 300px !important;
+  }
+
+  .modernPreviewImage {
+    width: 100% !important;
+    height: auto !important;
+    display: block !important;
+  }
+
+  .modernUrlPreview {
+    background: rgba(0, 0, 0, 0.05) !important;
+    border-radius: 8px !important;
+    padding: 12px !important;
+    border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  }
+
+  .modernUrlText {
+    font-size: 14px !important;
+    color: #374151 !important;
+    word-break: break-all !important;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace !important;
+  }
+
+  /* Analysis Action Styles */
+  .modernAnalysisAction {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 16px !important;
+  }
+
+  .modernAnalysisHeader {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    position: relative !important;
+  }
+
+  .modernAnalysisIcon {
+    font-size: 20px !important;
+  }
+
+  .modernAnalysisText {
+    font-size: 16px !important;
+    font-weight: 600 !important;
+    color: white !important;
+    flex: 1 !important;
+  }
+
+  .modernDismissBtn {
+    background: rgba(255, 255, 255, 0.2) !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 50% !important;
+    width: 24px !important;
+    height: 24px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    transition: all 0.2s ease !important;
+    backdrop-filter: blur(10px) !important;
+  }
+
+  .modernDismissBtn:hover {
+    background: rgba(255, 255, 255, 0.3) !important;
+    transform: scale(1.1) !important;
+  }
+
+  .modernDismissBtn:active {
+    transform: scale(0.95) !important;
+  }
+
+  .modernContextInput {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+  }
+
+  .modernContextLabel {
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    color: rgba(255, 255, 255, 0.9) !important;
+  }
+
+  .modernContextTextarea {
+    width: 100% !important;
+    min-height: 80px !important;
+    padding: 12px !important;
+    background: rgba(255, 255, 255, 0.1) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    border-radius: 8px !important;
+    color: white !important;
+    font-size: 14px !important;
+    resize: vertical !important;
+    backdrop-filter: blur(10px) !important;
+  }
+
+  .modernContextTextarea::placeholder {
+    color: rgba(255, 255, 255, 0.6) !important;
+  }
+
+  .modernContextTextarea:focus {
+    outline: none !important;
+    border-color: rgba(255, 255, 255, 0.4) !important;
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1) !important;
+  }
+
+  .modernAnalyzeButton {
+    background: rgba(255, 255, 255, 0.2) !important;
+    color: white !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    border-radius: 12px !important;
+    padding: 12px 20px !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    backdrop-filter: blur(10px) !important;
+  }
+
+  .modernAnalyzeButton:hover {
+    background: rgba(255, 255, 255, 0.3) !important;
+    border-color: rgba(255, 255, 255, 0.4) !important;
+    transform: translateY(-1px) !important;
+  }
+
+  .modernAnalyzeButton:active {
+    transform: translateY(0) !important;
+  }
+
+  /* Field Results Styles */
+  .modernFieldResults {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 16px !important;
+  }
+
+  .modernFieldResultsHeader {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding-bottom: 12px !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1) !important;
+  }
+
+  .modernFieldResultsIcon {
+    font-size: 20px !important;
+    margin-right: 8px !important;
+  }
+
+  .modernFieldResultsTitle {
+    font-size: 16px !important;
+    font-weight: 600 !important;
+    color: #1f2937 !important;
+    flex: 1 !important;
+  }
+
+  .modernStartOverBtn {
+    background: none !important;
+    border: 1px solid rgba(0, 0, 0, 0.2) !important;
+    border-radius: 6px !important;
+    padding: 4px 8px !important;
+    font-size: 12px !important;
+    color: #6b7280 !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+  }
+
+  .modernStartOverBtn:hover {
+    background: rgba(0, 0, 0, 0.05) !important;
+    color: #374151 !important;
+  }
+
+  .modernAnalyzedPreview {
+    background: rgba(0, 0, 0, 0.05) !important;
+    border-radius: 8px !important;
+    padding: 16px !important;
+    text-align: center !important;
+  }
+
+  .modernPreviewImage {
+    width: 100% !important;
+    height: 80px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  .modernPreviewPlaceholder {
+    font-size: 14px !important;
+    color: #6b7280 !important;
+    font-weight: 500 !important;
+  }
+
+  .modernFieldList {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+  }
+
+  .modernFieldListHeader {
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    color: #374151 !important;
+    margin-bottom: 8px !important;
+  }
+
+  .modernFieldItems {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 6px !important;
+    max-height: 200px !important;
+    overflow-y: auto !important;
+  }
+
+  .modernFieldItem {
+    display: flex !important;
+    align-items: flex-start !important;
+    gap: 8px !important;
+    padding: 8px !important;
+    background: rgba(0, 0, 0, 0.02) !important;
+    border-radius: 6px !important;
+    border: 1px solid rgba(0, 0, 0, 0.05) !important;
+  }
+
+  .modernFieldCheck {
+    font-size: 12px !important;
+    color: #10b981 !important;
+    flex-shrink: 0 !important;
+    margin-top: 2px !important;
+  }
+
+  .modernFieldInfo {
+    flex: 1 !important;
+    min-width: 0 !important;
+  }
+
+  .modernFieldLabel {
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    color: #1f2937 !important;
+    margin-bottom: 2px !important;
+  }
+
+  .modernFieldMeta {
+    font-size: 11px !important;
+    color: #6b7280 !important;
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 4px !important;
+  }
+
+  .modernFieldOptions {
+    color: #8b5cf6 !important;
+  }
+
+  .modernGenerateFormBtn {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 12px !important;
+    padding: 14px 20px !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    box-shadow: 
+      0 4px 16px rgba(16, 185, 129, 0.25),
+      0 2px 8px rgba(16, 185, 129, 0.15) !important;
+  }
+
+  .modernGenerateFormBtn:hover {
+    transform: translateY(-1px) !important;
+    box-shadow: 
+      0 6px 20px rgba(16, 185, 129, 0.3),
+      0 4px 12px rgba(16, 185, 129, 0.2) !important;
+  }
+
+  .modernGenerateFormBtn:active {
+    transform: translateY(0) !important;
+  }
+
+  .modernGenerateIcon {
+    font-size: 16px !important;
+  }
   
   /* Thinking Messages */
   .modernThinkingMessage {
     background: rgba(156, 163, 175, 0.15) !important;
     border: 1px solid rgba(156, 163, 175, 0.25) !important;
     border-radius: 16px !important;
-    padding: 12px 16px !important;
+    padding: 20px 24px !important;
     backdrop-filter: blur(10px) !important;
+    max-width: 80% !important;
+    min-width: 300px !important;
   }
   
   .modernThinkingText {
-    font-size: 15px !important;
+    font-size: 18px !important;
     font-weight: 600 !important;
-    color: rgba(255, 255, 255, 0.8) !important;
+    color: rgba(255, 255, 255, 0.9) !important;
+    line-height: 1.4 !important;
   }
   
   /* Processing Messages */
@@ -204,5 +579,9 @@
     .modernThinkingText,
     .modernProcessingText {
       font-size: 14px !important;
+    }
+
+    .modernImagePreview {
+      max-width: 250px !important;
     }
   }
