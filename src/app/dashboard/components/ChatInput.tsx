@@ -366,7 +366,7 @@ export default function ChatInput({
               className="change-btn discard"
             >
               <span>↩️</span>
-              <span>Discard</span>
+              <span>Discard Changes</span>
             </button>
           </div>
         )}
