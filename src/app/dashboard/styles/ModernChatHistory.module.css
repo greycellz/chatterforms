@@ -77,7 +77,7 @@
   
   /* CRITICAL: Message text with maximum specificity */
   .modernMessageText {
-    font-size: 19px !important; /* Even larger to ensure it shows */
+    font-size: 17px !important; /* Even larger to ensure it shows */
     line-height: 1.6 !important;
     font-weight: 400 !important;
     word-wrap: break-word !important;
