@@ -65,20 +65,15 @@ export function useFormGeneration() {
       }
       
       // Enhanced chat history for different sources
-      const userMessage = extractedFields 
-        ? `Generated form from ${uploadedPDF ? 'PDF document' : uploadedURL ? 'URL' : 'screenshot'} with ${extractedFields.length} fields${description ? ` and instructions: ${description}` : ''}`
-        : description
-      
       const assistantMessage = isEdit 
         ? 'Form updated!' 
         : extractedFields 
-          ? `Form created from ${uploadedPDF ? 'PDF' : uploadedURL ? 'URL' : 'screenshot'}! Found ${extractedFields.length} fields.`
+          ? `Generated form from ${uploadedPDF ? 'PDF document' : uploadedURL ? 'URL' : 'screenshot'} with ${extractedFields.length} fields${description ? ` and additional instructions` : ''}`
           : 'Form created!'
       
         setChatHistory(prev => [
           ...prev,
-          { role: 'user', content: userMessage, timestamp: Date.now() },
-          { role: 'assistant', content: assistantMessage, timestamp: Date.now() + 500 }
+          { role: 'assistant', content: assistantMessage, timestamp: Date.now() }
         ])
               
       if (extractedFields) {

@@ -48,6 +48,9 @@
   .modernMessageContent {
     max-width: 85% !important;
     min-width: 120px !important;
+    word-wrap: break-word !important;
+    overflow-wrap: break-word !important;
+    hyphens: auto !important;
   }
   
   /* User Messages - Enhanced blue bubbles */
@@ -59,6 +62,9 @@
     box-shadow: 
       0 4px 16px rgba(37, 99, 235, 0.25),
       0 2px 8px rgba(37, 99, 235, 0.15) !important;
+    word-wrap: break-word !important;
+    overflow-wrap: break-word !important;
+    hyphens: auto !important;
   }
   
   /* Assistant Messages - Beautiful Dark Orange Gradient */
@@ -117,8 +123,11 @@
     line-height: 1.6 !important;
     font-weight: 400 !important;
     word-wrap: break-word !important;
+    overflow-wrap: break-word !important;
+    hyphens: auto !important;
     letter-spacing: 0.01em !important;
     margin-bottom: 2px !important;
+    max-width: 100% !important;
   }
   
   .modernMessageTimestamp {
@@ -459,6 +468,33 @@
 
   .modernGenerateFormBtn:active {
     transform: translateY(0) !important;
+  }
+
+  .modernGenerateFormBtnLoading {
+    background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%) !important;
+    cursor: not-allowed !important;
+    opacity: 0.7 !important;
+  }
+
+  .modernGenerateFormBtnLoading:hover {
+    transform: none !important;
+    box-shadow: 
+      0 4px 16px rgba(16, 185, 129, 0.25),
+      0 2px 8px rgba(16, 185, 129, 0.15) !important;
+  }
+
+  .modernLoadingSpinner {
+    width: 16px !important;
+    height: 16px !important;
+    border: 2px solid rgba(255, 255, 255, 0.3) !important;
+    border-top: 2px solid white !important;
+    border-radius: 50% !important;
+    animation: spin 1s linear infinite !important;
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
   }
 
   .modernGenerateIcon {

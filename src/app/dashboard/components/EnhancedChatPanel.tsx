@@ -84,20 +84,21 @@ export default function EnhancedChatPanel({
       
       {/* Chat History - Takes up available space with proper scrolling */}
       <div className="chat-content-area">
-        <ChatHistory 
-          chatHistory={chatHistory}
-          // Pass analysis functions to ChatHistory for inline actions
-          onAnalyzeImage={onAnalyzeImage}
-          onAnalyzePDF={onAnalyzePDF}
-          onAnalyzeURL={onAnalyzeURL}
-          uploadedImage={uploadedImage}
-          uploadedPDF={uploadedPDF}
-          uploadedURL={uploadedURL}
-          isAnalyzing={isAnalyzing}
-          analysisComplete={analysisComplete}
-          onGenerateFormFromFields={onGenerateFormFromFields}
-          onResetAnalysis={onResetAnalysis}
-        />
+                        <ChatHistory
+                  chatHistory={chatHistory}
+                  // Pass analysis functions to ChatHistory for inline actions
+                  onAnalyzeImage={onAnalyzeImage}
+                  onAnalyzePDF={onAnalyzePDF}
+                  onAnalyzeURL={onAnalyzeURL}
+                  uploadedImage={uploadedImage}
+                  uploadedPDF={uploadedPDF}
+                  uploadedURL={uploadedURL}
+                  isAnalyzing={isAnalyzing}
+                  analysisComplete={analysisComplete}
+                  onGenerateFormFromFields={onGenerateFormFromFields}
+                  onResetAnalysis={onResetAnalysis}
+                  isLoading={isLoading}
+                />
       </div>
       
       {/* Compact Chat Input - Always at bottom */}

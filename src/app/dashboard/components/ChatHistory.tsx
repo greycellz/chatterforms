@@ -35,6 +35,7 @@ interface ChatHistoryProps {
   analysisComplete?: boolean
   onGenerateFormFromFields?: (fields: FieldExtraction[]) => void
   onResetAnalysis?: () => void
+  isLoading?: boolean
 }
 
 // Helper function to group consecutive messages by sender
@@ -240,9 +241,10 @@ const AnalysisAction = ({ fileType, onAnalyze, additionalContext, onContextChang
 )
 
 // Field Results component
-const FieldResults = ({ extractedFields, onGenerateForm }: { 
+const FieldResults = ({ extractedFields, onGenerateForm, isLoading }: { 
   extractedFields?: FieldExtraction[], 
-  onGenerateForm?: () => void 
+  onGenerateForm?: () => void,
+  isLoading?: boolean
 }) => {
   if (!extractedFields || extractedFields.length === 0) return null
 
@@ -252,17 +254,6 @@ const FieldResults = ({ extractedFields, onGenerateForm }: {
         <div className={styles.modernFieldResultsIcon}>✅</div>
         <div className={styles.modernFieldResultsTitle}>
           Analysis Complete
-        </div>
-        <button className={styles.modernStartOverBtn}>
-          Start Over
-        </button>
-      </div>
-      
-      <div className={styles.modernAnalyzedPreview}>
-        <div className={styles.modernPreviewImage}>
-          <div className={styles.modernPreviewPlaceholder}>
-            📄 Analyzed screenshot
-          </div>
         </div>
       </div>
       
@@ -294,10 +285,20 @@ const FieldResults = ({ extractedFields, onGenerateForm }: {
       
       <button
         onClick={onGenerateForm}
-        className={styles.modernGenerateFormBtn}
+        disabled={isLoading}
+        className={`${styles.modernGenerateFormBtn} ${isLoading ? styles.modernGenerateFormBtnLoading : ''}`}
       >
-        <span className={styles.modernGenerateIcon}>✅</span>
-        Generate Form ({extractedFields.length} fields)
+        {isLoading ? (
+          <>
+            <div className={styles.modernLoadingSpinner} />
+            Generating Form...
+          </>
+        ) : (
+          <>
+            <span className={styles.modernGenerateIcon}>✅</span>
+            Generate Form ({extractedFields.length} fields)
+          </>
+        )}
       </button>
     </div>
   )
@@ -360,7 +361,8 @@ export default function ChatHistory({
   isAnalyzing,
   analysisComplete,
   onGenerateFormFromFields,
-  onResetAnalysis
+  onResetAnalysis,
+  isLoading
 }: ChatHistoryProps) {
   const chatContainerRef = useRef<HTMLDivElement>(null)
   const [isAtBottom, setIsAtBottom] = useState(true)
@@ -495,6 +497,7 @@ export default function ChatHistory({
                              onGenerateFormFromFields(message.metadata.extractedFields)
                            }
                          }}
+                         isLoading={isLoading}
                        />
                      ) : (
                       <>
