@@ -1,3 +1,5 @@
+// src/app/dashboard/components/EnhancedFormPreview.tsx
+import { useState } from 'react'
 import FormHeader from './FormHeader'
 import FieldList from './FieldList'
 import SubmitButtonEditor from './SubmitButtonEditor'
@@ -20,6 +22,7 @@ interface FormField {
 interface FormSchema {
   title: string
   fields: FormField[]
+  formId?: string // Add formId to schema
 }
 
 interface FormPreviewProps {
@@ -47,6 +50,11 @@ interface FormPreviewProps {
   // Enhanced props for save/discard functionality
   onSaveChanges: () => void
   onDiscardChanges: () => void
+
+  // NEW: Publish functionality props
+  onPublishForm: () => void
+  isPublishing: boolean
+  publishedFormId: string | null
 
   // Example selection prop
   onExampleSelect?: (example: string) => void
@@ -150,6 +158,144 @@ const EnhancedLoadingFormAnimation = ({ stylingConfig }: { stylingConfig: Stylin
   </div>
 )
 
+// IMPROVED: Publish Section Component - Simple & Clean
+const PublishSection = ({
+  formSchema,
+  hasUnsavedChanges,
+  isPublishing,
+  publishedFormId,
+  onPublishForm
+}: {
+  formSchema: FormSchema | null
+  hasUnsavedChanges: boolean
+  isPublishing: boolean
+  publishedFormId: string | null
+  onPublishForm: () => void
+}) => {
+  const [copySuccess, setCopySuccess] = useState(false)
+
+  if (!formSchema) return null
+
+  // Determine the current publication state
+  const currentFormId = publishedFormId || formSchema.formId
+  const isPublished = !!currentFormId
+  const needsUpdate = isPublished && hasUnsavedChanges
+
+  // Copy URL to clipboard
+  const handleCopyURL = async () => {
+    if (currentFormId) {
+      try {
+        await navigator.clipboard.writeText(`${window.location.origin}/forms/${currentFormId}`)
+        setCopySuccess(true)
+        setTimeout(() => setCopySuccess(false), 2000)
+      } catch (err) {
+        console.error('Failed to copy:', err)
+      }
+    }
+  }
+
+  // Enhanced status logic - simplified
+  const getStatusText = () => {
+    if (!isPublished) return 'Draft'
+    if (needsUpdate) return 'Live • Update pending'
+    return 'Live • Up to date'
+  }
+
+  const getStatusColor = () => {
+    if (!isPublished) return '#6b7280'
+    if (needsUpdate) return '#f59e0b'
+    return '#059669'
+  }
+
+  return (
+    <div className="simple-publish-section">
+      {/* Status & Action */}
+      <div className="publish-header">
+        <div className="status-text" style={{ color: getStatusColor() }}>
+          {needsUpdate ? '⚡' : isPublished ? '✅' : '📝'} {getStatusText()}
+        </div>
+      </div>
+
+      {/* Compact Publish Button */}
+      <button
+        onClick={onPublishForm}
+        disabled={isPublishing}
+        className={`compact-publish-btn ${needsUpdate ? 'update-mode' : 'publish-mode'}`}
+        title={needsUpdate ? 'Update the live form with your changes' : 'Publish your form to make it live'}
+      >
+        {isPublishing ? (
+          <>
+            <div className="publish-spinner" />
+            <span>Publishing...</span>
+          </>
+        ) : needsUpdate ? (
+          <>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/>
+              <path d="M21 3v5h-5"/>
+            </svg>
+            <span>Update Live</span>
+          </>
+        ) : (
+          <>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M22 2L15 22L11 13L2 9L22 2Z"/>
+            </svg>
+            <span>{isPublished ? 'Republish' : 'Publish'}</span>
+          </>
+        )}
+      </button>
+
+      {/* Compact Form URL Display */}
+      {currentFormId && (
+        <div className="compact-url-section">
+          <div className="url-display">
+            <div className="url-content">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+              </svg>
+              <span className="url-text">/forms/{currentFormId}</span>
+            </div>
+            
+            <div className="url-actions">
+              <button
+                onClick={handleCopyURL}
+                className={`url-action-btn ${copySuccess ? 'success' : ''}`}
+                title="Copy URL"
+              >
+                {copySuccess ? (
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <polyline points="20,6 9,17 4,12"/>
+                  </svg>
+                ) : (
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                  </svg>
+                )}
+              </button>
+              
+              <a 
+                href={`/forms/${currentFormId}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="url-action-btn"
+                title="Open form"
+              >
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M7 7h10v10"/>
+                  <path d="M7 17L17 7"/>
+                </svg>
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 export default function FormPreview({
   formSchema,
   effectiveFormSchema,
@@ -169,6 +315,9 @@ export default function FormPreview({
   submitButtonText,
   onSaveChanges,
   onDiscardChanges,
+  onPublishForm,
+  isPublishing,
+  publishedFormId,
   onExampleSelect
 }: FormPreviewProps) {
   
@@ -227,6 +376,15 @@ export default function FormPreview({
           )}
         </div>
         
+        {/* NEW: Publish Section */}
+        <PublishSection
+          formSchema={formSchema}
+          hasUnsavedChanges={hasUnsavedChanges}
+          isPublishing={isPublishing}
+          publishedFormId={publishedFormId}
+          onPublishForm={onPublishForm}
+        />
+        
         {/* Progress indicator when form exists */}
         {formSchema && (
           <div className="form-progress">
@@ -240,9 +398,9 @@ export default function FormPreview({
               <span>Customized</span>
             </div>
             <div className="progress-connector" />
-            <div className="progress-item">
+            <div className={`progress-item ${publishedFormId || formSchema.formId ? 'completed' : 'pending'}`}>
               <div className="progress-dot">🚀</div>
-              <span>Ready to Publish</span>
+              <span>Published</span>
             </div>
           </div>
         )}

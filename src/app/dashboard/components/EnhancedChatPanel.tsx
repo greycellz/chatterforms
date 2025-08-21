@@ -17,9 +17,7 @@ interface EnhancedChatPanelProps {
   hasUnsavedChanges: boolean
   onSaveChanges: () => void
   onDiscardChanges: () => void
-  onPublishForm: () => void
-  isPublishing: boolean
-  publishedFormId: string | null
+  // REMOVED: onPublishForm, isPublishing, publishedFormId (moved to form preview)
   error: string
   
   // File upload functionality props
@@ -54,9 +52,7 @@ export default function EnhancedChatPanel({
   hasUnsavedChanges,
   onSaveChanges,
   onDiscardChanges,
-  onPublishForm,
-  isPublishing,
-  publishedFormId,
+  // REMOVED: onPublishForm, isPublishing, publishedFormId
   error,
   uploadedImage,
   uploadedPDF,
@@ -113,12 +109,7 @@ export default function EnhancedChatPanel({
           isLoading={isLoading}
           onGenerateForm={onGenerateForm}
           onUpdateForm={onUpdateForm}
-          //hasUnsavedChanges={hasUnsavedChanges}
-          //onSaveChanges={onSaveChanges}
-          //onDiscardChanges={onDiscardChanges}
-          onPublishForm={onPublishForm}
-          isPublishing={isPublishing}
-          publishedFormId={publishedFormId}
+          // REMOVED: onPublishForm, isPublishing, publishedFormId (moved to form preview)
           error={error}
           uploadedImage={uploadedImage}
           uploadedPDF={uploadedPDF}

@@ -22,9 +22,7 @@ interface CompactChatInputProps {
   isLoading: boolean
   onGenerateForm: () => void
   onUpdateForm: () => void
-  onPublishForm: () => void
-  isPublishing: boolean
-  publishedFormId: string | null
+  // REMOVED: onPublishForm, isPublishing, publishedFormId (moved to form preview)
   error: string
   
   // Hide input when in upload workflow
@@ -46,9 +44,6 @@ export default function CompactChatInput({
   isLoading,
   onGenerateForm,
   onUpdateForm,
-  onPublishForm,
-  isPublishing,
-  publishedFormId,
   error,
   uploadedImage,
   uploadedPDF,
@@ -63,10 +58,6 @@ export default function CompactChatInput({
   const [showURLInput, setShowURLInput] = useState(false)
   const [urlValue, setUrlValue] = useState('')
   const [showSecondaryActions, setShowSecondaryActions] = useState(false)
-
-  // Check if this form has been published before
-  const hasExistingForm = formSchema?.formId || publishedFormId
-  const formUrl = publishedFormId || formSchema?.formId
 
   // Smart placeholder based on context
   const getSmartPlaceholder = () => {
@@ -249,7 +240,7 @@ export default function CompactChatInput({
         )}
       </div>
 
-      {/* Secondary Actions - Cleaner organization */}
+      {/* Secondary Actions - Cleaner organization (REMOVED publish action) */}
       <div className={styles.secondaryActions}>
         <button 
           onClick={() => setShowSecondaryActions(!showSecondaryActions)}
@@ -283,20 +274,6 @@ export default function CompactChatInput({
               <span className={styles.actionIcon}>📎</span>
               <span>Upload File</span>
             </button>
-            
-            {formSchema && (
-              <button
-                onClick={() => {
-                  onPublishForm()
-                  setShowSecondaryActions(false)
-                }}
-                disabled={isPublishing}
-                className={`${styles.actionItem} ${styles.publishAction}`}
-              >
-                <span className={styles.actionIcon}>🚀</span>
-                <span>{isPublishing ? 'Publishing...' : hasExistingForm ? 'Update Live' : 'Publish'}</span>
-              </button>
-            )}
           </div>
         )}
       </div>
@@ -310,24 +287,6 @@ export default function CompactChatInput({
         onChange={handleFileChange}
       />
 
-      {/* Form URL Display - Only when published */}
-      {formUrl && (
-        <div className={styles.formUrlDisplay}>
-          <div className={styles.urlStatus}>
-            <span className={styles.statusIcon}>✅</span>
-            <span className={styles.statusText}>Live at:</span>
-          </div>
-          <a 
-            href={`/forms/${formUrl}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.formUrlLink}
-          >
-            /forms/{formUrl} ↗
-          </a>
-        </div>
-      )}
-      
       {/* Error Display */}
       {error && (
         <div className={styles.errorDisplay}>

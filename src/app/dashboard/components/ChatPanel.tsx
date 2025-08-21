@@ -113,9 +113,9 @@ export default function ChatPanel({
           //hasUnsavedChanges={hasUnsavedChanges}
           //onSaveChanges={onSaveChanges}
           //onDiscardChanges={onDiscardChanges}
-          onPublishForm={onPublishForm}
-          isPublishing={isPublishing}
-          publishedFormId={publishedFormId}
+          //onPublishForm={onPublishForm}
+          //isPublishing={isPublishing}
+          //publishedFormId={publishedFormId}
           error={error}
           uploadedImage={uploadedImage}
           uploadedPDF={uploadedPDF}

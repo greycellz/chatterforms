@@ -1,4 +1,4 @@
-// Update your src/app/dashboard/page.tsx to use the enhanced components
+// Updated src/app/dashboard/page.tsx
 
 'use client'
 
@@ -12,14 +12,13 @@ import './dashboard.css'                           // Your existing base styles
 import './styles/compact-chat-input.css'          // Your existing compact input styles  
 import './styles/dashboard-chat-panel-fixes.css'  // Your existing chat panel fixes
 import './styles/dashboard-critical.css'          // NEW: High-specificity overrides
+import './styles/enhanced-form-preview.css'       // NEW: Enhanced form preview with publish
 
 // Import the enhanced components
 import EnhancedChatPanel from './components/EnhancedChatPanel'
 import FormPreview from './components/EnhancedFormPreview'
 import { FieldExtraction } from './types'
-// Import the compact input styles
 
-import TestChatPanel from './components/TestChatPanel'
 // Helper to convert base64 back to File - FIXED for PDF
 const base64ToFile = (base64: string, filename: string, mimeType: string, isPDF = false): File => {
   if (isPDF) {
@@ -290,6 +289,7 @@ function DashboardContent() {
     }
   }
 
+  // MOVED: Publish functionality to form preview
   const handlePublishForm = async () => {
     try {
       const effectiveForm = getEffectiveFormSchema()
@@ -356,7 +356,7 @@ function DashboardContent() {
       </div>
 
       <div className="dashboard-layout">
-        {/* Use the Enhanced Chat Panel */}
+        {/* Use the Enhanced Chat Panel (REMOVED publish props) */}
         <EnhancedChatPanel
           description={description}
           onDescriptionChange={setDescription}
@@ -368,9 +368,6 @@ function DashboardContent() {
           hasUnsavedChanges={hasUnsavedChanges}
           onSaveChanges={handleSaveChanges}
           onDiscardChanges={discardChanges}
-          onPublishForm={handlePublishForm}
-          isPublishing={isPublishing}
-          publishedFormId={publishedFormId}
           error={error}
           
           // File analysis props
@@ -392,6 +389,7 @@ function DashboardContent() {
           onPageSelectionComplete={handlePageSelectionComplete}
         />
 
+        {/* UPDATED: FormPreview with publish functionality */}
         <FormPreview
           formSchema={formSchema}
           effectiveFormSchema={getEffectiveFormSchema()}
@@ -409,9 +407,13 @@ function DashboardContent() {
           onSizeChange={handleSizeChange}
           onStylingChange={handleStylingChange}
           submitButtonText={getEffectiveButtonText()}
-          onSaveChanges={handleSaveChanges}  // NEW
-          onDiscardChanges={discardChanges}  // NEW
-          onExampleSelect={handleExampleSelect}  // NEW (optional)
+          onSaveChanges={handleSaveChanges}
+          onDiscardChanges={discardChanges}
+          onExampleSelect={handleExampleSelect}
+          // NEW: Publish functionality moved here
+          onPublishForm={handlePublishForm}
+          isPublishing={isPublishing}
+          publishedFormId={publishedFormId}
         />      
         </div>
     </div>

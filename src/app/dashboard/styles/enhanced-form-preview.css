@@ -118,6 +118,202 @@
     width: 14px;
     height: 14px;
   }
+
+  /* UPDATED: Simple Publish Section Layout */
+  .simple-publish-section {
+    padding: 14px 0;
+    border-top: 1px solid rgba(0, 0, 0, 0.06);
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;  /* Changed from flex-end */
+    gap: 12px;
+    margin-top: 8px;
+  }
+
+  /* Compact Header */
+  .publish-header {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;  /* Changed from center to right-align */
+    margin-bottom: 8px;         /* Added margin */
+  }
+
+  .status-text {
+    font-size: 13px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    letter-spacing: -0.01em;
+  }
+
+  /* Compact Publish Button - Smaller & Cleaner */
+  .compact-publish-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    min-height: 38px;
+    width: auto;                /* Changed from 100% */
+    order: 2;
+    flex-shrink: 0;           /* Added - ensures minimum readability */
+  }
+
+  /* Publish Mode - Initial publish */
+  .compact-publish-btn.publish-mode {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    color: white;
+    box-shadow: 0 2px 8px rgba(5, 150, 105, 0.2);
+  }
+
+  .compact-publish-btn.publish-mode:hover {
+    background: linear-gradient(135deg, #047857 0%, #065f46 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
+  }
+
+  /* Update Mode - Updating existing form */
+  .compact-publish-btn.update-mode {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    color: white;
+    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.2);
+  }
+
+  .compact-publish-btn.update-mode:hover {
+    background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+  }
+
+  /* Active/Loading state */
+  .compact-publish-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .compact-publish-btn:disabled:hover {
+    transform: none;
+    box-shadow: 0 2px 8px rgba(5, 150, 105, 0.2);
+  }
+
+  /* Publishing spinner - smaller */
+  .publish-spinner {
+    width: 14px;
+    height: 14px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top: 2px solid white;
+    border-radius: 50%;
+    animation: publishSpin 1s linear infinite;
+  }
+
+  @keyframes publishSpin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  /* Compact Form URL Section */
+  .compact-url-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .url-display {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 8px 12px;         /* Increased padding back */
+    background: #374151;       /* Dark background restored */
+    border: 1px solid #4b5563; /* Dark border */
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    flex-shrink: 1;
+    order: 1;                  /* Added - ensures URL comes first */
+  }
+
+  .url-display:hover {
+    background: #4b5563;       /* Slightly lighter on hover */
+    border-color: #6b7280;
+    transform: translateY(-1px); /* Subtle lift effect */
+  }
+
+  .url-content {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex: 1;
+    min-width: 0;
+    color: #ffffff;            /* White color for icons */
+  }
+
+  .url-display:hover .url-content svg {
+    transform: scale(1.1);
+    color: #e5e7eb;           /* Slightly lighter on hover */
+  }
+
+  .url-text {
+    font-family: 'SF Mono', 'Monaco', 'Cascadia Code', 'Roboto Mono', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    color: #ffffff;            /* White text on dark background */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    transition: font-size 0.2s ease;
+  }
+
+  .url-display:hover .url-text {
+    font-size: 14px;
+  }
+
+  /* Compact URL Actions */
+  .url-actions {
+    display: flex;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+
+  .url-action-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    background: rgba(255, 255, 255, 0.1); /* Semi-transparent white */
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: #ffffff;            /* White icons */
+    text-decoration: none;
+  }
+
+  .url-action-btn:hover {
+    background: rgba(255, 255, 255, 0.2); /* Brighter on hover */
+    border-color: rgba(255, 255, 255, 0.4);
+    transform: scale(1.05);
+    color: #ffffff;            /* Keep white on hover */
+  }
+
+  .url-action-btn.success {
+    background: rgba(34, 197, 94, 0.3); /* Green success state */
+    border-color: rgba(34, 197, 94, 0.5);
+    color: #ffffff;
+  }
+  
+
   
   /* Progress indicator */
   .form-progress {
@@ -126,6 +322,9 @@
     justify-content: center;
     gap: 4px;
     opacity: 0.8;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(0, 0, 0, 0.06);
   }
   
   .progress-item {
@@ -456,7 +655,18 @@
     outline: 2px solid #3b82f6;
     outline-offset: 2px;
   }
-  
+
+  /* Focus states for accessibility */
+  .compact-publish-btn:focus-visible {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+  }
+
+  .url-action-btn:focus-visible {
+    outline: 2px solid #3b82f6;
+    outline-offset: 1px;
+  }
+
   /* Responsive adjustments */
   @media (max-width: 1024px) {
     .enhanced-form-preview-container {
@@ -481,6 +691,30 @@
   
     .header-main-content {
       margin-bottom: 0;
+    }
+
+    .simple-publish-section {
+      padding: 12px 0;
+      gap: 8px;
+    }
+
+    .compact-publish-btn {
+      padding: 8px 14px;
+      font-size: 12px;
+      min-height: 36px;
+    }
+
+    .url-display {
+      padding: 8px 10px;
+    }
+
+    .url-text {
+      font-size: 11px;
+    }
+
+    .url-action-btn {
+      width: 26px;
+      height: 26px;
     }
   }
   
@@ -557,8 +791,34 @@
       flex-direction: row;
       justify-content: center;
     }
+
+    .simple-publish-section {
+        flex-direction: column;    /* Stack vertically on mobile */
+        align-items: stretch;      /* Full width on mobile */
+        gap: 8px;
+    }
+
+    .compact-publish-btn {
+        width: 100%;              /* Full width on mobile */
+    }
+
+    .status-text {
+      font-size: 12px;
+    }
+
+    .url-display {
+        width: 100%;              /* Full width on mobile */
+    }
+
+    .url-actions {
+      justify-content: center;
+    }
+
+    .publish-header {
+        justify-content: center;   /* Center on mobile */
+      }
   }
-  
+
   /* High contrast mode support */
   @media (prefers-contrast: high) {
     .enhanced-form-preview-card {
@@ -581,6 +841,27 @@
       color: #ffffff;
       border: 2px solid #ffffff;
     }
+
+    .compact-publish-btn.publish-mode {
+      background: #047857;
+      border: 2px solid #ffffff;
+    }
+
+    .compact-publish-btn.update-mode {
+      background: #d97706;
+      border: 2px solid #ffffff;
+    }
+
+    .url-display {
+      border-width: 2px;
+      border-color: #059669;
+    }
+
+    .url-action-btn {
+      border-width: 2px;
+      border-color: #374151;
+      background: #ffffff;
+    }
   }
   
   /* Reduced motion support */
@@ -595,7 +876,11 @@
     .skeleton-title,
     .skeleton-label,
     .skeleton-input,
-    .skeleton-button {
+    .skeleton-button,
+    .compact-publish-btn,
+    .url-action-btn,
+    .url-display,
+    .publish-spinner {
       transition: none;
       animation: none;
     }
@@ -611,5 +896,33 @@
     .header-save-btn:hover,
     .header-discard-btn:hover {
       transform: none;
+    }
+
+    .compact-publish-btn:hover {
+      transform: none;
+    }
+
+    .url-action-btn:hover {
+      transform: none;
+    }
+  }
+
+  /* Dark mode preparation (for future enhancement) */
+  @media (prefers-color-scheme: dark) {
+    .compact-url-section {
+      background: linear-gradient(135deg, rgba(34, 197, 94, 0.12) 0%, rgba(16, 185, 129, 0.12) 100%);
+      border-color: rgba(34, 197, 94, 0.25);
+    }
+
+    .url-display {
+      background: rgba(31, 41, 55, 0.8);
+      color: #f9fafb;
+      border-color: rgba(34, 197, 94, 0.25);
+    }
+
+    .url-action-btn {
+      background: rgba(31, 41, 55, 0.8);
+      color: #f9fafb;
+      border-color: rgba(34, 197, 94, 0.25);
     }
   }
