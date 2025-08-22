@@ -20,9 +20,11 @@
     border: 1px solid rgba(255, 255, 255, 0.3) !important;
     border-radius: 16px !important;
     padding: 16px !important;
+    padding-bottom: 70px !important; /* Extra padding for the button */
     backdrop-filter: blur(20px) !important;
     transition: all 0.2s ease !important;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1) !important;
+    position: relative !important; /* For absolute positioning of child elements */
   }
   
   .compactInputCard:focus-within {
@@ -48,8 +50,8 @@
     font-size: 18px !important; /* INCREASED from 16px */
     font-family: inherit !important;
     resize: none !important;
-    min-height: 24px !important;
-    max-height: 80px !important;
+    min-height: 48px !important; /* DOUBLED from 24px */
+    max-height: 160px !important; /* DOUBLED from 80px */
     line-height: 1.5 !important; /* Better line height */
     font-weight: 500 !important;
     overflow-y: auto !important;

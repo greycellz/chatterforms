@@ -40,7 +40,7 @@ export default function FormField({
 }: FormFieldComponentProps) {
   // Use field-specific size if available, otherwise fall back to global size
   const effectiveSize = field.size || globalSize
-  const baseClasses = "border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+  const baseClasses = "border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
   const sizeClasses = getInputSizeClasses(effectiveSize)
   const containerClasses = getFieldContainerClasses()
 

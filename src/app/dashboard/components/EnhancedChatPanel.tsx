@@ -119,6 +119,7 @@ export default function EnhancedChatPanel({
           onImageUpload={onImageUpload}
           onPDFUpload={onPDFUpload}
           onURLSubmit={onURLSubmit}
+          onAnalyzeURL={onAnalyzeURL}
         />
       </div>
 

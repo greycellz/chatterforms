@@ -70,8 +70,8 @@ export default function AnalysisReview({
     )
   }
 
-  // Upload context input (before analysis)
-  if ((uploadedImage || uploadedPDF || uploadedURL) && !analysisComplete && !isAnalyzing) {
+  // Upload context input (before analysis) - Skip intermediate step for URLs
+  if ((uploadedImage || uploadedPDF) && !analysisComplete && !isAnalyzing) {
     return (
       <FilePreview
         fileType={fileType}
@@ -83,8 +83,6 @@ export default function AnalysisReview({
         onAnalyze={() => {
           if (uploadedPDF) {
             onAnalyzePDF(uploadedPDF, additionalContext)
-          } else if (uploadedURL) {
-            onAnalyzeURL(uploadedURL, additionalContext)
           } else {
             onAnalyzeImage(additionalContext)
           }

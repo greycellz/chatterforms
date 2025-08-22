@@ -149,7 +149,7 @@ export default function PublicFormClient({ formSchema, formId, submitButtonText 
 
   const renderField = (field: FormField) => {
     const fieldSize = fieldSizes[field.id] || field.size || 'm'
-    const baseClasses = "w-full border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+    const baseClasses = "w-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
     const sizeClasses = getInputSizeClasses(fieldSize)
     
     // Keep input fields white with gray-900 text (as requested)

@@ -1,6 +1,7 @@
-import { useRef, useState } from 'react'
+import { useRef, useState, useEffect } from 'react'
 // Import CSS Modules instead of regular CSS
 import styles from '../styles/CompactChatInput.module.css'
+import popupStyles from '../styles/PlusButtonPopup.module.css'
 
 interface FormSchema {
   title: string
@@ -35,6 +36,7 @@ interface CompactChatInputProps {
   onImageUpload: (imageData: string) => void
   onPDFUpload: (file: File) => void
   onURLSubmit: (url: string) => void
+  onAnalyzeURL: (url: string, additionalContext?: string) => void
 }
 
 export default function CompactChatInput({
@@ -51,13 +53,49 @@ export default function CompactChatInput({
   analysisComplete,
   onImageUpload,
   onPDFUpload,
-  onURLSubmit
+  onURLSubmit,
+  onAnalyzeURL
 }: CompactChatInputProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [showURLInput, setShowURLInput] = useState(false)
   const [urlValue, setUrlValue] = useState('')
-  const [showSecondaryActions, setShowSecondaryActions] = useState(false)
+  const [showPopup, setShowPopup] = useState(false)
+  const popupRef = useRef<HTMLDivElement>(null)
+
+  // Handle click outside to close popup
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (popupRef.current && !popupRef.current.contains(event.target as Node)) {
+        setShowPopup(false)
+      }
+    }
+
+    if (showPopup) {
+      document.addEventListener('mousedown', handleClickOutside)
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [showPopup])
+
+  // Handle escape key to close popup
+  useEffect(() => {
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setShowPopup(false)
+      }
+    }
+
+    if (showPopup) {
+      document.addEventListener('keydown', handleEscape)
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEscape)
+    }
+  }, [showPopup])
 
   // Smart placeholder based on context
   const getSmartPlaceholder = () => {
@@ -74,9 +112,6 @@ export default function CompactChatInput({
   const getContextualHints = () => {
     if (analysisComplete && !formSchema) {
       return "💡 Review the extracted fields above, then describe any modifications you'd like"
-    }
-    if (description.length < 10) {
-      return "💡 Be specific about your form requirements for better results"
     }
     if (description.length > 50 && !formSchema) {
       return "✅ Perfect! Your description is detailed enough to generate a great form"
@@ -114,7 +149,6 @@ export default function CompactChatInput({
   // File upload handlers
   const handleAttachClick = () => {
     fileInputRef.current?.click()
-    setShowSecondaryActions(false)
   }
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -139,7 +173,8 @@ export default function CompactChatInput({
 
   const handleURLSubmit = () => {
     if (urlValue.trim()) {
-      onURLSubmit(urlValue.trim())
+      // Directly trigger URL analysis instead of just setting URL state
+      onAnalyzeURL(urlValue.trim())
       setUrlValue('')
       setShowURLInput(false)
     }
@@ -151,7 +186,7 @@ export default function CompactChatInput({
       <div className={styles.compactInputContainer}>
         <div className={styles.urlInputSection}>
           <div className={styles.urlHeader}>
-            <span className={styles.urlTitle}>🔗 Analyze Form URL</span>
+            <span className={styles.urlTitle}>🔗 Clone From URL</span>
             <button
               onClick={() => {
                 setShowURLInput(false)
@@ -180,7 +215,7 @@ export default function CompactChatInput({
             disabled={!urlValue.trim()}
             className={styles.urlSubmitBtn}
           >
-            Analyze URL
+            Clone from URL
           </button>
         </div>
       </div>
@@ -230,6 +265,49 @@ export default function CompactChatInput({
             )}
           </div>
           
+          {/* Plus Button with Popup Menu - Positioned at bottom left */}
+          <div className={popupStyles.plusButtonContainer} ref={popupRef}>
+            <button 
+              onClick={() => setShowPopup(!showPopup)}
+              className={`${popupStyles.plusButton} ${showPopup ? popupStyles.active : ''}`}
+              title={showPopup ? "Close menu" : "More options"}
+            >
+              {showPopup ? (
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M18 6L6 18M6 6l12 12"/>
+                </svg>
+              ) : (
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M12 5v14M5 12h14"/>
+                </svg>
+              )}
+            </button>
+            
+            <div className={`${popupStyles.popupMenu} ${showPopup ? popupStyles.visible : ''}`}>
+              <button
+                onClick={() => {
+                  setShowURLInput(true)
+                  setShowPopup(false)
+                }}
+                className={popupStyles.menuItem}
+              >
+                <span className={popupStyles.menuIcon}>🔗</span>
+                <span className={popupStyles.menuText}>Clone from URL</span>
+              </button>
+              
+              <button
+                onClick={() => {
+                  handleAttachClick()
+                  setShowPopup(false)
+                }}
+                className={popupStyles.menuItem}
+              >
+                <span className={popupStyles.menuIcon}>📷</span>
+                <span className={popupStyles.menuText}>Extract from PDF/Image</span>
+              </button>
+            </div>
+          </div>
+          
           {/* Contextual hints */}
           {getContextualHints() && (
             <div className={styles.smartHints}>
@@ -246,43 +324,7 @@ export default function CompactChatInput({
         )}
       </div>
 
-      {/* Secondary Actions - Cleaner organization (REMOVED publish action) */}
-      <div className={styles.secondaryActions}>
-        <button 
-          onClick={() => setShowSecondaryActions(!showSecondaryActions)}
-          className={styles.toggleActionsBtn}
-        >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <circle cx="12" cy="12" r="1"/>
-            <circle cx="19" cy="12" r="1"/>
-            <circle cx="5" cy="12" r="1"/>
-          </svg>
-          More options
-        </button>
-        
-        {showSecondaryActions && (
-          <div className={styles.actionsPanel}>
-            <button
-              onClick={() => {
-                setShowURLInput(true)
-                setShowSecondaryActions(false)
-              }}
-              className={styles.actionItem}
-            >
-              <span className={styles.actionIcon}>🔗</span>
-              <span>Analyze URL</span>
-            </button>
-            
-            <button
-              onClick={handleAttachClick}
-              className={styles.actionItem}
-            >
-              <span className={styles.actionIcon}>📎</span>
-              <span>Upload File</span>
-            </button>
-          </div>
-        )}
-      </div>
+
 
       {/* Hidden file input */}
       <input 
