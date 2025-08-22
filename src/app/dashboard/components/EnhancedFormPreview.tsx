@@ -58,6 +58,10 @@ interface FormPreviewProps {
 
   // Example selection prop
   onExampleSelect?: (example: string) => void
+  
+  // Styling panel state
+  isStylingPanelOpen?: boolean
+  onStylingPanelToggle?: (isOpen: boolean) => void
 }
 
 // Enhanced loading form animation with new styling
@@ -318,7 +322,9 @@ export default function FormPreview({
   onPublishForm,
   isPublishing,
   publishedFormId,
-  onExampleSelect
+  onExampleSelect,
+  isStylingPanelOpen,
+  onStylingPanelToggle
 }: FormPreviewProps) {
   
   // Handle individual radio option editing
@@ -442,6 +448,7 @@ export default function FormPreview({
                     onCancelEdit={onCancelEdit}
                     onSizeChange={onSizeChange}
                     onStylingChange={onStylingChange}
+                    onStylingPanelToggle={onStylingPanelToggle}
                   />
                   
                   {/* Field List */}

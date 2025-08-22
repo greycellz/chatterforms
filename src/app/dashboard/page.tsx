@@ -91,6 +91,7 @@ function DashboardContent() {
   const [description, setDescription] = useState('')
   const [hasProcessedLandingParams, setHasProcessedLandingParams] = useState(false)
   const [isFromLanding, setIsFromLanding] = useState(false)
+  const [isStylingPanelOpen, setIsStylingPanelOpen] = useState(false)
   const searchParams = useSearchParams()
 
   // Enhanced hook with all functionality
@@ -415,6 +416,9 @@ function DashboardContent() {
           onPublishForm={handlePublishForm}
           isPublishing={isPublishing}
           publishedFormId={publishedFormId}
+          // NEW: Styling panel state
+          isStylingPanelOpen={isStylingPanelOpen}
+          onStylingPanelToggle={setIsStylingPanelOpen}
         />      
         </div>
     </div>

@@ -21,6 +21,7 @@ interface ImprovedStylingPanelProps {
   onBackgroundColorChange: (color: string) => void
   onButtonColorChange: (color: string) => void
   onSizeChange: (fieldId: string | 'global', size: SizeType) => void
+  onPanelToggle?: (isOpen: boolean) => void
 }
 
 export default function ImprovedStylingPanel({
@@ -33,18 +34,83 @@ export default function ImprovedStylingPanel({
   onFontColorChange,
   onBackgroundColorChange,
   onButtonColorChange,
-  onSizeChange
+  onSizeChange,
+  onPanelToggle
 }: ImprovedStylingPanelProps) {
   const [isExpanded, setIsExpanded] = useState(false)
-  const [activeTab, setActiveTab] = useState('style')
+  const [activeTab, setActiveTab] = useState('quick')
+  const [selectedPalette, setSelectedPalette] = useState<string | null>(null)
   const panelRef = useRef<HTMLDivElement>(null)
 
+  // Notify parent when panel state changes
+  useEffect(() => {
+    onPanelToggle?.(isExpanded)
+  }, [isExpanded, onPanelToggle])
+
   const webSafeFonts = [
-    { value: 'Inter, sans-serif', label: 'Inter', preview: 'Aa' },
-    { value: 'Arial, sans-serif', label: 'Arial', preview: 'Aa' },
-    { value: 'Helvetica, Arial, sans-serif', label: 'Helvetica', preview: 'Aa' },
-    { value: 'Georgia, serif', label: 'Georgia', preview: 'Aa' },
-    { value: 'Verdana, Geneva, sans-serif', label: 'Verdana', preview: 'Aa' },
+    { value: 'Inter, sans-serif', label: 'Inter', category: 'Modern' },
+    { value: 'Arial, sans-serif', label: 'Arial', category: 'Classic' },
+    { value: 'Helvetica, Arial, sans-serif', label: 'Helvetica', category: 'Classic' },
+    { value: 'Georgia, serif', label: 'Georgia', category: 'Elegant' },
+    { value: 'Verdana, Geneva, sans-serif', label: 'Verdana', category: 'Readable' },
+  ]
+
+  // Compact color palettes inspired by the color card design
+  const compactColorPalettes = [
+    {
+      name: 'Professional',
+      colors: {
+        background: '#ffffff',
+        font: '#1f2937',
+        button: '#3b82f6'
+      },
+      description: 'Trustworthy and corporate'
+    },
+    {
+      name: 'Education',
+      colors: {
+        background: '#f0fdf4',
+        font: '#064e3b',
+        button: '#059669'
+      },
+      description: 'Calm and educational'
+    },
+    {
+      name: 'Healthcare',
+      colors: {
+        background: '#f0fdfa',
+        font: '#0f766e',
+        button: '#0d9488'
+      },
+      description: 'Medical and reliable'
+    },
+    {
+      name: 'Creative',
+      colors: {
+        background: '#fef3c7',
+        font: '#92400e',
+        button: '#f59e0b'
+      },
+      description: 'Warm and approachable'
+    },
+    {
+      name: 'Modern',
+      colors: {
+        background: '#f8fafc',
+        font: '#374151',
+        button: '#8b5cf6'
+      },
+      description: 'Sleek and contemporary'
+    },
+    {
+      name: 'Minimal',
+      colors: {
+        background: '#ffffff',
+        font: '#374151',
+        button: '#6b7280'
+      },
+      description: 'Clean and minimal'
+    }
   ]
 
   const presetThemes = [
@@ -87,6 +153,13 @@ export default function ImprovedStylingPanel({
     onFontColorChange(theme.fontColor)
     onBackgroundColorChange(theme.backgroundColor)
     onButtonColorChange(theme.buttonColor)
+  }
+
+  const applyColorPalette = (palette: typeof compactColorPalettes[0]) => {
+    onFontColorChange(palette.colors.font)
+    onBackgroundColorChange(palette.colors.background)
+    onButtonColorChange(palette.colors.button)
+    setSelectedPalette(palette.name)
   }
 
   // Close panel when clicking outside
@@ -138,174 +211,155 @@ export default function ImprovedStylingPanel({
 
       {/* Expanded Settings Panel */}
       {isExpanded && (
-        <div className="absolute top-full right-0 w-96 bg-white/95 backdrop-blur-lg border border-gray-200/60 rounded-2xl shadow-xl overflow-hidden z-50 animate-slideIn">
-          {/* Tab Navigation */}
-          <div className="border-b border-gray-100/80 bg-gray-50/50">
-            <div className="flex">
+        <div className="absolute top-full right-0 w-[450px] border-4 border-gray-800 rounded-xl shadow-2xl overflow-hidden z-50 animate-in slide-in-from-top-2 duration-200 backdrop-blur-sm" style={{ height: '600px', background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.95) 100%)' }}>
+          {/* Tab Navigation - More spacing and better labels */}
+                      <div className="border-b border-gray-100 bg-gray-50 px-10 py-4" style={{ padding: '16px 40px' }}>
+            <div className="flex justify-between">
               {[
-                { id: 'style', label: 'Style', icon: '🎨' },
-                { id: 'themes', label: 'Themes', icon: '✨' }
+                { id: 'quick', label: 'Quick Start' },
+                { id: 'themes', label: 'Great Themes' },
+                { id: 'style', label: 'Custom Style' }
               ].map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center space-x-2 px-6 py-4 text-sm font-medium transition-all duration-200 border-b-2 ${
+                  className={`px-4 py-2 text-base font-medium transition-all duration-200 border-b-2 ${
                     activeTab === tab.id
                       ? 'border-purple-500 text-purple-600 bg-white/80'
                       : 'border-transparent text-gray-600 hover:text-gray-800 hover:bg-gray-100/50'
                   }`}
                 >
-                  <span>{tab.icon}</span>
-                  <span>{tab.label}</span>
+                  {tab.label}
                 </button>
               ))}
             </div>
           </div>
 
-          {/* Tab Content */}
-          <div className="p-6 max-h-96 overflow-y-auto">
-            {activeTab === 'style' && (
+          {/* Tab Content - More margin and better spacing */}
+          <div className="px-8 py-4 max-h-[480px] overflow-y-auto" style={{ padding: '16px' }}>
+            {/* Quick Start Tab - Compact color palettes */}
+            {activeTab === 'quick' && (
               <div className="space-y-6">
-                {/* Typography Section */}
+                {/* Welcome Section */}
+                <div className="text-center px-8 py-1" style={{ padding: '4px 24px' }}>
+                  <h3 className="text-xl font-semibold text-gray-800 mb-1">Quick Customization</h3>
+                  <p className="text-sm text-gray-600">Choose a color palette that you like</p>
+                </div>
+
+                {/* Compact Color Palettes */}
                 <div className="space-y-4">
-                  <h4 className="text-sm font-semibold text-gray-800 flex items-center space-x-2 border-b border-gray-100 pb-2">
-                    <span>📝</span>
-                    <span>Typography</span>
+                  <h4 className="text-sm font-semibold text-gray-800 flex items-center space-x-2 px-8" style={{ paddingLeft: '24px', paddingRight: '24px' }}>
+                    <span>🎨</span>
+                    <span>Recommended Palettes</span>
                   </h4>
                   
-                  <div className="space-y-4">
-                    {/* Font Family */}
-                    <div>
-                      <label className="block text-xs font-medium text-gray-600 mb-2">Font Family</label>
-                      <div className="grid grid-cols-1 gap-2">
-                        {webSafeFonts.map((font) => (
-                          <button
-                            key={font.value}
-                            onClick={() => onFontFamilyChange(font.value)}
-                            className={`p-3 border rounded-lg text-left transition-all hover:border-purple-300 ${
-                              fontFamily === font.value 
-                                ? 'border-purple-500 bg-purple-50' 
-                                : 'border-gray-200 hover:bg-gray-50'
-                            }`}
-                          >
-                            <div className="flex items-center justify-between">
-                              <span className="text-sm font-medium" style={{ fontFamily: font.value }}>
-                                {font.label}
-                              </span>
-                              <span className="text-lg opacity-60" style={{ fontFamily: font.value }}>
-                                {font.preview}
-                              </span>
+                  <div className="grid grid-cols-1 gap-6 px-8" style={{ paddingLeft: '24px', paddingRight: '24px' }}>
+                    {compactColorPalettes.map((palette, idx) => (
+                      <button 
+                        key={idx} 
+                        onClick={() => applyColorPalette(palette)}
+                        className={`w-full p-6 mx-2 border-2 transition-all duration-200 text-left shadow-sm hover:shadow-md ${
+                          selectedPalette === palette.name 
+                            ? 'border-purple-600 bg-purple-50/50 shadow-md' 
+                            : 'border-gray-400 hover:border-purple-400 bg-white hover:bg-purple-50/30'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex-1">
+                            <div className="text-sm font-medium text-gray-800 group-hover:text-purple-700">
+                              {palette.name}
                             </div>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                    
-                    {/* Font Size */}
-                    <div>
-                      <label className="block text-xs font-medium text-gray-600 mb-2">Text Size</label>
-                      <div className="flex items-center space-x-3 bg-gray-50 rounded-lg p-3">
-                        <span className="text-xs text-gray-400 font-medium">XS</span>
-                        <input
-                          type="range"
-                          min="0"
-                          max="4"
-                          value={['xs', 's', 'm', 'l', 'xl'].indexOf(globalFontSize)}
-                          onChange={(e) => {
-                            const sizes: SizeType[] = ['xs', 's', 'm', 'l', 'xl']
-                            onSizeChange('global', sizes[parseInt(e.target.value)])
-                          }}
-                          className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer range-slider"
-                          style={{
-                            background: `linear-gradient(to right, #8b5cf6 0%, #8b5cf6 ${((['xs', 's', 'm', 'l', 'xl'].indexOf(globalFontSize)) / 4) * 100}%, #e5e7eb ${((['xs', 's', 'm', 'l', 'xl'].indexOf(globalFontSize)) / 4) * 100}%, #e5e7eb 100%)`
-                          }}
-                        />
-                        <span className="text-xs text-gray-400 font-medium">XL</span>
-                        <span className="text-xs font-semibold text-purple-600 bg-purple-100 px-2 py-1 rounded min-w-[2rem] text-center">
-                          {globalFontSize.toUpperCase()}
-                        </span>
-                      </div>
-                    </div>
+                            <div className="text-xs text-gray-500 mt-1">
+                              {palette.description}
+                            </div>
+                          </div>
+                          
+                          {/* Compact color swatches - rectangular format */}
+                          <div className="flex space-x-2 ml-4">
+                            <div 
+                              className="w-8 h-6 border-2 border-gray-500" 
+                              style={{ backgroundColor: palette.colors.background }}
+                              title="Background"
+                            />
+                            <div 
+                              className="w-8 h-6 border-2 border-gray-500" 
+                              style={{ backgroundColor: palette.colors.font }}
+                              title="Font"
+                            />
+                            <div 
+                              className="w-8 h-6 border-2 border-gray-500" 
+                              style={{ backgroundColor: palette.colors.button }}
+                              title="Button"
+                            />
+                          </div>
+                        </div>
+                      </button>
+                    ))}
                   </div>
                 </div>
 
-                {/* Colors Section */}
+                {/* Quick Font Selection */}
                 <div className="space-y-4">
-                  <h4 className="text-sm font-semibold text-gray-800 flex items-center space-x-2 border-b border-gray-100 pb-2">
-                    <span>🎨</span>
-                    <span>Colors</span>
+                  <h4 className="text-sm font-semibold text-gray-800 flex items-center space-x-2 px-8" style={{ paddingLeft: '24px', paddingRight: '24px' }}>
+                    <span>📝</span>
+                    <span>Font Style</span>
                   </h4>
                   
-                  <div className="space-y-3">
-                    {[
-                      { 
-                        label: 'Text Color', 
-                        value: fontColor, 
-                        onChange: onFontColorChange,
-                        desc: 'Form text and labels' 
-                      },
-                      { 
-                        label: 'Background', 
-                        value: backgroundColor, 
-                        onChange: onBackgroundColorChange,
-                        desc: 'Form background' 
-                      },
-                      { 
-                        label: 'Accent Color', 
-                        value: buttonColor, 
-                        onChange: onButtonColorChange,
-                        desc: 'Buttons and highlights' 
-                      }
-                    ].map((item, idx) => (
-                      <div key={idx} className="bg-gray-50 rounded-lg p-3">
-                        <div className="flex items-center justify-between mb-2">
-                          <label className="text-xs font-medium text-gray-600">{item.label}</label>
-                          <span className="text-xs text-gray-500">{item.desc}</span>
+                  <div className="grid grid-cols-2 gap-3 px-8" style={{ paddingLeft: '24px', paddingRight: '24px' }}>
+                    {webSafeFonts.slice(0, 4).map((font) => (
+                      <button
+                        key={font.value}
+                        onClick={() => onFontFamilyChange(font.value)}
+                        className={`p-4 mx-1 border text-left transition-all hover:border-purple-300 ${
+                          fontFamily === font.value 
+                            ? 'border-purple-500 bg-purple-50' 
+                            : 'border-gray-200 hover:bg-gray-50'
+                        }`}
+                      >
+                        <div className="text-sm font-medium" style={{ fontFamily: font.value }}>
+                          {font.label}
                         </div>
-                        <UnifiedColorPicker
-                          value={item.value}
-                          onChange={item.onChange}
-                          label={item.label}
-                        />
-                      </div>
+                        <div className="text-xs text-gray-500">{font.category}</div>
+                      </button>
                     ))}
                   </div>
                 </div>
               </div>
             )}
-                
+
+            {/* Great Themes Tab - More margin and better spacing */}
             {activeTab === 'themes' && (
-              <div className="space-y-4">
-                <h4 className="text-sm font-semibold text-gray-800 flex items-center space-x-2 border-b border-gray-100 pb-2">
-                  <span>✨</span>
-                  <span>Quick Themes</span>
-                </h4>
-                
-                <div className="grid grid-cols-1 gap-3">
+              <div className="space-y-6">
+                <div className="text-center px-6 py-1" style={{ padding: '4px 24px' }}>
+                  <h3 className="text-xl font-semibold text-gray-800 mb-1">Beautiful Themes</h3>
+                  <p className="text-sm text-gray-600">Choose a theme that you like</p>
+                </div>
+
+                <div className="grid grid-cols-1 gap-4 px-6">
                   {presetThemes.map((theme, idx) => (
                     <button 
                       key={idx} 
                       onClick={() => applyTheme(theme)}
-                      className="group p-4 border border-gray-200 rounded-xl hover:border-purple-300 hover:shadow-md transition-all duration-200 text-left bg-white/50 hover:bg-purple-50/50"
+                      className="w-full p-5 border-2 border-gray-400 hover:border-purple-400 hover:shadow-md transition-all duration-200 text-left bg-white hover:bg-purple-50/50"
                     >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-3">
-                          <div className="flex space-x-1">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center space-x-4">
+                          <div className="flex space-x-2">
                             <div 
-                              className="w-4 h-4 rounded-full border border-gray-200" 
+                              className="w-6 h-6 border-2 border-gray-500" 
                               style={{ backgroundColor: theme.backgroundColor }}
                             />
                             <div 
-                              className="w-4 h-4 rounded-full" 
+                              className="w-6 h-6 border-2 border-gray-500" 
                               style={{ backgroundColor: theme.buttonColor }}
                             />
                             <div 
-                              className="w-4 h-4 rounded-full border border-gray-200" 
+                              className="w-6 h-6 border-2 border-gray-500" 
                               style={{ backgroundColor: theme.fontColor }}
                             />
                           </div>
                           <div>
-                            <div className="text-sm font-medium text-gray-800 group-hover:text-purple-700">
+                            <div className="text-sm font-medium text-gray-800">
                               {theme.name}
                             </div>
                             <div className="text-xs text-gray-500" style={{ fontFamily: theme.fontFamily }}>
@@ -314,16 +368,14 @@ export default function ImprovedStylingPanel({
                           </div>
                         </div>
                         
-                        <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                          <svg className="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                          </svg>
-                        </div>
+                        <svg className="w-5 h-5 text-purple-500 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
                       </div>
                       
                       {/* Theme Preview */}
                       <div 
-                        className="mt-3 p-3 rounded-lg border transition-all group-hover:shadow-sm"
+                        className="p-4 border transition-all group-hover:shadow-sm"
                         style={{ 
                           backgroundColor: theme.backgroundColor,
                           borderColor: theme.buttonColor + '40'
@@ -349,7 +401,7 @@ export default function ImprovedStylingPanel({
                           Name: ___________
                         </div>
                         <div 
-                          className="text-xs px-2 py-1 rounded text-white inline-block"
+                          className="text-xs px-2 py-1 text-white inline-block"
                           style={{ backgroundColor: theme.buttonColor }}
                         >
                           Submit
@@ -358,19 +410,108 @@ export default function ImprovedStylingPanel({
                     </button>
                   ))}
                 </div>
-                
-                {/* Pro Tip */}
-                <div className="mt-4 p-3 bg-purple-50 border border-purple-200 rounded-lg">
-                  <div className="flex items-start space-x-2">
-                    <svg className="w-4 h-4 text-purple-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <div>
-                      <p className="text-xs font-medium text-purple-800">Pro Tip</p>
-                      <p className="text-xs text-purple-700 mt-1">
-                        Use the Style tab to create your own custom theme with precise color control.
-                      </p>
+              </div>
+            )}
+
+            {/* Custom Style Tab - More margin and better spacing */}
+            {activeTab === 'style' && (
+              <div className="space-y-6">
+                <div className="text-center px-6 py-1" style={{ padding: '4px 24px' }}>
+                  <h3 className="text-xl font-semibold text-gray-800 mb-1">Custom Styling</h3>
+                  <p className="text-sm text-gray-600">Customize your form&apos;s appearance</p>
+                </div>
+
+                {/* Typography Section - More margin */}
+                <div className="space-y-4">
+                  <h4 className="text-lg font-semibold text-gray-800 flex items-center space-x-2 px-6">
+                    <span>✏️</span>
+                    <span>Typography</span>
+                  </h4>
+                  
+                  <div className="space-y-4 px-6">
+                    {/* Font Family */}
+                    <div className="bg-gray-50 p-6 rounded-lg border border-gray-200">
+                      <label className="block text-sm font-medium text-gray-600 mb-3">Font Family</label>
+                      <select
+                        value={fontFamily}
+                        onChange={(e) => onFontFamilyChange(e.target.value)}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900"
+                      >
+                        <option value="Inter">Inter (Modern)</option>
+                        <option value="Roboto">Roboto (Clean)</option>
+                        <option value="Open Sans">Open Sans (Friendly)</option>
+                        <option value="Lato">Lato (Professional)</option>
+                        <option value="Poppins">Poppins (Contemporary)</option>
+                      </select>
                     </div>
+
+                    {/* Text Size */}
+                    <div className="bg-gray-50 p-6 rounded-lg border border-gray-200">
+                      <label className="block text-sm font-medium text-gray-600 mb-3">Text Size</label>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between text-sm text-gray-600">
+                          <span>XS</span>
+                          <span>XL</span>
+                        </div>
+                        <input
+                          type="range"
+                          min="0"
+                          max="4"
+                          value={['xs', 's', 'm', 'l', 'xl'].indexOf(globalFontSize)}
+                          onChange={(e) => {
+                            const sizes: SizeType[] = ['xs', 's', 'm', 'l', 'xl']
+                            onSizeChange('global', sizes[parseInt(e.target.value)])
+                          }}
+                          className="w-full h-3 bg-gray-200 rounded-lg appearance-none cursor-pointer range-slider"
+                        />
+                        <div className="flex justify-center">
+                          <span className="text-sm font-medium text-blue-600">M</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Colors Section - Popped up */}
+                <div className="space-y-4">
+                  <h4 className="text-lg font-semibold text-gray-800 flex items-center space-x-2 px-6">
+                    <span>🎨</span>
+                    <span>Colors</span>
+                  </h4>
+                  
+                  <div className="space-y-4 px-6">
+                    {[
+                      { 
+                        label: 'Text Color', 
+                        value: fontColor, 
+                        onChange: onFontColorChange,
+                        desc: 'Form text and labels' 
+                      },
+                      { 
+                        label: 'Background', 
+                        value: backgroundColor, 
+                        onChange: onBackgroundColorChange,
+                        desc: 'Form background' 
+                      },
+                      { 
+                        label: 'Accent Color', 
+                        value: buttonColor, 
+                        onChange: onButtonColorChange,
+                        desc: 'Buttons and highlights' 
+                      }
+                    ].map((item, idx) => (
+                      <div key={idx} className="bg-gray-50 p-6 rounded-lg border border-gray-200">
+                        <div className="flex items-center justify-between mb-4">
+                          <label className="text-sm font-medium text-gray-600">{item.label}</label>
+                          <span className="text-xs text-gray-500">{item.desc}</span>
+                        </div>
+                        <UnifiedColorPicker
+                          value={item.value}
+                          onChange={item.onChange}
+                          label={item.label}
+                        />
+                      </div>
+                    ))}
                   </div>
                 </div>
               </div>
@@ -378,62 +519,17 @@ export default function ImprovedStylingPanel({
           </div>
           
           {/* Close Button */}
-          <div className="border-t border-gray-100/80 bg-gray-50/50 px-6 py-3">
-            <button
-              onClick={() => setIsExpanded(false)}
-              className="w-full text-xs text-gray-600 hover:text-gray-800 transition-colors"
-            >
-              Click outside or press ESC to close
-            </button>
+          <div className="border-t border-gray-100 bg-gray-50 px-8 py-6">
+            <div className="text-center">
+              <p className="text-sm text-gray-500">Click outside or press ESC to close</p>
+            </div>
           </div>
         </div>
       )}
       
-      {/* Backdrop */}
-      {isExpanded && (
-        <div 
-          className="fixed inset-0 bg-black/10 backdrop-blur-sm z-40"
-          onClick={() => setIsExpanded(false)}
-        />
-      )}
+
       
-      <style jsx>{`
-        @keyframes slideIn {
-          from {
-            opacity: 0;
-            transform: translateY(-8px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        
-        .animate-slideIn {
-          animation: slideIn 0.2s ease-out;
-        }
-        
-        .range-slider::-webkit-slider-thumb {
-          appearance: none;
-          height: 16px;
-          width: 16px;
-          border-radius: 50%;
-          background: #8b5cf6;
-          cursor: pointer;
-          border: 2px solid #ffffff;
-          box-shadow: 0 2px 6px rgba(139, 92, 246, 0.4);
-        }
-        
-        .range-slider::-moz-range-thumb {
-          height: 16px;
-          width: 16px;
-          border-radius: 50%;
-          background: #8b5cf6;
-          cursor: pointer;
-          border: 2px solid #ffffff;
-          box-shadow: 0 2px 6px rgba(139, 92, 246, 0.4);
-        }
-      `}</style>
+
     </div>
   )
 }

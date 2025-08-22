@@ -16,6 +16,7 @@ interface FormHeaderProps {
   onCancelEdit: () => void
   onSizeChange: (fieldId: string | 'global', size: SizeType) => void
   onStylingChange: (config: Partial<StylingConfig>) => void
+  onStylingPanelToggle?: (isOpen: boolean) => void
 }
 
 export default function FormHeader({
@@ -30,7 +31,8 @@ export default function FormHeader({
   onSaveEdit,
   onCancelEdit,
   onSizeChange,
-  onStylingChange
+  onStylingChange,
+  onStylingPanelToggle
 }: FormHeaderProps) {
   return (
     <div className="space-y-4">
@@ -46,6 +48,7 @@ export default function FormHeader({
         onBackgroundColorChange={(backgroundColor) => onStylingChange({ backgroundColor })}
         onButtonColorChange={(buttonColor) => onStylingChange({ buttonColor })}
         onSizeChange={onSizeChange}
+        onPanelToggle={onStylingPanelToggle}
       />
       
       {/* Editable Form Title */}
