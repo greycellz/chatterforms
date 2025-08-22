@@ -424,17 +424,25 @@ export default function PublicFormClient({ formSchema, formId, submitButtonText 
           </div>
         )}
         
-        <button 
-          type="submit"
-          disabled={isSubmitting}
-          className={`w-full text-white rounded-lg transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed ${getButtonSizeClasses(globalSize)}`}
-          style={{
-            fontFamily: stylingConfig.fontFamily,
-            background: stylingConfig.buttonColor
-          }}
-        >
-          {isSubmitting ? 'Submitting...' : submitButtonText}
-        </button>
+        <div className="flex justify-center">
+          <button 
+            type="submit"
+            disabled={isSubmitting}
+            className={`text-white rounded-lg transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed ${getButtonSizeClasses(globalSize)}`}
+            style={{
+              fontFamily: stylingConfig.fontFamily,
+              background: stylingConfig.buttonColor,
+              width: 'fit-content',
+              padding: '16px 32px',
+              minHeight: '56px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            {isSubmitting ? 'Submitting...' : submitButtonText}
+          </button>
+        </div>
       </form>
     </div>
   )

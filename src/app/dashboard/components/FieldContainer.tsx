@@ -1,5 +1,6 @@
 import FormField from './FormField'
 import EditableText from './EditableText'
+import FieldThreeDotMenu from './FieldThreeDotMenu'
 import { SizeType, StylingConfig, getTextSizeClasses } from '../components/SizeUtilities'
 
 interface FormFieldType {
@@ -251,14 +252,36 @@ export default function FieldContainer({
   onRadioOptionEdit
 }: FieldContainerProps) {
   return (
-    <div className="space-y-3 relative">
-      {/* Field Settings Container - NO background, inherits form background */}
-      <div className="relative p-3">
+    <div className="space-y-3 relative group ml-8">
+      {/* Clean Field Header with Three-Dot Menu in Margin */}
+      <div className="relative">
+        {/* Three-Dot Menu - Absolute positioned in left margin */}
+        <div className="absolute -left-8 top-0 opacity-0 group-hover:opacity-100 transition-opacity">
+          <FieldThreeDotMenu
+            fieldId={field.id}
+            fieldType={field.type}
+            isRequired={field.required}
+            currentSize={currentFieldSize}
+            placeholder={field.placeholder}
+            onToggleRequired={onToggleRequired}
+            onSizeChange={onSizeChange}
+            onStartEditing={onStartEditing}
+            fieldIndex={fieldIndex}
+            editingField={editingField}
+            editValue={editValue}
+            onEditValueChange={onEditValueChange}
+            onSaveEdit={onSaveEdit}
+            onCancelEdit={onCancelEdit}
+          />
+        </div>
         
-        {/* Top Controls Row */}
-        <div className="flex items-center justify-between mb-3">
-          {/* Field Label with Required Toggle */}
-          <div className="flex items-center flex-1">
+        {/* Field Label - Click to Edit */}
+        <div className="flex items-center">
+          <div
+            className="cursor-pointer hover:bg-blue-50 hover:bg-opacity-50 rounded px-2 py-1 transition-colors"
+            onDoubleClick={() => onStartEditing('label', field.id, fieldIndex)}
+            title="Double-click to edit field name"
+          >
             <EditableText
               text={field.label}
               editKey={`label-${field.id}`}
@@ -274,45 +297,19 @@ export default function FieldContainer({
                 color: stylingConfig.fontColor
               }}
             />
-            {field.required && <span className="text-red-500 ml-1">*</span>}
-            
-            {/* Required/Optional Toggle */}
-            <EnhancedRequiredToggle
-              fieldId={field.id}
-              isRequired={field.required}
-              onToggle={onToggleRequired}
-            />
           </div>
           
-          {/* Field Size Slider */}
-          <div className="flex-shrink-0">
-            <EnhancedSizeSlider
-              fieldId={field.id}
-              currentSize={currentFieldSize}
-              onSizeChange={onSizeChange}
-              label="Size"
-            />
-          </div>
+          {/* Required Badge */}
+          {field.required && (
+            <span className="ml-2 px-2 py-1 text-xs font-medium text-red-700 bg-red-100 rounded-full">
+              Required
+            </span>
+          )}
         </div>
-        
-        {/* Field Metadata (placeholder/options) */}
-        <EnhancedFieldMetadata
-          fieldId={field.id}
-          fieldIndex={fieldIndex}
-          fieldType={field.type}
-          placeholder={field.placeholder}
-          options={field.options}
-          editingField={editingField}
-          editValue={editValue}
-          onEditValueChange={onEditValueChange}
-          onStartEditing={onStartEditing}
-          onSaveEdit={onSaveEdit}
-          onCancelEdit={onCancelEdit}
-        />
       </div>
       
-      {/* Form Field Rendered Below Settings */}
-      <div className="ml-2">
+      {/* Form Field */}
+      <div>
         <FormField 
           field={{
             ...field,

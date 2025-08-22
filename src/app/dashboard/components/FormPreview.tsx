@@ -45,7 +45,7 @@ interface FormPreviewProps {
   onExampleSelect?: (example: string) => void
 }
 
-// Enhanced loading form animation with new styling
+// Enhanced loading form animation with purple theme and improved UX
 const EnhancedLoadingFormAnimation = ({ stylingConfig }: { stylingConfig: StylingConfig }) => (
   <div 
     className="enhanced-loading-container"
@@ -56,58 +56,74 @@ const EnhancedLoadingFormAnimation = ({ stylingConfig }: { stylingConfig: Stylin
     }}
   >
     <div className="loading-content">
-      {/* Enhanced loading header */}
+      {/* Enhanced loading header with better visual hierarchy */}
       <div className="loading-header">
-        <div className="loading-icon">🎨</div>
+        <div className="loading-icon-container">
+          <div className="loading-icon">✨</div>
+          <div className="icon-glow" />
+        </div>
         <div className="loading-text">
           <h3 className="loading-title">Creating your form...</h3>
           <p className="loading-subtitle">AI is analyzing your requirements</p>
         </div>
       </div>
       
-      {/* Enhanced progress indicator */}
+      {/* Enhanced progress indicator with purple theme */}
       <div className="loading-progress">
         <div className="progress-steps">
-          <div className="progress-step active">
-            <div className="step-dot">✓</div>
+          <div className="progress-step completed">
+            <div className="step-dot">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                <polyline points="20,6 9,17 4,12" />
+              </svg>
+            </div>
             <span>Understanding requirements</span>
           </div>
           <div className="progress-step active">
-            <div className="step-dot">⚡</div>
+            <div className="step-dot">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+              </svg>
+            </div>
             <span>Generating fields</span>
           </div>
           <div className="progress-step">
-            <div className="step-dot">🎨</div>
+            <div className="step-dot">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="12" cy="12" r="3" />
+                <path d="M12 1v6m0 6v6m11-7h-6m-6 0H1" />
+              </svg>
+            </div>
             <span>Applying styling</span>
           </div>
         </div>
         
         <div className="progress-bar">
           <div className="progress-fill" />
+          <div className="progress-glow" />
         </div>
       </div>
       
-      {/* Skeleton content with staggered animation */}
-      <div className="skeleton-form">
-        <div className="skeleton-title" />
+      {/* Animated form preview that builds progressively */}
+      <div className="animated-form-preview">
+        <div className="form-title-animated" />
         
-        <div className="skeleton-fields">
+        <div className="form-fields-animated">
           {[1, 2, 3, 4].map((_, index) => (
             <div 
               key={index}
-              className="skeleton-field"
+              className="form-field-animated"
               style={{
-                animationDelay: `${index * 200}ms`,
-                opacity: 1 - (index * 0.2)
+                animationDelay: `${index * 300}ms`
               }}
             >
-              <div className="skeleton-label" />
-              <div className="skeleton-input" />
+              <div className="field-label-animated" />
+              <div className="field-input-animated" />
             </div>
           ))}
         </div>
         
-        <div className="skeleton-button" style={{ backgroundColor: stylingConfig.buttonColor }} />
+        <div className="form-button-animated" />
       </div>
     </div>
 
@@ -122,7 +138,7 @@ const EnhancedLoadingFormAnimation = ({ stylingConfig }: { stylingConfig: Stylin
       }
 
       .loading-content {
-        max-width: 500px;
+        max-width: 600px;
         width: 100%;
       }
 
@@ -130,13 +146,31 @@ const EnhancedLoadingFormAnimation = ({ stylingConfig }: { stylingConfig: Stylin
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 20px;
-        margin-bottom: 40px;
+        gap: 24px;
+        margin-bottom: 50px;
+      }
+
+      .loading-icon-container {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
       }
 
       .loading-icon {
-        font-size: 48px;
-        animation: pulse 2s ease-in-out infinite;
+        font-size: 56px;
+        animation: magicPulse 3s ease-in-out infinite;
+        z-index: 2;
+        position: relative;
+      }
+
+      .icon-glow {
+        position: absolute;
+        width: 80px;
+        height: 80px;
+        background: radial-gradient(circle, rgba(147, 51, 234, 0.3) 0%, transparent 70%);
+        border-radius: 50%;
+        animation: glowPulse 3s ease-in-out infinite;
       }
 
       .loading-text {
@@ -144,151 +178,240 @@ const EnhancedLoadingFormAnimation = ({ stylingConfig }: { stylingConfig: Stylin
       }
 
       .loading-title {
-        font-size: 24px;
+        font-size: 28px;
         font-weight: 700;
-        margin-bottom: 4px;
+        margin-bottom: 8px;
         color: ${stylingConfig.fontColor};
+        background: linear-gradient(135deg, #9333ea, #7c3aed);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
       }
 
       .loading-subtitle {
-        font-size: 14px;
+        font-size: 16px;
         color: ${stylingConfig.fontColor};
-        opacity: 0.7;
+        opacity: 0.8;
         margin: 0;
       }
 
       .loading-progress {
-        margin-bottom: 40px;
+        margin-bottom: 50px;
       }
 
       .progress-steps {
         display: flex;
         justify-content: center;
-        gap: 24px;
-        margin-bottom: 20px;
+        gap: 32px;
+        margin-bottom: 30px;
       }
 
       .progress-step {
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 8px;
-        font-size: 12px;
+        gap: 12px;
+        font-size: 14px;
+        font-weight: 500;
         color: ${stylingConfig.fontColor};
-        opacity: 0.5;
-        transition: opacity 0.3s ease;
+        opacity: 0.4;
+        transition: all 0.4s ease;
+      }
+
+      .progress-step.completed {
+        opacity: 1;
+        color: #10b981;
       }
 
       .progress-step.active {
         opacity: 1;
+        color: #9333ea;
+        transform: scale(1.05);
       }
 
       .step-dot {
-        width: 32px;
-        height: 32px;
+        width: 40px;
+        height: 40px;
         border-radius: 50%;
-        background: ${stylingConfig.buttonColor}20;
+        background: #f3f4f6;
+        border: 2px solid #e5e7eb;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 14px;
+        transition: all 0.4s ease;
+        position: relative;
+      }
+
+      .progress-step.completed .step-dot {
+        background: #10b981;
+        border-color: #10b981;
+        color: white;
+        animation: checkmarkBounce 0.6s ease-out;
       }
 
       .progress-step.active .step-dot {
-        background: ${stylingConfig.buttonColor};
+        background: #9333ea;
+        border-color: #9333ea;
         color: white;
+        animation: activePulse 2s ease-in-out infinite;
+        box-shadow: 0 0 20px rgba(147, 51, 234, 0.4);
       }
 
       .progress-bar {
-        height: 4px;
-        background: ${stylingConfig.fontColor}20;
-        border-radius: 2px;
+        height: 8px;
+        background: #f3f4f6;
+        border-radius: 4px;
         overflow: hidden;
         margin: 0 auto;
-        max-width: 300px;
+        max-width: 400px;
+        position: relative;
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
       }
 
       .progress-fill {
         height: 100%;
-        background: linear-gradient(90deg, ${stylingConfig.buttonColor}, ${stylingConfig.buttonColor}cc);
-        border-radius: 2px;
-        animation: progressFlow 3s ease-in-out infinite;
+        background: linear-gradient(90deg, #9333ea, #7c3aed, #9333ea);
+        border-radius: 4px;
+        animation: progressFlow 4s ease-in-out infinite;
+        position: relative;
+      }
+
+      .progress-glow {
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        animation: glowFlow 2s ease-in-out infinite;
+      }
+
+      .animated-form-preview {
+        display: flex;
+        flex-direction: column;
+        gap: 28px;
+        align-items: center;
+        max-width: 450px;
+        margin: 0 auto;
+      }
+
+      .form-title-animated {
+        width: 240px;
+        height: 36px;
+        background: linear-gradient(90deg, #9333ea20, #7c3aed20, #9333ea20);
+        border-radius: 8px;
+        animation: formBuild 2s ease-in-out infinite;
+        border: 1px solid rgba(147, 51, 234, 0.2);
+      }
+
+      .form-fields-animated {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+      }
+
+      .form-field-animated {
+        animation: fieldAppear 0.8s ease-out forwards;
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      .field-label-animated {
+        width: 140px;
+        height: 18px;
+        background: linear-gradient(90deg, #9333ea15, #7c3aed15);
+        border-radius: 4px;
+        margin-bottom: 10px;
+        animation: formBuild 2s ease-in-out infinite;
+        border: 1px solid rgba(147, 51, 234, 0.1);
+      }
+
+      .field-input-animated {
+        width: 100%;
+        height: 44px;
+        background: linear-gradient(90deg, #f8fafc, #f1f5f9);
+        border: 2px solid rgba(147, 51, 234, 0.2);
+        border-radius: 8px;
+        animation: formBuild 2s ease-in-out infinite;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .field-input-animated::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(147, 51, 234, 0.1), transparent);
+        animation: shimmerFlow 2s ease-in-out infinite;
+      }
+
+      .form-button-animated {
+        width: 160px;
+        height: 48px;
+        background: linear-gradient(135deg, #9333ea, #7c3aed);
+        border-radius: 8px;
+        animation: buttonPulse 2s ease-in-out infinite;
+        box-shadow: 0 4px 12px rgba(147, 51, 234, 0.3);
+      }
+
+      @keyframes magicPulse {
+        0%, 100% { transform: scale(1) rotate(0deg); }
+        25% { transform: scale(1.1) rotate(5deg); }
+        50% { transform: scale(1.05) rotate(-3deg); }
+        75% { transform: scale(1.15) rotate(2deg); }
+      }
+
+      @keyframes glowPulse {
+        0%, 100% { opacity: 0.3; transform: scale(1); }
+        50% { opacity: 0.6; transform: scale(1.2); }
+      }
+
+      @keyframes activePulse {
+        0%, 100% { transform: scale(1); box-shadow: 0 0 20px rgba(147, 51, 234, 0.4); }
+        50% { transform: scale(1.1); box-shadow: 0 0 30px rgba(147, 51, 234, 0.6); }
+      }
+
+      @keyframes checkmarkBounce {
+        0% { transform: scale(0.8); }
+        50% { transform: scale(1.2); }
+        100% { transform: scale(1); }
       }
 
       @keyframes progressFlow {
         0% { width: 0%; }
-        50% { width: 70%; }
+        30% { width: 40%; }
+        70% { width: 85%; }
         100% { width: 100%; }
       }
 
-      .skeleton-form {
-        display: flex;
-        flex-direction: column;
-        gap: 24px;
-        align-items: center;
+      @keyframes glowFlow {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(100%); }
       }
 
-      .skeleton-title {
-        width: 200px;
-        height: 32px;
-        background: ${stylingConfig.fontColor}15;
-        border-radius: 8px;
-        animation: shimmer 1.5s ease-in-out infinite;
-      }
-
-      .skeleton-fields {
-        width: 100%;
-        max-width: 400px;
-        display: flex;
-        flex-direction: column;
-        gap: 20px;
-      }
-
-      .skeleton-field {
-        animation: fadeInUp 0.5s ease-out forwards;
-        opacity: 0;
-      }
-
-      .skeleton-label {
-        width: 120px;
-        height: 16px;
-        background: ${stylingConfig.fontColor}15;
-        border-radius: 4px;
-        margin-bottom: 8px;
-        animation: shimmer 1.5s ease-in-out infinite;
-      }
-
-      .skeleton-input {
-        width: 100%;
-        height: 40px;
-        background: ${stylingConfig.fontColor}10;
-        border: 1px solid ${stylingConfig.fontColor}20;
-        border-radius: 8px;
-        animation: shimmer 1.5s ease-in-out infinite;
-      }
-
-      .skeleton-button {
-        width: 140px;
-        height: 44px;
-        border-radius: 8px;
-        opacity: 0.4;
-        animation: shimmer 1.5s ease-in-out infinite;
-      }
-
-      @keyframes pulse {
-        0%, 100% { transform: scale(1); opacity: 1; }
-        50% { transform: scale(1.05); opacity: 0.8; }
-      }
-
-      @keyframes shimmer {
-        0% { opacity: 0.5; }
-        50% { opacity: 0.8; }
-        100% { opacity: 0.5; }
-      }
-
-      @keyframes fadeInUp {
+      @keyframes fieldAppear {
         from { opacity: 0; transform: translateY(20px); }
         to { opacity: 1; transform: translateY(0); }
+      }
+
+      @keyframes formBuild {
+        0% { opacity: 0.6; }
+        50% { opacity: 1; }
+        100% { opacity: 0.6; }
+      }
+
+      @keyframes shimmerFlow {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(100%); }
+      }
+
+      @keyframes buttonPulse {
+        0%, 100% { transform: scale(1); box-shadow: 0 4px 12px rgba(147, 51, 234, 0.3); }
+        50% { transform: scale(1.05); box-shadow: 0 6px 20px rgba(147, 51, 234, 0.5); }
       }
     `}</style>
   </div>
