@@ -6,7 +6,6 @@
   flex-direction: column !important;
   gap: 20px;
   margin-bottom: 30px;
-  border: 2px solid red; /* Debug border */
 }
 
 /* Alternative approach: Use higher specificity to override external CSS */
@@ -15,7 +14,6 @@
   flex-direction: column !important;
   gap: 20px;
   margin-bottom: 30px;
-  border: 2px solid red; /* Debug border */
 }
 
 /* Nuclear option: Use maximum specificity to override any external CSS */
@@ -24,7 +22,34 @@
   flex-direction: column !important;
   gap: 20px;
   margin-bottom: 30px;
-  border: 2px solid red; /* Debug border */
+}
+
+/* Super nuclear option: Target the exact class name from the HTML */
+.LoadingAnimation-module__COPtsG__loadingAnimationVerticalProgressSteps {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+/* Ultra nuclear option: Override any progress-steps class */
+.progress-steps,
+.LoadingAnimation-module__COPtsG__loadingAnimationVerticalProgressSteps {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+/* Maximum specificity override for external CSS */
+.enhanced-loading-container .progress-steps,
+.enhanced-loading-container .LoadingAnimation-module__COPtsG__loadingAnimationVerticalProgressSteps,
+.enhanced-form-preview-card .progress-steps,
+.enhanced-form-preview-card .LoadingAnimation-module__COPtsG__loadingAnimationVerticalProgressSteps {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 20px;
+  margin-bottom: 30px;
 }
 
 .progressStepItem {
@@ -39,19 +64,16 @@
 .completed {
   opacity: 1;
   color: #10b981;
-  border: 1px solid blue; /* Debug border */
 }
 
 .active {
   opacity: 1;
   color: #9333ea;
   transform: scale(1.02);
-  border: 1px solid green; /* Debug border */
 }
 
 .pending {
   opacity: 0.4;
-  border: 1px solid orange; /* Debug border */
 }
 
 .stepDot {

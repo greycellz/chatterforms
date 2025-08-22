@@ -301,8 +301,8 @@ export default function FieldContainer({
           
           {/* Required Badge */}
           {field.required && (
-            <span className="ml-2 px-2 py-1 text-xs font-medium text-red-700 bg-red-100 rounded-full">
-              Required
+            <span className="ml-1 text-red-500 font-medium">
+              *
             </span>
           )}
         </div>
