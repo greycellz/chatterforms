@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import ModernFileUpload from '../../dashboard/components/ModernFileUpload'
 
 interface FormField {
   id: string
@@ -258,18 +259,20 @@ export default function PublicFormClient({ formSchema, formId, submitButtonText 
       case 'checkbox-with-other':
         const checkboxData = formData[field.id] as { selected: string[], other?: string } || { selected: [] }
         return (
-          <div key={field.id} className="space-y-3">
+          <div key={field.id} className="space-y-2">
             {field.options?.map((option, idx) => (
               <label key={idx} htmlFor={`${field.id}-${idx}`} className="flex items-center space-x-2 cursor-pointer">
                 <input
                   id={`${field.id}-${idx}`}
                   type="checkbox"
-                  checked={checkboxData.selected.includes(option)}
+                  name={field.id}
+                  value={option}
+                  checked={Array.isArray(formData[field.id]) && (formData[field.id] as string[]).includes(option)}
                   onChange={(e) => handleCheckboxGroupChange(field.id, option, e.target.checked)}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 flex-shrink-0"
                 />
                 <span 
-                  className={`font-medium ${getTextSizeClasses(globalSize, 'label')}`}
+                  className={`text-sm ${getTextSizeClasses(globalSize, 'label')}`}
                   style={{
                     fontFamily: stylingConfig.fontFamily,
                     color: stylingConfig.fontColor
@@ -278,23 +281,21 @@ export default function PublicFormClient({ formSchema, formId, submitButtonText 
                   {option}
                 </span>
               </label>
-            ))}
+            )) || []}
             
             {/* Other option for checkbox-with-other */}
             {field.type === 'checkbox-with-other' && field.allowOther && (
               <label className="flex items-center space-x-2 cursor-pointer">
                 <input
                   type="checkbox"
-                  checked={!!checkboxData.other}
-                  onChange={(e) => {
-                    if (!e.target.checked) {
-                      handleOtherChange(field.id, '')
-                    }
-                  }}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  name={`${field.id}_other`}
+                  value="other"
+                  checked={Array.isArray(formData[field.id]) && (formData[field.id] as string[]).includes('other')}
+                  onChange={(e) => handleCheckboxGroupChange(field.id, 'other', e.target.checked)}
+                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 flex-shrink-0"
                 />
                 <span 
-                  className={`font-medium ${getTextSizeClasses(globalSize, 'label')}`}
+                  className={`text-sm ${getTextSizeClasses(globalSize, 'label')}`}
                   style={{
                     fontFamily: stylingConfig.fontFamily,
                     color: stylingConfig.fontColor
@@ -305,10 +306,10 @@ export default function PublicFormClient({ formSchema, formId, submitButtonText 
                 <input
                   type="text"
                   placeholder={field.otherPlaceholder || 'Please specify...'}
-                  value={checkboxData.other || ''}
+                  value={((formData[field.id] as { selected: string[], other?: string })?.other) || ''}
+                  onChange={(e) => handleOtherChange(field.id, e.target.value)}
                   className="ml-2 border border-gray-300 rounded px-2 py-1 text-sm flex-1"
                   style={inputStyle}
-                  onChange={(e) => handleOtherChange(field.id, e.target.value)}
                 />
               </label>
             )}
@@ -336,6 +337,20 @@ export default function PublicFormClient({ formSchema, formId, submitButtonText 
               {field.label}
             </span>
           </label>
+        )
+      case 'file':
+        return (
+          <ModernFileUpload
+            label={field.label}
+            required={field.required}
+            accept={field.placeholder || "*/*"}
+            multiple={false}
+            maxSize={10}
+            placeholder={field.placeholder || "Click to upload a file"}
+            onFileSelect={(files) => {
+              handleInputChange(field.id, files.map(f => f.name).join(', '))
+            }}
+          />
         )
       default:
         return (

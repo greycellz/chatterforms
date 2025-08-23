@@ -1,4 +1,6 @@
+import { useState } from 'react'
 import EditableText from './EditableText'
+import ModernFileUpload from './ModernFileUpload'
 import { getInputSizeClasses, getTextSizeClasses, getFieldContainerClasses, SizeType, StylingConfig } from '../components/SizeUtilities'
 
 interface FormField {
@@ -233,6 +235,24 @@ export default function FormField({
               />
             </label>
           )}
+        </div>
+      )
+      
+    case 'file':
+      return (
+        <div className={containerClasses}>
+          <ModernFileUpload
+            label={field.label}
+            required={field.required}
+            accept={field.placeholder || "*/*"}
+            multiple={false}
+            maxSize={10}
+            placeholder={field.placeholder || "Click to upload a file"}
+            onFileSelect={(files) => {
+              // In preview mode, we don't actually handle file selection
+              console.log('File selected:', files)
+            }}
+          />
         </div>
       )
       

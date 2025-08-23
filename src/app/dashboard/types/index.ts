@@ -1,6 +1,6 @@
 // Shared types for the dashboard components
 
-export type FieldType = 'text' | 'email' | 'tel' | 'textarea' | 'select' | 'radio' | 'checkbox' | 'date' | 'checkbox-group' | 'radio-with-other' | 'checkbox-with-other'
+export type FieldType = 'text' | 'email' | 'tel' | 'textarea' | 'select' | 'radio' | 'checkbox' | 'date' | 'checkbox-group' | 'radio-with-other' | 'checkbox-with-other' | 'file'
 
 export type SizeType = 'xs' | 's' | 'm' | 'l' | 'xl'
 

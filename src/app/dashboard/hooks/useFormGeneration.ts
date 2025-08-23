@@ -33,6 +33,14 @@ export function useFormGeneration() {
     setIsLoading(true)
     setError('')
 
+    // Add user message to chat history (only if there's a description)
+    if (description.trim()) {
+      setChatHistory(prev => [
+        ...prev,
+        { role: 'user', content: description, timestamp: Date.now() }
+      ])
+    }
+
     try {
       const response = await fetch('/api/generate-form', {
         method: 'POST',
