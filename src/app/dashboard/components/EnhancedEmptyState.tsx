@@ -1,17 +1,13 @@
 import { useState, useEffect } from 'react'
 import styles from './EnhancedEmptyState.module.css'
+import { FieldExtraction, StylingConfig } from '../types'
 
 interface EnhancedEmptyStateProps {
-  stylingConfig: {
-    fontFamily: string
-    fontColor: string
-    backgroundColor: string
-    buttonColor: string
-  }
+  stylingConfig: StylingConfig
   onExampleClick?: (example: string) => void
   // Analysis complete state props
   analysisComplete?: boolean
-  extractedFields?: any[]
+  extractedFields?: FieldExtraction[]
   onGenerateFormFromFields?: () => void
 }
 
@@ -66,8 +62,8 @@ const AnalysisCompleteState = ({
   extractedFields, 
   onGenerateFormFromFields 
 }: { 
-  stylingConfig: any
-  extractedFields?: any[]
+  stylingConfig: StylingConfig
+  extractedFields?: FieldExtraction[]
   onGenerateFormFromFields?: () => void 
 }) => {
   const fieldCount = extractedFields?.length || 0

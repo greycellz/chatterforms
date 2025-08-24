@@ -233,19 +233,19 @@ export default function FieldThreeDotMenu({
                     <input
                       type="text"
                       value={editValue}
-                      onChange={(e) => onEditValueChange(e.target.value)}
+                      onChange={(e) => onEditValueChange?.(e.target.value)}
                       onKeyDown={(e) => {
                         if (e.key === 'Enter') {
-                          onSaveEdit()
+                          onSaveEdit?.()
                           setIsOpen(false)
                         }
                         if (e.key === 'Escape') {
-                          onCancelEdit()
+                          onCancelEdit?.()
                           setIsOpen(false)
                         }
                       }}
                       onBlur={() => {
-                        onSaveEdit()
+                        onSaveEdit?.()
                         setIsOpen(false)
                       }}
                       className="w-full px-3 py-2 text-sm bg-white border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"

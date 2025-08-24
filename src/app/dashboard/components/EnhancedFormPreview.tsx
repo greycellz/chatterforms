@@ -5,6 +5,7 @@ import FieldList from './FieldList'
 import SubmitButtonEditor from './SubmitButtonEditor'
 import EnhancedEmptyState from './EnhancedEmptyState'
 import { SizeType, SizeConfig, StylingConfig } from '../components/SizeUtilities'
+import { FieldExtraction } from '../types'
 import styles from './LoadingAnimation.module.css'
 
 // Using CSS modules to override external CSS conflicts
@@ -67,7 +68,7 @@ interface FormPreviewProps {
   isAnalyzing?: boolean
   analysisComplete?: boolean
   onResetAnalysis?: () => void
-  extractedFields?: Array<{ id: string; label: string; type: string; confidence: number }>
+  extractedFields?: FieldExtraction[]
   onGenerateFormFromFields?: () => void
 }
 
