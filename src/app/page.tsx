@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import './landing.css'
 import Link from 'next/link'
+import plusButtonStyles from './styles/PlusButton.module.css'
 
 const TYPING_EXAMPLES = [
   "Create a patient intake form with contact info and medical history...",
@@ -19,9 +20,38 @@ export default function Home() {
   const [currentPlaceholder, setCurrentPlaceholder] = useState('')
   const [currentExampleIndex, setCurrentExampleIndex] = useState(0)
   const [isTyping, setIsTyping] = useState(true)
+  const [showPopup, setShowPopup] = useState(false)
+  const [showURLInput, setShowURLInput] = useState(false)
+  const [urlValue, setUrlValue] = useState('')
   const fileInputRef = useRef<HTMLInputElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const popupRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
+
+  // Close popup when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (popupRef.current && !popupRef.current.contains(event.target as Node)) {
+        setShowPopup(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  // Close popup on escape key
+  useEffect(() => {
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setShowPopup(false)
+        setShowURLInput(false)
+      }
+    }
+
+    document.addEventListener('keydown', handleEscape)
+    return () => document.removeEventListener('keydown', handleEscape)
+  }, [])
 
   // Typing animation effect
   useEffect(() => {
@@ -157,18 +187,63 @@ export default function Home() {
     textarea.style.height = `${textarea.scrollHeight}px`
   }
 
+  // Handle URL input
+  const handleURLSubmit = () => {
+    if (urlValue.trim()) {
+      const cleanUrl = extractURL(urlValue.trim())
+      router.push(`/dashboard?mode=url&url=${encodeURIComponent(cleanUrl)}`)
+      setUrlValue('')
+      setShowURLInput(false)
+      setShowPopup(false)
+    }
+  }
+
+  const handleURLKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleURLSubmit()
+    }
+  }
+
   // Handle file attachment
   const handleAttachClick = () => {
     fileInputRef.current?.click()
   }
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files
     if (files && files.length > 0) {
       const fileName = files[0].name
       setInputValue(`📎 ${fileName} attached`)
+      
+      // Automatically trigger form generation for file uploads
+      setIsSubmitting(true)
+      
+      try {
+        const fileType = files[0].type
+        const fileData = await fileToBase64(files[0])
+        
+        // Store file in sessionStorage for dashboard
+        sessionStorage.setItem('uploadedFile', JSON.stringify({
+          name: fileName,
+          type: fileType,
+          data: fileData,
+          isPDF: fileType === 'application/pdf'
+        }))
+        
+        // Navigate to dashboard with appropriate mode
+        if (fileType === 'application/pdf') {
+          router.push(`/dashboard?mode=pdf&filename=${encodeURIComponent(fileName)}`)
+        } else if (fileType.startsWith('image/')) {
+          router.push(`/dashboard?mode=image&filename=${encodeURIComponent(fileName)}`)
+        }
+      } catch (error) {
+        console.error('File upload error:', error)
+        setIsSubmitting(false)
+      }
     }
   }
+
+
 
   // Main submit handler with hybrid detection
   const handleSubmit = async (e: React.FormEvent) => {
@@ -255,7 +330,17 @@ export default function Home() {
         {/* Hero Section */}
         <main className="hero">
           <div className="hero-badge">
-            ✨ No drag & drop. Just describe what you need.
+            <img 
+              src="/chatterforms-bubble-transparent.gif" 
+              alt="Bubble animation" 
+              style={{
+                width: '16px',
+                height: '16px',
+                marginRight: '8px',
+                verticalAlign: 'middle'
+              }}
+            />
+            No drag & drop. Just describe what you need.
           </div>
           
           <h1 className="hero-title">
@@ -283,16 +368,52 @@ export default function Home() {
                   }}
                 />
                 
-                <button 
-                  type="button"
-                  className="attach-btn" 
-                  onClick={handleAttachClick}
-                  disabled={isSubmitting}
-                >
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66L9.64 16.2a2 2 0 0 1-2.83-2.83l8.49-8.49"/>
-                  </svg>
-                </button>
+                {/* Plus Button */}
+                <div className={plusButtonStyles.plusButtonContainer} ref={popupRef}>
+                  <button 
+                    type="button"
+                    className={`${plusButtonStyles.plusButton} ${showPopup ? plusButtonStyles.active : ''}`}
+                    onClick={() => setShowPopup(!showPopup)}
+                    disabled={isSubmitting}
+                  >
+                    {showPopup ? (
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M18 6L6 18M6 6l12 12"/>
+                      </svg>
+                    ) : (
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M12 5v14M5 12h14"/>
+                      </svg>
+                    )}
+                  </button>
+                  
+                  {/* Popup Menu */}
+                  <div className={`${plusButtonStyles.popupMenu} ${showPopup ? plusButtonStyles.visible : ''}`}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowURLInput(true)
+                        setShowPopup(false)
+                      }}
+                      className={plusButtonStyles.menuItem}
+                    >
+                      <span className={plusButtonStyles.menuIcon}>🔗</span>
+                      <span className={plusButtonStyles.menuText}>Clone from URL</span>
+                    </button>
+                    
+                    <button
+                      type="button"
+                      onClick={() => {
+                        handleAttachClick()
+                        setShowPopup(false)
+                      }}
+                      className={plusButtonStyles.menuItem}
+                    >
+                      <span className={plusButtonStyles.menuIcon}>📎</span>
+                      <span className={plusButtonStyles.menuText}>Extract from PDF/Image</span>
+                    </button>
+                  </div>
+                </div>
                 
                 <button 
                   type="submit"
@@ -315,19 +436,63 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Input hints */}
+            {/* Input Hints */}
             <div className="input-hints">
               <div className="hint-chip">
-                💬 <span>Describe your form</span>
+                <span className="hint-icon">🔗</span>
+                <span>Paste a form URL</span>
               </div>
               <div className="hint-chip">
-                🔗 <span>Paste any URL</span>
+                <span className="hint-icon">📎</span>
+                <span>Upload PDF/Image</span>
               </div>
               <div className="hint-chip">
-                📎 <span>Upload screenshot or PDF</span>
+                <span className="hint-icon">✍️</span>
+                <span>Describe your form</span>
               </div>
             </div>
           </form>
+
+          {/* URL Input Modal */}
+          {showURLInput && (
+            <div className="url-input-modal">
+              <div className="url-input-card">
+                <div className="url-input-header">
+                  <h3>🔗 Clone from URL</h3>
+                  <button 
+                    type="button"
+                    onClick={() => setShowURLInput(false)}
+                    className="close-btn"
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M18 6L6 18M6 6l12 12"/>
+                    </svg>
+                  </button>
+                </div>
+                
+                <div className="url-input-content">
+                  <input
+                    type="url"
+                    value={urlValue}
+                    onChange={(e) => setUrlValue(e.target.value)}
+                    onKeyPress={handleURLKeyPress}
+                    placeholder="https://forms.google.com/d/xyz... or any form URL"
+                    className="url-input"
+                    autoFocus
+                  />
+                  
+                  <button
+                    type="button"
+                    onClick={handleURLSubmit}
+                    disabled={!urlValue.trim()}
+                    className="url-submit-btn"
+                  >
+                    Clone from URL
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Features */}
           <div className="features">

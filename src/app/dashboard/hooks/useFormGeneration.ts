@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { FormSchema, ChatMessage, FieldExtraction, PDFPageSelectionResponse } from '../types'
 
 export function useFormGeneration() {
@@ -20,6 +20,9 @@ export function useFormGeneration() {
 
   // New PDF page selection state
   const [pdfPageSelection, setPdfPageSelection] = useState<PDFPageSelectionResponse | null>(null)
+  
+  // Ref to track if analysis is in progress (prevents race conditions)
+  const isAnalyzingRef = useRef(false)
 
   const generateForm = async (
     description: string, 
@@ -178,18 +181,49 @@ export function useFormGeneration() {
   }
 
   const analyzeURL = async (url: string, additionalContext?: string) => {
-    setIsAnalyzing(true)
+    console.log('🔍 analyzeURL called with:', { url, additionalContext, timestamp: Date.now() })
+    // URL ANALYSIS FUNCTION - UNIQUE IDENTIFIER
+    
+    // Prevent duplicate analysis if already analyzing (using ref for immediate check)
+    if (isAnalyzingRef.current) {
+      console.log('⏭️ Skipping analyzeURL - already analyzing (ref check)')
+      return
+    }
+    
+    // Set analyzing flag immediately
+    isAnalyzingRef.current = true
+    
+    // Set URL state first (like other analysis functions)
+    setUploadedURL(url)
+    setUploadedImage(null) // Clear image if URL is uploaded
+    setUploadedPDF(null) // Clear PDF if URL is uploaded
+    setExtractedFields([])
+    setAnalysisComplete(false)
+    setPdfPageSelection(null)
     setError('')
+    
+    setIsAnalyzing(true)
     
     const startTime = Date.now()
     
-    // Add thinking message immediately
+    // Add URL upload message and thinking message
     setChatHistory(prev => [
       ...prev,
       { 
+        role: 'file', 
+        content: 'URL uploaded',
+        timestamp: startTime,
+        metadata: {
+          fileType: 'url',
+          fileName: url,
+          fileData: url,
+          isUpload: true
+        }
+      },
+      { 
         role: 'thinking', 
         content: 'Analyzing URL...',
-        timestamp: startTime,
+        timestamp: startTime + 100,
         metadata: {
           duration: 0,
           steps: ['Fetching webpage', 'Extracting form fields', 'Validating field types']
@@ -242,6 +276,8 @@ export function useFormGeneration() {
         ]
       })
 
+      // Reset analyzing flag on success
+      isAnalyzingRef.current = false
       return data.extractedFields
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Something went wrong'
@@ -249,6 +285,9 @@ export function useFormGeneration() {
       
       // Remove thinking message on error
       setChatHistory(prev => prev.filter(msg => msg.role !== 'thinking'))
+      
+      // Reset analyzing flag on error
+      isAnalyzingRef.current = false
       
       throw err
     } finally {

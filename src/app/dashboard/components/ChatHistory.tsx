@@ -36,6 +36,7 @@ interface ChatHistoryProps {
   onGenerateFormFromFields?: (fields: FieldExtraction[]) => void
   onResetAnalysis?: () => void
   isLoading?: boolean
+  isFromLanding?: boolean // Add flag to prevent duplicate analysis actions
 }
 
 // Helper function to group consecutive messages by sender
@@ -362,7 +363,8 @@ export default function ChatHistory({
   analysisComplete,
   onGenerateFormFromFields,
   onResetAnalysis,
-  isLoading
+  isLoading,
+  isFromLanding
 }: ChatHistoryProps) {
   const chatContainerRef = useRef<HTMLDivElement>(null)
   const [isAtBottom, setIsAtBottom] = useState(true)
@@ -403,7 +405,8 @@ export default function ChatHistory({
   }
 
   // Check if we should show analysis action
-  const shouldShowAnalysisAction = (uploadedImage || uploadedPDF || uploadedURL) && !isAnalyzing && !analysisComplete
+  // Don't show if coming from landing page to prevent duplicates
+  const shouldShowAnalysisAction = (uploadedImage || uploadedPDF || uploadedURL) && !isAnalyzing && !analysisComplete && !isFromLanding
 
   if (chatHistory.length === 0 && !shouldShowAnalysisAction) {
     return (

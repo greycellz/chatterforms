@@ -78,9 +78,16 @@
   }
   
   .logo::before {
-    content: "✨";
+    content: "";
     margin-right: 8px;
-    font-size: 28px;
+    width: 28px;
+    height: 28px;
+    display: inline-block;
+    background-image: url('/chatterforms-bubble-transparent.gif');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    vertical-align: middle;
   }
   
   .nav-links {
@@ -244,6 +251,8 @@
     51%, 100% { opacity: 0; }
   }
   
+
+  
   .attach-btn {
     background: #f3f4f6;
     border: none;
@@ -273,6 +282,130 @@
     height: 20px;
     color: #6b7280;
   }
+  
+  /* Input hints */
+  .input-hints {
+    margin-top: 16px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+  }
+  
+  .hint-chip {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  /* URL Input Modal Styles */
+  .url-input-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+  }
+  
+  .url-input-card {
+    background: white;
+    border-radius: 16px;
+    padding: 24px;
+    max-width: 500px;
+    width: 100%;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  }
+  
+  .url-input-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  
+  .url-input-header h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0;
+  }
+  
+  .close-btn {
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 50%;
+    background: #f3f4f6;
+    color: #6b7280;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .close-btn:hover {
+    background: #e5e7eb;
+    color: #374151;
+  }
+  
+  .url-input-content {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .url-input {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s ease;
+    color: #1f2937;
+  }
+  
+  .url-input:focus {
+    border-color: #8b5cf6;
+  }
+  
+  .url-submit-btn {
+    padding: 12px 24px;
+    background: #8b5cf6;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+  
+  .url-submit-btn:hover:not(:disabled) {
+    background: #7c3aed;
+  }
+  
+  .url-submit-btn:disabled {
+    background: #d1d5db;
+    cursor: not-allowed;
+  }
+  
+
   
   .submit-btn {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -325,28 +458,7 @@
     100% { transform: rotate(360deg); }
   }
   
-  /* Input hints */
-  .input-hints {
-    margin-top: 16px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    justify-content: center;
-  }
-  
-  .hint-chip {
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    color: white;
-    padding: 6px 12px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 500;
-    backdrop-filter: blur(10px);
-    display: flex;
-    align-items: center;
-    gap: 4px;
-  }
+
   
   /* Features section - Only 2 cards, bigger */
   .features {

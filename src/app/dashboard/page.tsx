@@ -146,12 +146,23 @@ function DashboardContent() {
 
   // Process landing page parameters ONCE
   useEffect(() => {
-    if (hasProcessedLandingParams) return
+    console.log('🔄 Dashboard useEffect triggered:', { 
+      hasProcessedLandingParams, 
+      searchParams: Object.fromEntries(searchParams.entries()),
+      timestamp: Date.now() 
+    })
+    
+    if (hasProcessedLandingParams) {
+      console.log('⏭️ Skipping - already processed')
+      return
+    }
 
     const input = searchParams.get('input')
     const mode = searchParams.get('mode')
     const filename = searchParams.get('filename')
     const url = searchParams.get('url')
+    
+    console.log('📋 Processing landing params:', { input, mode, filename, url })
     
     // Mark as processed immediately to prevent loops
     setHasProcessedLandingParams(true)
@@ -169,7 +180,6 @@ function DashboardContent() {
         } else if (mode === 'url' && url) {
           // URL analysis flow - Skip chat history, analyzeURL will handle it
           console.log('Processing URL from landing:', url)
-          handleURLUpload(url)
           await analyzeURL(url)
           
         } else if (mode && filename) {
@@ -208,14 +218,7 @@ function DashboardContent() {
     }
   }, [
     searchParams, 
-    hasProcessedLandingParams,
-    generateForm,
-    analyzeURL,
-    analyzeScreenshot,
-    analyzePDF,
-    handleImageUpload,
-    handlePDFUpload,
-    handleURLUpload
+    hasProcessedLandingParams
   ])
 
   // 🎯 NEW: Handle example selection from empty state
@@ -328,7 +331,12 @@ function DashboardContent() {
   }
 
   const handleAnalyzeURL = async (url: string, additionalContext?: string) => {
-    if (isFromLanding) return
+    console.log('🎯 handleAnalyzeURL called:', { url, additionalContext, isFromLanding, timestamp: Date.now() })
+    
+    if (isFromLanding) {
+      console.log('⏭️ Skipping handleAnalyzeURL - isFromLanding is true')
+      return
+    }
     
     try {
       await analyzeURL(url, additionalContext)
@@ -389,6 +397,7 @@ function DashboardContent() {
           pdfPageSelection={pdfPageSelection}
           onPageSelectionComplete={handlePageSelectionComplete}
           onGenerateFormFromFields={generateFormFromFields}
+          isFromLanding={isFromLanding}
         />
 
         {/* UPDATED: FormPreview with publish functionality */}
@@ -419,6 +428,16 @@ function DashboardContent() {
           // NEW: Styling panel state
           isStylingPanelOpen={isStylingPanelOpen}
           onStylingPanelToggle={setIsStylingPanelOpen}
+          // NEW: Analysis state props
+          isAnalyzing={isAnalyzing}
+          analysisComplete={analysisComplete}
+          onResetAnalysis={resetAnalysis}
+          extractedFields={extractedFields}
+          onGenerateFormFromFields={() => {
+            if (extractedFields && extractedFields.length > 0) {
+              generateFormFromFields(extractedFields)
+            }
+          }}
         />      
         </div>
     </div>

@@ -9,6 +9,10 @@ interface EnhancedEmptyStateProps {
     buttonColor: string
   }
   onExampleClick?: (example: string) => void
+  // Analysis complete state props
+  analysisComplete?: boolean
+  extractedFields?: any[]
+  onGenerateFormFromFields?: () => void
 }
 
 const FORM_EXAMPLES = [
@@ -56,7 +60,121 @@ const FORM_EXAMPLES = [
   }
 ]
 
-export default function EnhancedEmptyState({ stylingConfig, onExampleClick }: EnhancedEmptyStateProps) {
+// Analysis Complete State Component
+const AnalysisCompleteState = ({ 
+  stylingConfig, 
+  extractedFields, 
+  onGenerateFormFromFields 
+}: { 
+  stylingConfig: any
+  extractedFields?: any[]
+  onGenerateFormFromFields?: () => void 
+}) => {
+  const fieldCount = extractedFields?.length || 0
+  
+  return (
+    <div 
+      style={{
+        background: stylingConfig.backgroundColor,
+        fontFamily: stylingConfig.fontFamily,
+        color: stylingConfig.fontColor,
+        minHeight: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '80px 40px',
+        position: 'relative',
+        overflow: 'hidden'
+      }}
+    >
+      {/* Main Content */}
+      <div style={{ textAlign: 'center', maxWidth: '600px' }}>
+        {/* Success Icon */}
+        <div style={{
+          width: '80px',
+          height: '80px',
+          borderRadius: '50%',
+          background: 'linear-gradient(135deg, #10B981, #059669)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          margin: '0 auto 32px',
+          boxShadow: '0 8px 32px rgba(16, 185, 129, 0.3)'
+        }}>
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3">
+            <polyline points="20,6 9,17 4,12" />
+          </svg>
+        </div>
+        
+        {/* Title */}
+        <h2 style={{
+          fontSize: '32px',
+          fontWeight: '700',
+          marginBottom: '16px',
+          background: 'linear-gradient(135deg, #10B981, #059669)',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          backgroundClip: 'text'
+        }}>
+          Your analysis is complete!
+        </h2>
+        
+        {/* Description */}
+        <p style={{
+          fontSize: '18px',
+          opacity: '0.8',
+          marginBottom: '48px',
+          lineHeight: '1.6'
+        }}>
+          Select &apos;Generate Form&apos; from the extracted fields above to create your form
+        </p>
+        
+        {/* Generate Form Button */}
+        <button
+          onClick={onGenerateFormFromFields}
+          style={{
+            background: 'linear-gradient(135deg, #10B981, #059669)',
+            color: 'white',
+            border: 'none',
+            padding: '16px 32px',
+            borderRadius: '12px',
+            fontSize: '16px',
+            fontWeight: '600',
+            cursor: 'pointer',
+            transition: 'all 0.2s ease',
+            boxShadow: '0 4px 16px rgba(16, 185, 129, 0.3)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            margin: '0 auto'
+          }}
+          onMouseOver={(e) => {
+            e.currentTarget.style.transform = 'translateY(-2px)'
+            e.currentTarget.style.boxShadow = '0 8px 24px rgba(16, 185, 129, 0.4)'
+          }}
+          onMouseOut={(e) => {
+            e.currentTarget.style.transform = 'translateY(0)'
+            e.currentTarget.style.boxShadow = '0 4px 16px rgba(16, 185, 129, 0.3)'
+          }}
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <polyline points="20,6 9,17 4,12" />
+          </svg>
+          Generate Form ({fieldCount} fields)
+        </button>
+      </div>
+    </div>
+  )
+}
+
+export default function EnhancedEmptyState({ 
+  stylingConfig, 
+  onExampleClick, 
+  analysisComplete, 
+  extractedFields, 
+  onGenerateFormFromFields 
+}: EnhancedEmptyStateProps) {
   const [currentExampleIndex, setCurrentExampleIndex] = useState(0)
   const [isAnimating, setIsAnimating] = useState(false)
 
@@ -74,6 +192,17 @@ export default function EnhancedEmptyState({ stylingConfig, onExampleClick }: En
   }, [])
 
   const currentExample = FORM_EXAMPLES[currentExampleIndex]
+
+  // Show analysis complete state if analysis is done
+  if (analysisComplete) {
+    return (
+      <AnalysisCompleteState 
+        stylingConfig={stylingConfig}
+        extractedFields={extractedFields}
+        onGenerateFormFromFields={onGenerateFormFromFields}
+      />
+    )
+  }
 
   return (
     <div 

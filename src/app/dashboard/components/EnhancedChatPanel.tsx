@@ -42,6 +42,9 @@ interface EnhancedChatPanelProps {
   
   // Form generation from fields
   onGenerateFormFromFields?: (fields: FieldExtraction[]) => void
+  
+  // Landing page flag to prevent duplicate analysis actions
+  isFromLanding?: boolean
 }
 
 export default function EnhancedChatPanel({
@@ -73,7 +76,8 @@ export default function EnhancedChatPanel({
   onResetAnalysis,
   pdfPageSelection,
   onPageSelectionComplete,
-  onGenerateFormFromFields
+  onGenerateFormFromFields,
+  isFromLanding
 }: EnhancedChatPanelProps) {
   return (
     <div className="chat-panel-enhanced">
@@ -98,6 +102,7 @@ export default function EnhancedChatPanel({
                   onGenerateFormFromFields={onGenerateFormFromFields}
                   onResetAnalysis={onResetAnalysis}
                   isLoading={isLoading}
+                  isFromLanding={isFromLanding}
                 />
       </div>
       

@@ -62,7 +62,167 @@ interface FormPreviewProps {
   // Styling panel state
   isStylingPanelOpen?: boolean
   onStylingPanelToggle?: (isOpen: boolean) => void
+  
+  // Analysis state props
+  isAnalyzing?: boolean
+  analysisComplete?: boolean
+  onResetAnalysis?: () => void
+  extractedFields?: Array<{ id: string; label: string; type: string; confidence: number }>
+  onGenerateFormFromFields?: () => void
 }
+
+// Analysis progress component for when upload/URL analysis is happening
+const AnalysisProgressState = ({ 
+  stylingConfig, 
+  onResetAnalysis 
+}: { 
+  stylingConfig: StylingConfig
+  onResetAnalysis?: () => void 
+}) => (
+  <div 
+    style={{
+      background: stylingConfig.backgroundColor,
+      fontFamily: stylingConfig.fontFamily,
+      color: stylingConfig.fontColor,
+      minHeight: '100vh',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '80px 40px',
+      position: 'relative',
+      overflow: 'hidden'
+    }}
+  >
+    {/* Analysis Progress Animation */}
+    <div style={{ textAlign: 'center', maxWidth: '600px' }}>
+      {/* Progress Icon */}
+      <div style={{
+        width: '80px',
+        height: '80px',
+        borderRadius: '50%',
+        background: 'linear-gradient(135deg, #8B5CF6, #A855F7)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        margin: '0 auto 32px',
+        animation: 'pulse 2s ease-in-out infinite'
+      }}>
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+          <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+        </svg>
+      </div>
+      
+      {/* Title */}
+      <h2 style={{
+        fontSize: '32px',
+        fontWeight: '700',
+        marginBottom: '16px',
+        background: 'linear-gradient(135deg, #8B5CF6, #A855F7)',
+        WebkitBackgroundClip: 'text',
+        WebkitTextFillColor: 'transparent',
+        backgroundClip: 'text'
+      }}>
+        Analyzing your content...
+      </h2>
+      
+      {/* Description */}
+      <p style={{
+        fontSize: '18px',
+        opacity: '0.8',
+        marginBottom: '48px',
+        lineHeight: '1.6'
+      }}>
+        We&apos;re extracting form fields from your upload. This usually takes 10-20 seconds.
+      </p>
+      
+      {/* Progress Dots */}
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        gap: '12px',
+        marginBottom: '48px'
+      }}>
+        {[0, 1, 2].map((i) => (
+          <div
+            key={i}
+            style={{
+              width: '12px',
+              height: '12px',
+              borderRadius: '50%',
+              background: '#8B5CF6',
+              animation: `bounce 1.4s ease-in-out infinite both`,
+              animationDelay: `${i * 0.16}s`
+            }}
+          />
+        ))}
+      </div>
+      
+      {/* Template Option */}
+      <div style={{
+        padding: '24px',
+        background: 'rgba(139, 92, 246, 0.05)',
+        border: '1px solid rgba(139, 92, 246, 0.2)',
+        borderRadius: '16px',
+        marginTop: '32px'
+      }}>
+        <p style={{
+          fontSize: '16px',
+          marginBottom: '16px',
+          opacity: '0.9'
+        }}>
+          Want to use a template instead?
+        </p>
+        <button
+          onClick={onResetAnalysis}
+          style={{
+            background: 'linear-gradient(135deg, #8B5CF6, #A855F7)',
+            color: 'white',
+            border: 'none',
+            padding: '12px 24px',
+            borderRadius: '8px',
+            fontSize: '14px',
+            fontWeight: '600',
+            cursor: 'pointer',
+            transition: 'all 0.2s ease'
+          }}
+          onMouseOver={(e) => {
+            e.currentTarget.style.transform = 'translateY(-2px)'
+            e.currentTarget.style.boxShadow = '0 8px 24px rgba(139, 92, 246, 0.3)'
+          }}
+          onMouseOut={(e) => {
+            e.currentTarget.style.transform = 'translateY(0)'
+            e.currentTarget.style.boxShadow = 'none'
+          }}
+        >
+          Start with a template
+        </button>
+      </div>
+    </div>
+    
+    <style jsx>{`
+      @keyframes pulse {
+        0%, 100% { 
+          transform: scale(1);
+          opacity: 1;
+        }
+        50% { 
+          transform: scale(1.05);
+          opacity: 0.8;
+        }
+      }
+      
+      @keyframes bounce {
+        0%, 80%, 100% { 
+          transform: scale(0);
+        }
+        40% { 
+          transform: scale(1);
+        }
+      }
+    `}</style>
+  </div>
+)
 
 // Enhanced loading form animation with purple theme and improved UX
 const EnhancedLoadingFormAnimation = ({ stylingConfig }: { stylingConfig: StylingConfig }) => (
@@ -592,7 +752,12 @@ export default function FormPreview({
   publishedFormId,
   onExampleSelect,
   isStylingPanelOpen,
-  onStylingPanelToggle
+  onStylingPanelToggle,
+  isAnalyzing,
+  analysisComplete,
+  onResetAnalysis,
+  extractedFields,
+  onGenerateFormFromFields
 }: FormPreviewProps) {
   
   // Handle individual radio option editing
@@ -750,11 +915,20 @@ export default function FormPreview({
                     onCancelEdit={onCancelEdit}
                   />
                 </div>
+              ) : isAnalyzing ? (
+                // Show analysis progress instead of templates
+                <AnalysisProgressState 
+                  stylingConfig={stylingConfig}
+                  onResetAnalysis={onResetAnalysis}
+                />
               ) : (
-                // Enhanced Empty state with better engagement
+                // Enhanced Empty state with better engagement (only when not analyzing)
                 <EnhancedEmptyState 
                   stylingConfig={stylingConfig}
                   onExampleClick={onExampleSelect}
+                  analysisComplete={analysisComplete}
+                  extractedFields={extractedFields}
+                  onGenerateFormFromFields={onGenerateFormFromFields}
                 />
               )}
             </div>
