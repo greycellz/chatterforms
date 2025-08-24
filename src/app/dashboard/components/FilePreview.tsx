@@ -21,7 +21,35 @@ export default function FilePreview({
 }: FilePreviewProps) {
   // Helper function to truncate long URLs
   const truncateFileName = (name: string, maxLength: number = 60) => {
-    return name.length > maxLength ? name.substring(0, maxLength) + '...' : name
+    if (name.length <= maxLength) return name
+    
+    // If it's a URL, use smart truncation
+    if (name.startsWith('http://') || name.startsWith('https://')) {
+      try {
+        const urlObj = new URL(name)
+        const domain = urlObj.hostname
+        const path = urlObj.pathname + urlObj.search + urlObj.hash
+        
+        if (domain.length + 10 > maxLength) {
+          // Domain is too long, just truncate the whole URL
+          return name.substring(0, maxLength - 3) + '...'
+        }
+        
+        // Keep domain and truncate path
+        const availablePathLength = maxLength - domain.length - 3 // 3 for "..."
+        if (path.length > availablePathLength) {
+          return `${domain}...${path.substring(path.length - availablePathLength + 3)}`
+        }
+        
+        return name
+      } catch {
+        // If URL parsing fails, just truncate
+        return name.substring(0, maxLength - 3) + '...'
+      }
+    }
+    
+    // For non-URLs, use simple truncation
+    return name.substring(0, maxLength - 3) + '...'
   }
 
   return (

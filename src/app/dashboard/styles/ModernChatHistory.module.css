@@ -39,6 +39,19 @@
   .modernMessageGroup.assistantGroup {
     align-items: flex-start !important;
   }
+
+  /* Sender Label Styles */
+  .modernSenderLabel {
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    color: white !important;
+    margin-bottom: 8px !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+    text-align: left !important;
+    width: 100% !important;
+    align-self: flex-start !important;
+  }
   
   .modernChatMessage {
     display: flex !important;
@@ -143,6 +156,9 @@
     display: flex !important;
     flex-direction: column !important;
     gap: 12px !important;
+    overflow: hidden !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
   }
 
   .modernFileHeader {
@@ -196,13 +212,22 @@
     border-radius: 8px !important;
     padding: 12px !important;
     border: 1px solid rgba(0, 0, 0, 0.1) !important;
+    overflow: hidden !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
   }
 
   .modernUrlText {
     font-size: 14px !important;
     color: #374151 !important;
-    word-break: break-all !important;
     font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    max-width: 100% !important;
+    word-break: normal !important;
+    word-wrap: normal !important;
+    overflow-wrap: normal !important;
   }
 
   /* Analysis Action Styles */

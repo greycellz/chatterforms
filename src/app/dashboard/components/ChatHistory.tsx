@@ -3,6 +3,34 @@ import { useRef, useEffect, useState } from 'react'
 import styles from '../styles/ModernChatHistory.module.css'
 import { FieldExtraction } from '../types'
 
+// Helper function to truncate long URLs
+const truncateUrl = (url: string, maxLength: number = 120): string => {
+  if (url.length <= maxLength) return url
+  
+  // Try to keep the domain and truncate the path
+  try {
+    const urlObj = new URL(url)
+    const domain = urlObj.hostname
+    const path = urlObj.pathname + urlObj.search + urlObj.hash
+    
+    if (domain.length + 10 > maxLength) {
+      // Domain is too long, just truncate the whole URL
+      return url.substring(0, maxLength - 3) + '...'
+    }
+    
+    // Keep domain and truncate path
+    const availablePathLength = maxLength - domain.length - 3 // 3 for "..."
+    if (path.length > availablePathLength) {
+      return `${domain}...${path.substring(path.length - availablePathLength + 3)}`
+    }
+    
+    return url
+  } catch {
+    // If URL parsing fails, just truncate
+    return url.substring(0, maxLength - 3) + '...'
+  }
+}
+
 interface ChatMessage {
   role: 'user' | 'assistant' | 'thinking' | 'processing' | 'file' | 'analysisAction' | 'fieldResults'
   content: string
@@ -180,12 +208,7 @@ const FileMessage = ({ fileType, fileName, fileData, isUpload }: {
       </div>
     )}
     
-    {/* Show URL preview for web pages */}
-    {fileType === 'url' && fileData && (
-      <div className={styles.modernUrlPreview}>
-        <div className={styles.modernUrlText}>{fileData}</div>
-      </div>
-    )}
+    {/* URL preview removed to prevent layout issues - user already knows what URL they uploaded */}
   </div>
 )
 
@@ -455,6 +478,11 @@ export default function ChatHistory({
               key={groupIndex}
               className={`${styles.modernMessageGroup} ${group.sender === 'user' ? styles.userGroup : styles.assistantGroup}`}
             >
+              {/* Sender Label */}
+              <div className={styles.modernSenderLabel}>
+                {group.sender === 'user' ? 'You' : 'Chatterforms AI'}
+              </div>
+              
               {group.messages.map((message, messageIndex) => (
                 <div
                   key={messageIndex}

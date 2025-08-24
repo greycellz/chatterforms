@@ -4,6 +4,34 @@ interface AnalysisProgressProps {
   fileName: string
 }
 
+// Helper function to truncate long URLs
+const truncateUrl = (url: string, maxLength: number = 50): string => {
+  if (url.length <= maxLength) return url
+  
+  // Try to keep the domain and truncate the path
+  try {
+    const urlObj = new URL(url)
+    const domain = urlObj.hostname
+    const path = urlObj.pathname + urlObj.search + urlObj.hash
+    
+    if (domain.length + 10 > maxLength) {
+      // Domain is too long, just truncate the whole URL
+      return url.substring(0, maxLength - 3) + '...'
+    }
+    
+    // Keep domain and truncate path
+    const availablePathLength = maxLength - domain.length - 3 // 3 for "..."
+    if (path.length > availablePathLength) {
+      return `${domain}...${path.substring(path.length - availablePathLength + 3)}`
+    }
+    
+    return url
+  } catch {
+    // If URL parsing fails, just truncate
+    return url.substring(0, maxLength - 3) + '...'
+  }
+}
+
 export default function AnalysisProgress({ uploadedPDF, uploadedURL, fileName }: AnalysisProgressProps) {
   return (
     <div className="p-4">
@@ -18,7 +46,7 @@ export default function AnalysisProgress({ uploadedPDF, uploadedURL, fileName }:
                 {uploadedPDF 
                   ? `Analyzing PDF document (${fileName})...`
                   : uploadedURL
-                    ? `Analyzing form URL (${fileName})...`
+                    ? `Analyzing form URL (${truncateUrl(fileName)})...`
                     : 'Analyzing screenshot and extracting form fields...'
                 }
               </span>

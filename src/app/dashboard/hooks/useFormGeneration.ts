@@ -418,18 +418,13 @@ export function useFormGeneration() {
     const additionalContext = validatedFields.find(f => f.additionalContext)?.additionalContext || ''
     
     const sourceInfo = uploadedPDF 
-      ? `PDF document "${uploadedPDF.name}"`
+      ? `PDF document`
       : uploadedURL
-        ? `URL "${uploadedURL}"`
+        ? `URL analysis`
         : 'screenshot'
     
-    const description = `Create a form based on fields extracted from ${sourceInfo}: ${validatedFields.map(field => {
-      let fieldDesc = `${field.label} (${field.type}${field.required ? ', required' : ', optional'})`
-      if (field.placeholder) fieldDesc += ` with placeholder "${field.placeholder}"`
-      if (field.options) fieldDesc += ` with options: ${field.options.join(', ')}`
-      if (field.pageNumber && uploadedPDF) fieldDesc += ` [page ${field.pageNumber}]`
-      return fieldDesc
-    }).join('; ')}. ${additionalContext}`
+    // Create a much shorter description to avoid layout issues
+    const description = `Generate form from ${sourceInfo} with ${validatedFields.length} extracted fields${additionalContext ? ` and custom requirements` : ''}`
 
     return await generateForm(description, null, false, undefined, validatedFields)
   }
