@@ -1,3 +1,4 @@
+import React, { useState } from 'react'
 import ChatHistory from './ChatHistory'
 import AnalysisReview from './AnalysisReview'
 import CompactChatInput from './CompactChatInput'
@@ -79,11 +80,78 @@ export default function EnhancedChatPanel({
   onGenerateFormFromFields,
   isFromLanding
 }: EnhancedChatPanelProps) {
+  const [showWorkspaceMenu, setShowWorkspaceMenu] = useState(false)
+  
+  // Close menu when clicking outside
+  const handleClickOutside = (event: MouseEvent) => {
+    const target = event.target as Element
+    if (!target.closest('.workspace-header') && !target.closest('.workspace-menu')) {
+      setShowWorkspaceMenu(false)
+    }
+  }
+  
+  // Add click outside listener
+  React.useEffect(() => {
+    if (showWorkspaceMenu) {
+      document.addEventListener('mousedown', handleClickOutside)
+      return () => document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [showWorkspaceMenu])
+  
   return (
     <div className="chat-panel-enhanced">
-      {/* Compact Header */}
+      {/* Workspace Header with Bubble GIF + Form Name + Dropdown */}
       <div className="chat-header-compact">
-        <h2>Describe your form</h2>
+        <div className="workspace-header">
+          <div className="workspace-icon">
+            <img 
+              src="/chatterforms-bubble-transparent.gif" 
+              alt="Bubble animation" 
+              style={{
+                width: '24px',
+                height: '24px',
+                verticalAlign: 'middle'
+              }}
+            />
+          </div>
+          <div className="workspace-name">
+            <span className="form-name">Create New Form</span>
+            <button className="dropdown-arrow" onClick={() => setShowWorkspaceMenu(!showWorkspaceMenu)}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M6 9l6 6 6-6"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+        
+        {/* Workspace Dropdown Menu */}
+        {showWorkspaceMenu && (
+          <div className="workspace-menu">
+            <button className="menu-item" onClick={() => window.location.href = '/'}>
+              <span className="menu-icon">🏠</span>
+              <span className="menu-text">Back to Landing</span>
+            </button>
+            <button className="menu-item" onClick={() => {
+              // Reset the dashboard to create a new form
+              window.location.href = '/dashboard'
+              setShowWorkspaceMenu(false)
+            }}>
+              <span className="menu-icon">📄</span>
+              <span className="menu-text">New Form</span>
+            </button>
+            <div className="menu-divider"></div>
+            <button className="menu-item disabled">
+              <span className="menu-icon">📁</span>
+              <span className="menu-text">My Forms</span>
+              <span className="coming-soon">Coming Soon</span>
+            </button>
+            <button className="menu-item disabled">
+              <span className="menu-icon">⚙️</span>
+              <span className="menu-text">Settings</span>
+              <span className="coming-soon">Coming Soon</span>
+            </button>
+          </div>
+        )}
       </div>
       
       {/* Chat History - Takes up available space with proper scrolling */}
@@ -157,17 +225,137 @@ export default function EnhancedChatPanel({
         .chat-header-compact {
           padding: 20px 28px 16px;
           border-bottom: 1px solid rgba(255, 255, 255, 0.15);
-          position: relative;
-          z-index: 2;
+          position: relative !important;
+          z-index: 99998 !important;
           flex-shrink: 0;
         }
 
-        .chat-header-compact h2 {
+        .workspace-header {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          cursor: pointer;
+          padding: 4px 8px;
+          border-radius: 8px;
+          transition: background-color 0.2s ease;
+        }
+        
+        .workspace-header:hover {
+          background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .workspace-icon {
+          flex-shrink: 0;
+        }
+        
+        .workspace-name {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          flex: 1;
+        }
+        
+        .form-name {
           font-size: 20px;
           font-weight: 700;
           color: white;
-          margin: 0;
           letter-spacing: -0.01em;
+        }
+        
+        .dropdown-arrow {
+          background: none;
+          border: none;
+          color: rgba(255, 255, 255, 0.7);
+          cursor: pointer;
+          padding: 4px;
+          border-radius: 4px;
+          transition: all 0.2s ease;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        
+        .dropdown-arrow:hover {
+          color: white;
+          background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .chat-panel-enhanced .chat-header-compact .workspace-menu {
+          position: absolute !important;
+          top: 100% !important;
+          left: 0 !important;
+          width: 50% !important;
+          background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%) !important;
+          backdrop-filter: blur(20px) !important;
+          border: 1px solid rgba(139, 92, 246, 0.3) !important;
+          border-radius: 12px !important;
+          padding: 8px !important;
+          margin-top: 8px !important;
+          z-index: 99999 !important;
+          box-shadow: 0 8px 32px rgba(139, 92, 246, 0.3) !important;
+          animation: slideDown 0.2s ease !important;
+        }
+        
+        .menu-item {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          width: 100%;
+          padding: 12px 16px;
+          border: none;
+          background: transparent;
+          color: white;
+          cursor: pointer;
+          border-radius: 8px;
+          transition: background-color 0.2s ease;
+          text-align: left;
+          font-size: 14px;
+          font-weight: 500;
+        }
+        
+        .menu-item:hover:not(.disabled) {
+          background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .menu-item.disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+        
+        .menu-icon {
+          font-size: 16px;
+          flex-shrink: 0;
+          width: 20px;
+          text-align: center;
+        }
+        
+        .menu-text {
+          flex: 1;
+        }
+        
+        .coming-soon {
+          font-size: 11px;
+          color: rgba(255, 255, 255, 0.5);
+          background: rgba(255, 255, 255, 0.1);
+          padding: 2px 6px;
+          border-radius: 4px;
+        }
+        
+        .menu-divider {
+          height: 1px;
+          background: rgba(255, 255, 255, 0.1);
+          margin: 8px 0;
+        }
+        
+        @keyframes slideDown {
+          from {
+            opacity: 0;
+            transform: translateY(-8px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
         }
 
         .chat-header-compact::after {
@@ -197,7 +385,7 @@ export default function EnhancedChatPanel({
           position: relative;
           z-index: 10;
           flex-shrink: 0;
-          background: linear-gradient(135deg, rgba(99, 102, 241, 0.95) 0%, rgba(139, 92, 246, 0.95) 100%);
+          background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
           backdrop-filter: blur(20px);
           border-top: 1px solid rgba(255, 255, 255, 0.15);
         }

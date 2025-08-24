@@ -330,17 +330,7 @@ export default function Home() {
         {/* Hero Section */}
         <main className="hero">
           <div className="hero-badge">
-            <img 
-              src="/chatterforms-bubble-transparent.gif" 
-              alt="Bubble animation" 
-              style={{
-                width: '16px',
-                height: '16px',
-                marginRight: '8px',
-                verticalAlign: 'middle'
-              }}
-            />
-            No drag & drop. Just describe what you need.
+            No more drag - drop, just chatter
           </div>
           
           <h1 className="hero-title">
@@ -436,21 +426,7 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Input Hints */}
-            <div className="input-hints">
-              <div className="hint-chip">
-                <span className="hint-icon">🔗</span>
-                <span>Paste a form URL</span>
-              </div>
-              <div className="hint-chip">
-                <span className="hint-icon">📎</span>
-                <span>Upload PDF/Image</span>
-              </div>
-              <div className="hint-chip">
-                <span className="hint-icon">✍️</span>
-                <span>Describe your form</span>
-              </div>
-            </div>
+
           </form>
 
           {/* URL Input Modal */}
