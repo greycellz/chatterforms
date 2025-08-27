@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { Redis } from '@upstash/redis'
-
-const redis = Redis.fromEnv()
+import { railwayClient } from '@/lib/railway-client'
 
 // Generate a unique form ID
 function generateFormId(): string {
@@ -21,16 +19,9 @@ export async function POST(request: NextRequest) {
     // If we have an existing form ID, try to update the existing form
     if (existingFormId) {
       try {
-        const existingForm = await redis.get(`form:${existingFormId}`)
-        if (existingForm) {
-          // Form exists, we'll update it with the same ID
-          formId = existingFormId
-          console.log(`Updating existing form with ID: ${formId}`)
-        } else {
-          // Form doesn't exist anymore, generate new ID
-          formId = generateFormId()
-          console.log(`Existing form not found, generating new ID: ${formId}`)
-        }
+        // Check if form exists in GCP (we'll use the same ID if it exists)
+        formId = existingFormId
+        console.log(`Updating existing form with ID: ${formId}`)
       } catch (error) {
         console.warn('Error checking existing form:', error)
         // If there's an error checking, generate new ID as fallback
@@ -41,37 +32,47 @@ export async function POST(request: NextRequest) {
       formId = generateFormId()
       console.log(`No existing form ID, generating new ID: ${formId}`)
     }
-    
-    // Get existing form data if updating
-    let existingFormData: {
-      createdAt?: string
-      submissions?: unknown[]
-    } | null = null
-    if (existingFormId) {
-      try {
-        existingFormData = await redis.get(`form:${existingFormId}`) as {
-          createdAt?: string
-          submissions?: unknown[]
-        } | null
-      } catch (error) {
-        console.warn('Error getting existing form data:', error)
-      }
-    }
 
-    // Save form schema to Redis with button text
+    // Prepare form data for GCP storage
     const formData = {
       id: formId,
       schema: {
         ...formSchema,
         formId // Ensure the schema includes the formId
       },
-      createdAt: existingFormData?.createdAt || new Date().toISOString(),
+      createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(), // Track when it was last updated
-      submissions: existingFormData?.submissions || [],
-      submitButtonText: submitButtonText || 'Submit Form'
+      submissions: [],
+      submitButtonText: submitButtonText || 'Submit Form',
+      isPublished: true
     }
     
-    await redis.set(`form:${formId}`, formData)
+    // Store form in GCP via Railway
+    try {
+      console.log(`📝 Storing form in GCP with ID: ${formId}`)
+      console.log(`📝 Form data structure:`, JSON.stringify(formData, null, 2))
+      
+      const result = await railwayClient.storeFormStructure(
+        formData,
+        'anonymous', // TODO: Add user authentication
+        {
+          source: 'form-publishing',
+          isUpdate: !!existingFormId,
+          submitButtonText: submitButtonText || 'Submit Form',
+          isPublished: true
+        }
+      )
+      
+      if (!result.success) {
+        console.error('❌ Failed to store form in GCP:', result.error)
+        throw new Error(`Failed to publish form to GCP: ${result.error}`)
+      }
+      
+      console.log(`✅ Form stored in GCP: ${formId}`)
+    } catch (error) {
+      console.error('❌ Failed to store form in GCP:', error)
+      throw new Error('Failed to publish form to GCP')
+    }
     
     const isUpdate = existingFormId === formId
     

@@ -2,7 +2,7 @@
 
 'use client'
 
-import { useState, useEffect, Suspense } from 'react'
+import { useState, useEffect, Suspense, useRef } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { useFormEditing } from './hooks/useFormEditing'
 import { useFormGeneration } from './hooks/useFormGeneration'
@@ -91,6 +91,7 @@ function DashboardContent() {
   const [description, setDescription] = useState('')
   const [hasProcessedLandingParams, setHasProcessedLandingParams] = useState(false)
   const [isFromLanding, setIsFromLanding] = useState(false)
+  const processedLandingParamsRef = useRef(false) // Add ref for immediate access
   const [isStylingPanelOpen, setIsStylingPanelOpen] = useState(false)
   const searchParams = useSearchParams()
 
@@ -146,26 +147,60 @@ function DashboardContent() {
 
   // Process landing page parameters ONCE
   useEffect(() => {
-    console.log('🔄 Dashboard useEffect triggered:', { 
-      hasProcessedLandingParams, 
-      searchParams: Object.fromEntries(searchParams.entries()),
-      timestamp: Date.now() 
-    })
-    
-    if (hasProcessedLandingParams) {
-      console.log('⏭️ Skipping - already processed')
-      return
-    }
-
     const input = searchParams.get('input')
     const mode = searchParams.get('mode')
     const filename = searchParams.get('filename')
     const url = searchParams.get('url')
     
-    console.log('📋 Processing landing params:', { input, mode, filename, url })
+    console.log('🔄 Dashboard useEffect triggered:', { 
+      hasProcessedLandingParams, 
+      processedLandingParamsRef: processedLandingParamsRef.current,
+      searchParams: Object.fromEntries(searchParams.entries()),
+      timestamp: Date.now() 
+    })
     
-    // Mark as processed immediately to prevent loops
+    // Check multiple safeguards to prevent HMR re-runs
+    const sessionProcessed = sessionStorage.getItem('landingParamsProcessed')
+    const sessionTimestamp = sessionStorage.getItem('landingParamsTimestamp')
+    const currentParams = JSON.stringify({ input, mode, filename, url })
+    const lastProcessedParams = sessionStorage.getItem('lastProcessedParams')
+    
+    // Check if session storage has expired (5 minutes)
+    const sessionAge = sessionTimestamp ? Date.now() - parseInt(sessionTimestamp) : 0
+    const sessionExpired = sessionAge > 5 * 60 * 1000 // 5 minutes
+    
+    console.log('🔍 Session storage check:', { 
+      sessionProcessed, 
+      sessionTimestamp,
+      sessionAge,
+      sessionExpired,
+      lastProcessedParams, 
+      currentParams,
+      paramsMatch: lastProcessedParams === currentParams
+    })
+    
+    // Clear session storage if expired or if we have new parameters
+    if (sessionExpired || (sessionProcessed && lastProcessedParams && lastProcessedParams !== currentParams)) {
+      console.log('🧹 Clearing session storage - expired or new parameters detected')
+      sessionStorage.removeItem('landingParamsProcessed')
+      sessionStorage.removeItem('lastProcessedParams')
+      sessionStorage.removeItem('landingParamsTimestamp')
+    }
+    
+    if (hasProcessedLandingParams || processedLandingParamsRef.current || (sessionProcessed && lastProcessedParams === currentParams && !sessionExpired)) {
+      console.log('⏭️ Skipping - already processed (state, ref, or session)')
+      return
+    }
+    
+    console.log('📋 Processing landing params:', { input, mode, filename, url })
+    console.log('📋 Raw searchParams:', Object.fromEntries(searchParams.entries()))
+    
+    // Mark as processed immediately to prevent loops (state, ref, and session)
     setHasProcessedLandingParams(true)
+    processedLandingParamsRef.current = true
+    sessionStorage.setItem('landingParamsProcessed', 'true')
+    sessionStorage.setItem('lastProcessedParams', currentParams)
+    sessionStorage.setItem('landingParamsTimestamp', Date.now().toString())
 
     const processLandingInput = async () => {
       try {
@@ -179,8 +214,10 @@ function DashboardContent() {
           
         } else if (mode === 'url' && url) {
           // URL analysis flow - Skip chat history, analyzeURL will handle it
-          console.log('Processing URL from landing:', url)
-          await analyzeURL(url)
+          console.log('🎯 Landing page - Processing URL:', url)
+          console.log('🎯 Landing page - About to call handleAnalyzeURL')
+          await handleAnalyzeURL(url)
+          console.log('🎯 Landing page - handleAnalyzeURL completed')
           
         } else if (mode && filename) {
           // File upload flow - Skip chat history, analysis functions will handle it
@@ -203,8 +240,11 @@ function DashboardContent() {
           }
         }
         
-        // Reset flag after processing
-        setTimeout(() => setIsFromLanding(false), 1000)
+        // Reset flag after processing (increased delay to prevent race conditions)
+        setTimeout(() => {
+          console.log('🔄 Resetting isFromLanding flag to false')
+          setIsFromLanding(false)
+        }, 3000)
         
       } catch (error) {
         console.error('Error processing landing input:', error)
@@ -333,10 +373,11 @@ function DashboardContent() {
   const handleAnalyzeURL = async (url: string, additionalContext?: string) => {
     console.log('🎯 handleAnalyzeURL called:', { url, additionalContext, isFromLanding, timestamp: Date.now() })
     
-    if (isFromLanding) {
-      console.log('⏭️ Skipping handleAnalyzeURL - isFromLanding is true')
-      return
-    }
+    // Temporarily allow URL analysis even when isFromLanding is true
+    // if (isFromLanding) {
+    //   console.log('⏭️ Skipping handleAnalyzeURL - isFromLanding is true')
+    //   return
+    // }
     
     try {
       await analyzeURL(url, additionalContext)

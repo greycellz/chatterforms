@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react'
 import { FormSchema, ChatMessage, FieldExtraction, PDFPageSelectionResponse } from '../types'
+import { railwayClient, AnalysisResult } from '@/lib/railway-client'
 
 export function useFormGeneration() {
   const [formSchema, setFormSchema] = useState<FormSchema | null>(null)
@@ -31,6 +32,14 @@ export function useFormGeneration() {
     preserveButtonText?: string,
     extractedFields?: FieldExtraction[]
   ) => {
+    console.log('🚀 generateForm called:', { 
+      description: description?.substring(0, 50) + '...', 
+      isEdit, 
+      hasExtractedFields: !!extractedFields,
+      timestamp: Date.now(),
+      stack: new Error().stack?.split('\n').slice(1, 4).join('\n')
+    })
+    
     if (!description.trim() && !extractedFields) return
 
     setIsLoading(true)
@@ -75,6 +84,24 @@ export function useFormGeneration() {
         setCustomButtonText(preserveButtonText)
       }
       
+      // Store form structure in GCP via Railway
+      try {
+        await railwayClient.storeFormStructure(
+          updatedSchema,
+          'anonymous', // TODO: Add user authentication
+          {
+            source: 'form-generation',
+            isEdit,
+            hasExtractedFields: !!extractedFields,
+            uploadedSource: uploadedPDF ? 'pdf' : uploadedURL ? 'url' : uploadedImage ? 'screenshot' : 'text'
+          }
+        )
+        console.log('✅ Form structure stored in GCP')
+      } catch (error) {
+        console.error('❌ Failed to store form in GCP:', error)
+        // Don't fail the form generation if GCP storage fails
+      }
+      
       // Enhanced chat history for different sources
       const assistantMessage = isEdit 
         ? 'Form updated!' 
@@ -82,10 +109,10 @@ export function useFormGeneration() {
           ? `Generated form from ${uploadedPDF ? 'PDF document' : uploadedURL ? 'URL' : 'screenshot'} with ${extractedFields.length} fields${description ? ` and additional instructions` : ''}`
           : 'Form created!'
       
-        setChatHistory(prev => [
-          ...prev,
-          { role: 'assistant', content: assistantMessage, timestamp: Date.now() }
-        ])
+      setChatHistory(prev => [
+        ...prev,
+        { role: 'assistant', content: assistantMessage, timestamp: Date.now() }
+      ])
               
       if (extractedFields) {
         resetAnalysis()
@@ -122,27 +149,13 @@ export function useFormGeneration() {
     ])
 
     try {
-      const response = await fetch('/api/analyze-screenshot', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          imageData,
-          additionalContext
-        }),
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to analyze screenshot')
-      }
+      // Use Railway backend for analysis
+      const result: AnalysisResult = await railwayClient.analyzeScreenshot(imageData, additionalContext)
 
       const endTime = Date.now()
       const duration = Math.round((endTime - startTime) / 1000)
 
-      setExtractedFields(data.extractedFields)
+      setExtractedFields(result.extractedFields)
       setAnalysisComplete(true)
       
       // Replace thinking message with results
@@ -152,7 +165,7 @@ export function useFormGeneration() {
           ...filtered,
           { 
             role: 'assistant', 
-            content: `Extracted ${data.extractedFields.length} fields from screenshot in ${duration}s. Please review and edit as needed.`, 
+            content: `Extracted ${result.extractedFields.length} fields from screenshot in ${duration}s. Please review and edit as needed.`, 
             timestamp: endTime 
           },
           {
@@ -160,13 +173,13 @@ export function useFormGeneration() {
             content: `Field extraction complete`,
             timestamp: endTime + 100,
             metadata: {
-              extractedFields: data.extractedFields
+              extractedFields: result.extractedFields
             }
           }
         ]
       })
 
-      return data.extractedFields
+      return result.extractedFields
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Something went wrong'
       setError(errorMessage)
@@ -232,27 +245,13 @@ export function useFormGeneration() {
     ])
 
     try {
-      const response = await fetch('/api/analyze-url', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          url,
-          additionalContext
-        }),
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to analyze URL')
-      }
+      // Use Railway backend for URL analysis
+      const result: AnalysisResult = await railwayClient.analyzeURL(url, additionalContext)
 
       const endTime = Date.now()
       const duration = Math.round((endTime - startTime) / 1000)
 
-      setExtractedFields(data.extractedFields)
+      setExtractedFields(result.extractedFields)
       setAnalysisComplete(true)
       
       // Replace thinking message with results
@@ -262,7 +261,7 @@ export function useFormGeneration() {
           ...filtered,
           { 
             role: 'assistant', 
-            content: `Extracted ${data.extractedFields.length} fields from URL using ${data.method} in ${duration}s. Please review and edit as needed.`, 
+            content: `Extracted ${result.extractedFields.length} fields from URL in ${duration}s. Please review and edit as needed.`, 
             timestamp: endTime 
           },
           {
@@ -270,7 +269,7 @@ export function useFormGeneration() {
             content: `Field extraction complete`,
             timestamp: endTime + 100,
             metadata: {
-              extractedFields: data.extractedFields
+              extractedFields: result.extractedFields
             }
           }
         ]
@@ -278,7 +277,7 @@ export function useFormGeneration() {
 
       // Reset analyzing flag on success
       isAnalyzingRef.current = false
-      return data.extractedFields
+      return result.extractedFields
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Something went wrong'
       setError(errorMessage)
@@ -321,54 +320,15 @@ export function useFormGeneration() {
     ])
 
     try {
-      // Convert file to base64
-      const arrayBuffer = await file.arrayBuffer()
-      const base64 = Buffer.from(arrayBuffer).toString('base64')
-
-      const response = await fetch('/api/analyze-pdf', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          pdfBuffer: base64,
-          additionalContext,
-          pageSelection
-        }),
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to analyze PDF')
-      }
-
-      // Check if page selection is needed
-      if (data.needsPageSelection) {
-        setPdfPageSelection(data)
-        setIsAnalyzing(false)
-        
-        // Replace thinking message with page selection request
-        setChatHistory(prev => {
-          const filtered = prev.filter(msg => msg.role !== 'thinking')
-          return [
-            ...filtered,
-            { role: 'assistant', content: `PDF has ${data.totalPages} pages. Please select which pages to analyze.` }
-          ]
-        })
-        
-        return null // No fields yet, waiting for page selection
-      }
+      // Use Railway backend for PDF analysis
+      const result: AnalysisResult = await railwayClient.analyzePDF(file, additionalContext)
 
       const endTime = Date.now()
       const duration = Math.round((endTime - startTime) / 1000)
 
       // Analysis completed
-      setExtractedFields(data.extractedFields)
+      setExtractedFields(result.extractedFields)
       setAnalysisComplete(true)
-      
-      const processedPagesText = data.processedPages ? 
-        ` (pages ${data.processedPages.join(', ')})` : ''
       
       // Replace thinking message with results
       setChatHistory(prev => {
@@ -377,7 +337,7 @@ export function useFormGeneration() {
           ...filtered,
           { 
             role: 'assistant', 
-            content: `Analyzed PDF using ${data.processingMethod} and extracted ${data.extractedFields.length} fields from ${data.processedPages?.length || 'selected'} pages in ${duration}s. Please review before generating.`,
+            content: `Analyzed PDF and extracted ${result.extractedFields.length} fields in ${duration}s. Please review before generating.`,
             timestamp: endTime
           },
           {
@@ -385,13 +345,13 @@ export function useFormGeneration() {
             content: `Field extraction complete`,
             timestamp: endTime + 100,
             metadata: {
-              extractedFields: data.extractedFields
+              extractedFields: result.extractedFields
             }
           }
         ]
       })
 
-      return data.extractedFields
+      return result.extractedFields
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Something went wrong'
       setError(errorMessage)

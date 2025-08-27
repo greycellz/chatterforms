@@ -249,7 +249,16 @@ export default function Home() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    if (!inputValue.trim() && !fileInputRef.current?.files?.length) return
+    console.log('🎯 Landing page - handleSubmit called:', { 
+      inputValue: inputValue.trim(), 
+      hasFiles: !!(fileInputRef.current?.files?.length),
+      timestamp: Date.now() 
+    })
+    
+    if (!inputValue.trim() && !fileInputRef.current?.files?.length) {
+      console.log('⏭️ Landing page - No input or files, returning early')
+      return
+    }
 
     setIsSubmitting(true)
     
@@ -284,6 +293,7 @@ export default function Home() {
         
       // 3. TEXT INPUT (fallback)
       } else if (text) {
+        console.log('🎯 Landing page - Navigating to dashboard with text input:', text)
         router.push(`/dashboard?input=${encodeURIComponent(text)}`)
       }
       

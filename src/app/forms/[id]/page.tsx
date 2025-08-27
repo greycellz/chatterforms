@@ -1,8 +1,6 @@
 import { notFound } from 'next/navigation'
-import { Redis } from '@upstash/redis'
+import { railwayClient } from '@/lib/railway-client'
 import PublicFormClient from './PublicFormClient'
-
-const redis = Redis.fromEnv()
 
 interface FormField {
   id: string
@@ -34,13 +32,62 @@ interface FormData {
 }
 
 async function getFormData(formId: string): Promise<FormData | null> {
-  try {
-    const formData = await redis.get(`form:${formId}`)
-    return formData as FormData | null
-  } catch (error) {
-    console.error('Error reading form data:', error)
-    return null
+  const maxRetries = 3;
+  const delay = 2000; // 2 seconds between retries
+
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      console.log(`🔄 Attempt ${attempt}/${maxRetries} to fetch form: ${formId}`);
+      
+      // Get form data from GCP via Railway
+      const result = await railwayClient.getFormStructure(formId)
+      
+      if (!result.success || !result.data) {
+        console.error(`❌ Attempt ${attempt} failed:`, result.error)
+        
+        if (attempt === maxRetries) {
+          return null;
+        }
+        
+        // Wait before retrying
+        console.log(`⏳ Waiting ${delay}ms before retry...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+        continue;
+      }
+
+      const gcpData = result.data
+      
+      // Debug: Log the actual data structure
+      console.log('GCP Form Data Structure:', JSON.stringify(gcpData, null, 2))
+      
+          // Transform GCP data to expected format
+    const formData: FormData = {
+      id: formId,
+      schema: gcpData.form?.structure?.schema || gcpData.structure?.schema || gcpData.structure || {
+        title: 'Form',
+        fields: []
+      },
+      createdAt: gcpData.form?.metadata?.created_at || gcpData.metadata?.created_at || new Date().toISOString(),
+      submissions: [],
+      submitButtonText: gcpData.form?.structure?.submitButtonText || gcpData.structure?.submitButtonText || 'Submit Form'
+    }
+      
+      console.log(`✅ Form retrieved successfully on attempt ${attempt}`);
+      return formData
+    } catch (error) {
+      console.error(`❌ Attempt ${attempt} failed:`, error)
+      
+      if (attempt === maxRetries) {
+        return null;
+      }
+      
+      // Wait before retrying
+      console.log(`⏳ Waiting ${delay}ms before retry...`);
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
   }
+
+  return null;
 }
 
 export default async function PublicFormPage({ 

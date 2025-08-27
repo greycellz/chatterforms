@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { Redis } from '@upstash/redis'
-
-const redis = Redis.fromEnv()
+import { railwayClient } from '@/lib/railway-client'
 
 interface FormSubmission {
   id: string
@@ -43,18 +41,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing form ID or data' }, { status: 400 })
     }
 
-    // Read the existing form data
-    let formData: FormData
-    try {
-      const data = await redis.get(`form:${formId}`)
-      if (!data) {
-        return NextResponse.json({ error: 'Form not found' }, { status: 404 })
-      }
-      formData = data as FormData
-    } catch {
-      return NextResponse.json({ error: 'Form not found' }, { status: 404 })
-    }
-
     // Create new submission
     const submission: FormSubmission = {
       id: generateSubmissionId(),
@@ -63,11 +49,29 @@ export async function POST(request: NextRequest) {
       ipAddress: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown'
     }
 
-    // Add submission to form data
-    formData.submissions.push(submission)
+    // Submit form data to GCP via Railway
+    try {
+      const result = await railwayClient.submitForm({
+        formId,
+        formData: data,
+        userId: 'anonymous', // TODO: Add user authentication
+        isHipaa: false, // TODO: Add HIPAA detection
+        metadata: {
+          ipAddress: submission.ipAddress,
+          userAgent: request.headers.get('user-agent') || undefined,
+          timestamp: submission.submittedAt
+        }
+      })
 
-    // Save updated form data to Redis
-    await redis.set(`form:${formId}`, formData)
+      if (!result.success) {
+        throw new Error(result.error || 'Form submission failed')
+      }
+
+      console.log(`✅ Form submission stored in GCP: ${submission.id}`)
+    } catch (error) {
+      console.error('❌ Failed to submit form to GCP:', error)
+      throw new Error('Failed to submit form to GCP')
+    }
 
     return NextResponse.json({ 
       success: true,
