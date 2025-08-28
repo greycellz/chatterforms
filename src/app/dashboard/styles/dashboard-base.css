@@ -24,9 +24,20 @@
   }
   
   /* Responsive design */
-  @media (max-width: 1024px) {
+  @media (max-width: 767px) {
     .dashboard-layout {
       flex-direction: column;
+    }
+  }
+  
+  /* IPAD SPECIFIC OVERRIDE - Force horizontal layout for iPad */
+  @media (min-width: 768px) and (max-width: 1024px) {
+    .dashboard-layout {
+      flex-direction: row !important;
+      display: flex !important;
+      align-items: stretch !important;
+      justify-content: flex-start !important;
+      height: 100vh !important;
     }
   }
   

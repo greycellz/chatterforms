@@ -7,16 +7,20 @@ import { useSearchParams } from 'next/navigation'
 import { useFormEditing } from './hooks/useFormEditing'
 import { useFormGeneration } from './hooks/useFormGeneration'
 
-// CSS IMPORTS - Load in this specific order for proper precedence
-import './dashboard.css'                           // Your existing base styles
-import './styles/compact-chat-input.css'          // Your existing compact input styles  
-import './styles/dashboard-chat-panel-fixes.css'  // Your existing chat panel fixes
-import './styles/dashboard-critical.css'          // NEW: High-specificity overrides
-import './styles/enhanced-form-preview.css'       // NEW: Enhanced form preview with publish
+            // CSS IMPORTS - Load in this specific order for proper precedence
+            import './dashboard.css'                           // Your existing base styles
+            import './styles/compact-chat-input.css'          // Your existing compact input styles
+            import './styles/dashboard-chat-panel-fixes.css'  // Your existing chat panel fixes
+            import './styles/dashboard-critical.css'          // NEW: High-specificity overrides
+            import './styles/enhanced-form-preview.css'       // NEW: Enhanced form preview with publish
+            import './styles/ipad-override.css'               // NEW: iPad-specific overrides
 
 // Import the enhanced components
 import EnhancedChatPanel from './components/EnhancedChatPanel'
+import MobileChatPanel from './components/MobileChatPanel'
+import IPadChatPanel from './components/iPadChatPanel'
 import FormPreview from './components/EnhancedFormPreview'
+import IPadFormPreview from './components/iPadFormPreview'
 import { FieldExtraction } from './types'
 
 // Helper to convert base64 back to File - FIXED for PDF
@@ -93,7 +97,23 @@ function DashboardContent() {
   const [isFromLanding, setIsFromLanding] = useState(false)
   const processedLandingParamsRef = useRef(false) // Add ref for immediate access
   const [isStylingPanelOpen, setIsStylingPanelOpen] = useState(false)
+                const [isMobile, setIsMobile] = useState(false)
+              const [isTablet, setIsTablet] = useState(false)
   const searchParams = useSearchParams()
+
+                // Detect mobile and tablet screen sizes
+              useEffect(() => {
+                const checkScreenSize = () => {
+                  const width = window.innerWidth
+                  setIsMobile(width < 768)
+                  setIsTablet(width >= 768 && width <= 1024)
+                }
+
+                checkScreenSize()
+                window.addEventListener('resize', checkScreenSize)
+
+                return () => window.removeEventListener('resize', checkScreenSize)
+              }, [])
 
   // Enhanced hook with all functionality
   const {
@@ -152,13 +172,6 @@ function DashboardContent() {
     const filename = searchParams.get('filename')
     const url = searchParams.get('url')
     
-    console.log('🔄 Dashboard useEffect triggered:', { 
-      hasProcessedLandingParams, 
-      processedLandingParamsRef: processedLandingParamsRef.current,
-      searchParams: Object.fromEntries(searchParams.entries()),
-      timestamp: Date.now() 
-    })
-    
     // Check multiple safeguards to prevent HMR re-runs
     const sessionProcessed = sessionStorage.getItem('landingParamsProcessed')
     const sessionTimestamp = sessionStorage.getItem('landingParamsTimestamp')
@@ -169,31 +182,16 @@ function DashboardContent() {
     const sessionAge = sessionTimestamp ? Date.now() - parseInt(sessionTimestamp) : 0
     const sessionExpired = sessionAge > 5 * 60 * 1000 // 5 minutes
     
-    console.log('🔍 Session storage check:', { 
-      sessionProcessed, 
-      sessionTimestamp,
-      sessionAge,
-      sessionExpired,
-      lastProcessedParams, 
-      currentParams,
-      paramsMatch: lastProcessedParams === currentParams
-    })
-    
     // Clear session storage if expired or if we have new parameters
     if (sessionExpired || (sessionProcessed && lastProcessedParams && lastProcessedParams !== currentParams)) {
-      console.log('🧹 Clearing session storage - expired or new parameters detected')
       sessionStorage.removeItem('landingParamsProcessed')
       sessionStorage.removeItem('lastProcessedParams')
       sessionStorage.removeItem('landingParamsTimestamp')
     }
     
     if (hasProcessedLandingParams || processedLandingParamsRef.current || (sessionProcessed && lastProcessedParams === currentParams && !sessionExpired)) {
-      console.log('⏭️ Skipping - already processed (state, ref, or session)')
       return
     }
-    
-    console.log('📋 Processing landing params:', { input, mode, filename, url })
-    console.log('📋 Raw searchParams:', Object.fromEntries(searchParams.entries()))
     
     // Mark as processed immediately to prevent loops (state, ref, and session)
     setHasProcessedLandingParams(true)
@@ -208,16 +206,12 @@ function DashboardContent() {
         
         if (input) {
           // Text input flow - Skip chat history, generateForm will handle it
-          console.log('Processing text input from landing:', input)
           setDescription(input)
           await generateForm(input, null, false)
           
         } else if (mode === 'url' && url) {
           // URL analysis flow - Skip chat history, analyzeURL will handle it
-          console.log('🎯 Landing page - Processing URL:', url)
-          console.log('🎯 Landing page - About to call handleAnalyzeURL')
           await handleAnalyzeURL(url)
-          console.log('🎯 Landing page - handleAnalyzeURL completed')
           
         } else if (mode && filename) {
           // File upload flow - Skip chat history, analysis functions will handle it
@@ -225,8 +219,6 @@ function DashboardContent() {
           if (storedFile) {
             const fileData = JSON.parse(storedFile)
             sessionStorage.removeItem('uploadedFile') // Clean up immediately
-            
-            console.log(`Processing ${mode} from landing:`, filename)
             
             if (mode === 'image') {
               handleImageUpload(fileData.data)
@@ -242,7 +234,6 @@ function DashboardContent() {
         
         // Reset flag after processing (increased delay to prevent race conditions)
         setTimeout(() => {
-          console.log('🔄 Resetting isFromLanding flag to false')
           setIsFromLanding(false)
         }, 3000)
         
@@ -263,18 +254,14 @@ function DashboardContent() {
 
   // 🎯 NEW: Handle example selection from empty state
   const handleExampleSelect = async (examplePrompt: string) => {
-    console.log('🎯 Example selected:', examplePrompt)
     
     try {
-      console.log('📝 Setting description:', examplePrompt)
       // Set the description in the input
       setDescription(examplePrompt)
       
-      console.log('⚡ Starting form generation...')
       // Automatically generate the form
       await generateForm(examplePrompt, null, false)
       
-      console.log('✅ Form generation complete, clearing description')
       // Clear the description after successful generation
       setDescription('')
       
@@ -371,13 +358,6 @@ function DashboardContent() {
   }
 
   const handleAnalyzeURL = async (url: string, additionalContext?: string) => {
-    console.log('🎯 handleAnalyzeURL called:', { url, additionalContext, isFromLanding, timestamp: Date.now() })
-    
-    // Temporarily allow URL analysis even when isFromLanding is true
-    // if (isFromLanding) {
-    //   console.log('⏭️ Skipping handleAnalyzeURL - isFromLanding is true')
-    //   return
-    // }
     
     try {
       await analyzeURL(url, additionalContext)
@@ -406,81 +386,173 @@ function DashboardContent() {
       </div>
 
       <div className="dashboard-layout">
-        {/* Use the Enhanced Chat Panel (REMOVED publish props) */}
-        <EnhancedChatPanel
-          description={description}
-          onDescriptionChange={setDescription}
-          formSchema={formSchema}
-          isLoading={isLoading}
-          onGenerateForm={handleGenerateForm}
-          onUpdateForm={handleUpdateForm}
-          chatHistory={chatHistory}
-          hasUnsavedChanges={hasUnsavedChanges}
-          onSaveChanges={handleSaveChanges}
-          onDiscardChanges={discardChanges}
-          error={error}
-          
-          // File analysis props
-          uploadedImage={uploadedImage}
-          uploadedPDF={uploadedPDF}
-          uploadedURL={uploadedURL}
-          extractedFields={extractedFields}
-          isAnalyzing={isAnalyzing}
-          analysisComplete={analysisComplete}
-          onImageUpload={handleImageUpload}
-          onPDFUpload={handlePDFUpload}
-          onURLSubmit={handleURLUpload}
-          onAnalyzeImage={handleAnalyzeImage}
-          onAnalyzePDF={handleAnalyzePDF}
-          onAnalyzeURL={handleAnalyzeURL}
-          onFieldsValidated={handleFieldsValidated}
-          onResetAnalysis={resetAnalysis}
-          pdfPageSelection={pdfPageSelection}
-          onPageSelectionComplete={handlePageSelectionComplete}
-          onGenerateFormFromFields={generateFormFromFields}
-          isFromLanding={isFromLanding}
-        />
+                            {/* Conditional Layout - Mobile, iPad, or Desktop */}
+                    {isMobile ? (
+                      <MobileChatPanel
+                        chatHistory={chatHistory}
+                        description={description}
+                        onDescriptionChange={setDescription}
+                        onGenerateForm={handleGenerateForm}
+                        onUpdateForm={handleUpdateForm}
+                        onImageUpload={handleImageUpload}
+                        onPDFUpload={handlePDFUpload}
+                        onURLSubmit={handleURLUpload}
+                        onAnalyzeURL={handleAnalyzeURL}
+                        isLoading={isLoading}
+                        formSchema={formSchema}
+                        publishedFormId={publishedFormId || undefined}
+                        error={error}
+                        onPublishForm={handlePublishForm}
+                        isPublishing={isPublishing}
+                        onCustomizeForm={() => setIsStylingPanelOpen(true)}
+                      />
+                    ) : isTablet ? (
+                      <>
+                        <IPadChatPanel
+                          chatHistory={chatHistory}
+                          description={description}
+                          onDescriptionChange={setDescription}
+                          onGenerateForm={handleGenerateForm}
+                          onUpdateForm={handleUpdateForm}
+                          onImageUpload={handleImageUpload}
+                          onPDFUpload={handlePDFUpload}
+                          isLoading={isLoading}
+                          formSchema={formSchema}
+                          error={error}
+                          hasUnsavedChanges={hasUnsavedChanges}
+                          onSaveChanges={handleSaveChanges}
+                          onDiscardChanges={discardChanges}
+                          uploadedImage={uploadedImage}
+                          uploadedPDF={uploadedPDF}
+                          uploadedURL={uploadedURL}
+                          extractedFields={extractedFields}
+                          isAnalyzing={isAnalyzing}
+                          analysisComplete={analysisComplete}
+                          onURLSubmit={handleURLUpload}
+                          onAnalyzeImage={handleAnalyzeImage}
+                          onAnalyzePDF={handleAnalyzePDF}
+                          onAnalyzeURL={handleAnalyzeURL}
+                          onFieldsValidated={handleFieldsValidated}
+                          onResetAnalysis={resetAnalysis}
+                          pdfPageSelection={pdfPageSelection}
+                          onPageSelectionComplete={handlePageSelectionComplete}
+                          onGenerateFormFromFields={generateFormFromFields}
+                          isFromLanding={isFromLanding}
+                        />
+                        <IPadFormPreview
+                          formSchema={formSchema}
+                          effectiveFormSchema={getEffectiveFormSchema()}
+                          isLoading={isLoading}
+                          hasUnsavedChanges={hasUnsavedChanges}
+                          editingField={editingField}
+                          editValue={editValue}
+                          onEditValueChange={setEditValue}
+                          onStartEditing={startEditing}
+                          onSaveEdit={saveEdit}
+                          onCancelEdit={cancelEdit}
+                          onToggleRequired={toggleRequired}
+                          sizeConfig={sizeConfig}
+                          stylingConfig={stylingConfig}
+                          onSizeChange={handleSizeChange}
+                          onStylingChange={handleStylingChange}
+                          submitButtonText={getEffectiveButtonText()}
+                          onSaveChanges={handleSaveChanges}
+                          onDiscardChanges={discardChanges}
+                          onPublishForm={handlePublishForm}
+                          isPublishing={isPublishing}
+                          publishedFormId={publishedFormId}
+                          onExampleSelect={handleExampleSelect}
+                          isStylingPanelOpen={isStylingPanelOpen}
+                          onStylingPanelToggle={setIsStylingPanelOpen}
+                          isAnalyzing={isAnalyzing}
+                          analysisComplete={analysisComplete}
+                          onResetAnalysis={resetAnalysis}
+                          extractedFields={extractedFields}
+                          onGenerateFormFromFields={() => {
+                            if (extractedFields && extractedFields.length > 0) {
+                              generateFormFromFields(extractedFields)
+                            }
+                          }}
+                        />
+                      </>
+                    ) : (
+          <>
+            <EnhancedChatPanel
+              description={description}
+              onDescriptionChange={setDescription}
+              formSchema={formSchema}
+              isLoading={isLoading}
+              onGenerateForm={handleGenerateForm}
+              onUpdateForm={handleUpdateForm}
+              chatHistory={chatHistory}
+              hasUnsavedChanges={hasUnsavedChanges}
+              onSaveChanges={handleSaveChanges}
+              onDiscardChanges={discardChanges}
+              error={error}
+              
+              // File analysis props
+              uploadedImage={uploadedImage}
+              uploadedPDF={uploadedPDF}
+              uploadedURL={uploadedURL}
+              extractedFields={extractedFields}
+              isAnalyzing={isAnalyzing}
+              analysisComplete={analysisComplete}
+              onImageUpload={handleImageUpload}
+              onPDFUpload={handlePDFUpload}
+              onURLSubmit={handleURLUpload}
+              onAnalyzeImage={handleAnalyzeImage}
+              onAnalyzePDF={handleAnalyzePDF}
+              onAnalyzeURL={handleAnalyzeURL}
+              onFieldsValidated={handleFieldsValidated}
+              onResetAnalysis={resetAnalysis}
+              pdfPageSelection={pdfPageSelection}
+              onPageSelectionComplete={handlePageSelectionComplete}
+              onGenerateFormFromFields={generateFormFromFields}
+              isFromLanding={isFromLanding}
+            />
 
-        {/* UPDATED: FormPreview with publish functionality */}
-        <FormPreview
-          formSchema={formSchema}
-          effectiveFormSchema={getEffectiveFormSchema()}
-          isLoading={isLoading}
-          hasUnsavedChanges={hasUnsavedChanges}
-          editingField={editingField}
-          editValue={editValue}
-          onEditValueChange={setEditValue}
-          onStartEditing={startEditing}
-          onSaveEdit={saveEdit}
-          onCancelEdit={cancelEdit}
-          onToggleRequired={toggleRequired}
-          sizeConfig={sizeConfig}
-          stylingConfig={stylingConfig}
-          onSizeChange={handleSizeChange}
-          onStylingChange={handleStylingChange}
-          submitButtonText={getEffectiveButtonText()}
-          onSaveChanges={handleSaveChanges}
-          onDiscardChanges={discardChanges}
-          onExampleSelect={handleExampleSelect}
-          // NEW: Publish functionality moved here
-          onPublishForm={handlePublishForm}
-          isPublishing={isPublishing}
-          publishedFormId={publishedFormId}
-          // NEW: Styling panel state
-          isStylingPanelOpen={isStylingPanelOpen}
-          onStylingPanelToggle={setIsStylingPanelOpen}
-          // NEW: Analysis state props
-          isAnalyzing={isAnalyzing}
-          analysisComplete={analysisComplete}
-          onResetAnalysis={resetAnalysis}
-          extractedFields={extractedFields}
-          onGenerateFormFromFields={() => {
-            if (extractedFields && extractedFields.length > 0) {
-              generateFormFromFields(extractedFields)
-            }
-          }}
-        />      
-        </div>
+            {/* Form Preview - Only show on desktop */}
+            <FormPreview
+              formSchema={formSchema}
+              effectiveFormSchema={getEffectiveFormSchema()}
+              isLoading={isLoading}
+              hasUnsavedChanges={hasUnsavedChanges}
+              editingField={editingField}
+              editValue={editValue}
+              onEditValueChange={setEditValue}
+              onStartEditing={startEditing}
+              onSaveEdit={saveEdit}
+              onCancelEdit={cancelEdit}
+              onToggleRequired={toggleRequired}
+              sizeConfig={sizeConfig}
+              stylingConfig={stylingConfig}
+              onSizeChange={handleSizeChange}
+              onStylingChange={handleStylingChange}
+              submitButtonText={getEffectiveButtonText()}
+              onSaveChanges={handleSaveChanges}
+              onDiscardChanges={discardChanges}
+              onExampleSelect={handleExampleSelect}
+              // NEW: Publish functionality moved here
+              onPublishForm={handlePublishForm}
+              isPublishing={isPublishing}
+              publishedFormId={publishedFormId}
+              // NEW: Styling panel state
+              isStylingPanelOpen={isStylingPanelOpen}
+              onStylingPanelToggle={setIsStylingPanelOpen}
+              // NEW: Analysis state props
+              isAnalyzing={isAnalyzing}
+              analysisComplete={analysisComplete}
+              onResetAnalysis={resetAnalysis}
+              extractedFields={extractedFields}
+              onGenerateFormFromFields={() => {
+                if (extractedFields && extractedFields.length > 0) {
+                  generateFormFromFields(extractedFields)
+                }
+              }}
+            />
+          </>
+        )}
+      </div>
     </div>
   )
 }

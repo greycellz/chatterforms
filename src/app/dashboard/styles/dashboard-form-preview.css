@@ -224,7 +224,7 @@
   }
   
   /* Responsive design for form preview */
-  @media (max-width: 1024px) {
+  @media (max-width: 767px) {
     .form-preview-panel {
       height: 60vh;
     }

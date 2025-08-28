@@ -544,6 +544,23 @@ export default function ChatHistory({
             </div>
           ))}
         </div>
+        
+        {/* Show loading message when generating form */}
+        {isLoading && (
+          <div className={`${styles.modernMessageGroup} ${styles.assistantGroup}`}>
+            <div className={styles.modernSenderLabel}>
+              Chatterforms AI
+            </div>
+            <div className={`${styles.modernChatMessage} assistant`}>
+              <div className={styles.modernMessageContent}>
+                <div className={styles.loadingMessage}>
+                  <span className={styles.loadingSpinner}>⚡</span>
+                  Generating your form...
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
       
       {/* Scroll to Bottom Button - Show when not at bottom */}

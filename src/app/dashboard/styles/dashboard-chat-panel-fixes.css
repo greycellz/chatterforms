@@ -2,7 +2,7 @@
 
 /* 1. CHAT PANEL LAYOUT FIX */
 .chat-panel-enhanced {
-    width: 33.333%;
+    width: 45%;
     background: rgba(255, 255, 255, 0.08);
     border-right: 1px solid rgba(255, 255, 255, 0.15);
     backdrop-filter: blur(20px);
@@ -118,15 +118,15 @@
     box-shadow: 0 2px 12px rgba(37, 99, 235, 0.25);
   }
   
-  /* Assistant Messages - Light theme */
+  /* Assistant Messages - Orange theme */
   .chat-message.assistant .message-content {
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(255, 165, 0, 0.15);
     color: rgba(255, 255, 255, 0.95);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 165, 0, 0.3);
     border-radius: 18px 18px 18px 4px;
     padding: 12px 16px;
     backdrop-filter: blur(10px);
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 12px rgba(255, 165, 0, 0.2);
   }
   
   .message-role {
@@ -259,7 +259,7 @@
   }
   
   /* 10. RESPONSIVE DESIGN */
-  @media (max-width: 1024px) {
+  @media (max-width: 767px) {
     .chat-panel-enhanced {
       width: 100%;
       height: 40vh;

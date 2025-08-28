@@ -124,7 +124,7 @@
   
   /* CHAT PANEL LAYOUT FIXES */
   .chat-panel-enhanced {
-    width: 33.333% !important;
+    width: 45% !important;
     background: rgba(255, 255, 255, 0.08) !important;
     border-right: 1px solid rgba(255, 255, 255, 0.15) !important;
     backdrop-filter: blur(20px) !important;
@@ -221,7 +221,7 @@
   }
   
   /* RESPONSIVE */
-  @media (max-width: 1024px) {
+  @media (max-width: 767px) {
     .dashboard-layout {
       flex-direction: column !important;
     }
@@ -231,6 +231,24 @@
       height: 40vh !important;
       border-right: none !important;
       border-bottom: 1px solid rgba(255, 255, 255, 0.15) !important;
+    }
+  }
+  
+  /* IPAD SPECIFIC OVERRIDE - Force horizontal layout for iPad */
+  @media (min-width: 768px) and (max-width: 1024px) {
+    .dashboard-layout {
+      flex-direction: row !important;
+      display: flex !important;
+      align-items: stretch !important;
+      justify-content: flex-start !important;
+      height: 100vh !important;
+    }
+    
+    .chat-panel-enhanced {
+      width: 45% !important;
+      height: 100vh !important;
+      border-right: 1px solid rgba(255, 255, 255, 0.15) !important;
+      border-bottom: none !important;
     }
   }
   
