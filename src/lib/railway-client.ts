@@ -1,5 +1,35 @@
 import { FieldExtraction } from '@/app/dashboard/types'
 
+interface FormSchema {
+  id?: string
+  title: string
+  fields: FormField[]
+  styling?: {
+    backgroundColor?: string
+    fontFamily?: string
+    fontSize?: string
+    color?: string
+    borderRadius?: string
+    padding?: string
+    margin?: string
+  }
+}
+
+interface FormField {
+  id: string
+  label: string
+  type: string
+  required: boolean
+  placeholder?: string
+  options?: string[]
+  confidence?: number
+  allowOther?: boolean
+  otherLabel?: string
+  otherPlaceholder?: string
+  pageNumber?: number
+  additionalContext?: string
+}
+
 /**
  * Railway API Client for Vercel Frontend
  * Handles communication with Railway backend for form processing and GCP integration
@@ -7,7 +37,7 @@ import { FieldExtraction } from '@/app/dashboard/types'
 
 const RAILWAY_BASE_URL = process.env.NEXT_PUBLIC_RAILWAY_URL || 'https://my-poppler-api-production.up.railway.app'
 
-export interface RailwayResponse<T = any> {
+export interface RailwayResponse<T = unknown> {
   success: boolean
   data?: T
   error?: string
@@ -16,7 +46,7 @@ export interface RailwayResponse<T = any> {
 
 export interface FormSubmissionData {
   formId: string
-  formData: Record<string, any>
+  formData: Record<string, unknown>
   userId?: string
   isHipaa?: boolean
   metadata?: {
@@ -31,6 +61,9 @@ export interface AnalysisResult {
   metadata?: {
     processingTime?: number
     source?: 'pdf' | 'screenshot' | 'url'
+    totalPages?: number
+    originalUrl?: string
+    method?: string
   }
 }
 
@@ -99,7 +132,7 @@ class RailwayClient {
       console.log('✅ PDF converted to images:', uploadData.uuid)
 
       // Step 2: Analyze images using GPT-4 Vision API
-      const imageUrls = uploadData.images.map((img: any) => img.url)
+      const imageUrls = uploadData.images.map((img: { url: string }) => img.url)
       const extractedFields = await this.analyzeImagesWithGPT(imageUrls, additionalContext)
 
       // Step 3: Cleanup Railway files
@@ -191,7 +224,7 @@ Return ONLY valid JSON in this exact format:
       const data = await response.json()
       
       // Transform to FieldExtraction format
-      return (data.fields || []).map((field: any) => ({
+      return (data.fields || []).map((field: { id?: string; label?: string; type?: string; required?: boolean; placeholder?: string; options?: string[]; confidence?: number; allowOther?: boolean; otherLabel?: string; otherPlaceholder?: string; pageNumber?: number; additionalContext?: string }) => ({
         id: field.id || `field_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         label: field.label || 'Untitled Field',
         type: field.type || 'text',
@@ -236,7 +269,7 @@ Return ONLY valid JSON in this exact format:
       const data = await response.json()
       
       // Transform to FieldExtraction format
-      const extractedFields: FieldExtraction[] = (data.extractedFields || []).map((field: any) => ({
+      const extractedFields: FieldExtraction[] = (data.extractedFields || []).map((field: { id?: string; label?: string; type?: string; required?: boolean; placeholder?: string; options?: string[]; confidence?: number; allowOther?: boolean; otherLabel?: string; otherPlaceholder?: string; pageNumber?: number; additionalContext?: string }) => ({
         id: field.id || `field_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         label: field.label || 'Untitled Field',
         type: field.type || 'text',
@@ -302,7 +335,7 @@ Return ONLY valid JSON in this exact format:
   /**
    * Store form structure in GCP via Railway
    */
-  async storeFormStructure(formData: any, userId?: string, metadata?: any): Promise<RailwayResponse> {
+  async storeFormStructure(formData: FormSchema, userId?: string, metadata?: Record<string, unknown>): Promise<RailwayResponse> {
     const maxRetries = 3;
     const timeout = 30000; // 30 seconds
 
@@ -444,8 +477,5 @@ Return ONLY valid JSON in this exact format:
   }
 }
 
-// Export singleton instance
+// Export the client instance
 export const railwayClient = new RailwayClient()
-
-// Export types
-export type { RailwayResponse, FormSubmissionData, AnalysisResult }

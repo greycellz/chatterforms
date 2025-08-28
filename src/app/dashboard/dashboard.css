@@ -31,62 +31,7 @@
 /* Settings - Enhanced settings panel and controls */
 @import './styles/dashboard-chat-panel-fixes.css';
 
-/* IPAD OVERRIDE - Force horizontal layout for iPad */
-@media (min-width: 768px) and (max-width: 1024px) {
-  /* Force the main layout to be horizontal */
-  .dashboard-layout {
-    flex-direction: row !important;
-    display: flex !important;
-    align-items: stretch !important;
-    justify-content: flex-start !important;
-    height: 100vh !important;
-    width: 100% !important;
-  }
 
-  /* Force chat panel to be 45% width and full height */
-  .chat-panel-enhanced {
-    width: 45% !important;
-    height: 100vh !important;
-    border-right: 1px solid rgba(255, 255, 255, 0.15) !important;
-    border-bottom: none !important;
-    flex-shrink: 0 !important;
-    flex: none !important;
-    min-width: 45% !important;
-    max-width: 45% !important;
-  }
-
-  /* Force form preview to be 55% width and full height */
-  .enhanced-form-preview-panel {
-    width: 55% !important;
-    height: 100vh !important;
-    flex-shrink: 0 !important;
-    flex: none !important;
-    min-width: 55% !important;
-    max-width: 55% !important;
-  }
-
-  /* Also override the old form-preview-panel class */
-  .form-preview-panel {
-    width: 55% !important;
-    height: 100vh !important;
-    flex-shrink: 0 !important;
-    flex: none !important;
-    min-width: 55% !important;
-    max-width: 55% !important;
-  }
-
-  /* Override any flex: 1 rules that might be causing issues */
-  .enhanced-form-preview-panel {
-    flex: none !important;
-  }
-
-  /* Override any other width rules that might interfere */
-  .chat-panel {
-    width: 45% !important;
-    flex: none !important;
-    flex-shrink: 0 !important;
-  }
-}
 
 
 /* Optional: Custom CSS variables for theming */

@@ -10,16 +10,6 @@
     overflow: hidden;
   }
   
-  /* IPAD OVERRIDE - Force specific width for iPad */
-  @media (min-width: 768px) and (max-width: 1024px) {
-    .enhanced-form-preview-panel {
-      flex: none !important;
-      width: 55% !important;
-      min-width: 55% !important;
-      max-width: 55% !important;
-    }
-  }
-  
   /* Compact Header with Progress Tracker on Same Line */
   .enhanced-form-preview-header {
     padding: 16px 32px 12px;

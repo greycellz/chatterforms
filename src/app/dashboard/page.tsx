@@ -13,14 +13,11 @@ import { useFormGeneration } from './hooks/useFormGeneration'
             import './styles/dashboard-chat-panel-fixes.css'  // Your existing chat panel fixes
             import './styles/dashboard-critical.css'          // NEW: High-specificity overrides
             import './styles/enhanced-form-preview.css'       // NEW: Enhanced form preview with publish
-            import './styles/ipad-override.css'               // NEW: iPad-specific overrides
 
 // Import the enhanced components
 import EnhancedChatPanel from './components/EnhancedChatPanel'
 import MobileChatPanel from './components/MobileChatPanel'
-import IPadChatPanel from './components/iPadChatPanel'
 import FormPreview from './components/EnhancedFormPreview'
-import IPadFormPreview from './components/iPadFormPreview'
 import { FieldExtraction } from './types'
 
 // Helper to convert base64 back to File - FIXED for PDF
@@ -97,23 +94,19 @@ function DashboardContent() {
   const [isFromLanding, setIsFromLanding] = useState(false)
   const processedLandingParamsRef = useRef(false) // Add ref for immediate access
   const [isStylingPanelOpen, setIsStylingPanelOpen] = useState(false)
-                const [isMobile, setIsMobile] = useState(false)
-              const [isTablet, setIsTablet] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
   const searchParams = useSearchParams()
 
-                // Detect mobile and tablet screen sizes
-              useEffect(() => {
-                const checkScreenSize = () => {
-                  const width = window.innerWidth
-                  setIsMobile(width < 768)
-                  setIsTablet(width >= 768 && width <= 1024)
-                }
-
-                checkScreenSize()
-                window.addEventListener('resize', checkScreenSize)
-
-                return () => window.removeEventListener('resize', checkScreenSize)
-              }, [])
+  // Detect mobile screen sizes
+  useEffect(() => {
+    const checkScreenSize = () => {
+      const width = window.innerWidth
+      setIsMobile(width < 768)
+    }
+    checkScreenSize()
+    window.addEventListener('resize', checkScreenSize)
+    return () => window.removeEventListener('resize', checkScreenSize)
+  }, [])
 
   // Enhanced hook with all functionality
   const {
@@ -396,85 +389,15 @@ function DashboardContent() {
                         onUpdateForm={handleUpdateForm}
                         onImageUpload={handleImageUpload}
                         onPDFUpload={handlePDFUpload}
-                        onURLSubmit={handleURLUpload}
                         onAnalyzeURL={handleAnalyzeURL}
                         isLoading={isLoading}
                         formSchema={formSchema}
-                        publishedFormId={publishedFormId || undefined}
                         error={error}
                         onPublishForm={handlePublishForm}
                         isPublishing={isPublishing}
+                        publishedFormId={publishedFormId || undefined}
                         onCustomizeForm={() => setIsStylingPanelOpen(true)}
                       />
-                    ) : isTablet ? (
-                      <>
-                        <IPadChatPanel
-                          chatHistory={chatHistory}
-                          description={description}
-                          onDescriptionChange={setDescription}
-                          onGenerateForm={handleGenerateForm}
-                          onUpdateForm={handleUpdateForm}
-                          onImageUpload={handleImageUpload}
-                          onPDFUpload={handlePDFUpload}
-                          isLoading={isLoading}
-                          formSchema={formSchema}
-                          error={error}
-                          hasUnsavedChanges={hasUnsavedChanges}
-                          onSaveChanges={handleSaveChanges}
-                          onDiscardChanges={discardChanges}
-                          uploadedImage={uploadedImage}
-                          uploadedPDF={uploadedPDF}
-                          uploadedURL={uploadedURL}
-                          extractedFields={extractedFields}
-                          isAnalyzing={isAnalyzing}
-                          analysisComplete={analysisComplete}
-                          onURLSubmit={handleURLUpload}
-                          onAnalyzeImage={handleAnalyzeImage}
-                          onAnalyzePDF={handleAnalyzePDF}
-                          onAnalyzeURL={handleAnalyzeURL}
-                          onFieldsValidated={handleFieldsValidated}
-                          onResetAnalysis={resetAnalysis}
-                          pdfPageSelection={pdfPageSelection}
-                          onPageSelectionComplete={handlePageSelectionComplete}
-                          onGenerateFormFromFields={generateFormFromFields}
-                          isFromLanding={isFromLanding}
-                        />
-                        <IPadFormPreview
-                          formSchema={formSchema}
-                          effectiveFormSchema={getEffectiveFormSchema()}
-                          isLoading={isLoading}
-                          hasUnsavedChanges={hasUnsavedChanges}
-                          editingField={editingField}
-                          editValue={editValue}
-                          onEditValueChange={setEditValue}
-                          onStartEditing={startEditing}
-                          onSaveEdit={saveEdit}
-                          onCancelEdit={cancelEdit}
-                          onToggleRequired={toggleRequired}
-                          sizeConfig={sizeConfig}
-                          stylingConfig={stylingConfig}
-                          onSizeChange={handleSizeChange}
-                          onStylingChange={handleStylingChange}
-                          submitButtonText={getEffectiveButtonText()}
-                          onSaveChanges={handleSaveChanges}
-                          onDiscardChanges={discardChanges}
-                          onPublishForm={handlePublishForm}
-                          isPublishing={isPublishing}
-                          publishedFormId={publishedFormId}
-                          onExampleSelect={handleExampleSelect}
-                          isStylingPanelOpen={isStylingPanelOpen}
-                          onStylingPanelToggle={setIsStylingPanelOpen}
-                          isAnalyzing={isAnalyzing}
-                          analysisComplete={analysisComplete}
-                          onResetAnalysis={resetAnalysis}
-                          extractedFields={extractedFields}
-                          onGenerateFormFromFields={() => {
-                            if (extractedFields && extractedFields.length > 0) {
-                              generateFormFromFields(extractedFields)
-                            }
-                          }}
-                        />
-                      </>
                     ) : (
           <>
             <EnhancedChatPanel

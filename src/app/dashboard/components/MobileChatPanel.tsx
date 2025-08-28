@@ -1,7 +1,37 @@
-import React, { useState, useRef, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import styles from '../styles/MobileChatPanel.module.css'
 import { ChatMessage } from '../types'
 import MobileFormPreviewModal from './MobileFormPreviewModal'
+
+interface FormSchema {
+  id?: string
+  title: string
+  fields: FormField[]
+  styling?: {
+    backgroundColor?: string
+    fontFamily?: string
+    fontSize?: string
+    color?: string
+    borderRadius?: string
+    padding?: string
+    margin?: string
+  }
+}
+
+interface FormField {
+  id: string
+  label: string
+  type: string
+  required: boolean
+  placeholder?: string
+  options?: string[]
+  confidence?: number
+  allowOther?: boolean
+  otherLabel?: string
+  otherPlaceholder?: string
+  pageNumber?: number
+  additionalContext?: string
+}
 
 interface MobileChatPanelProps {
   chatHistory: ChatMessage[]
@@ -11,10 +41,9 @@ interface MobileChatPanelProps {
   onUpdateForm: () => void
   onImageUpload: (imageData: string) => void
   onPDFUpload: (file: File) => void
-  onURLSubmit: (url: string) => void
   onAnalyzeURL: (url: string, additionalContext?: string) => void
   isLoading: boolean
-  formSchema: any
+  formSchema: FormSchema | null
   publishedFormId?: string
   error: string
   onPublishForm: () => void
@@ -30,7 +59,6 @@ export default function MobileChatPanel({
   onUpdateForm,
   onImageUpload,
   onPDFUpload,
-  onURLSubmit,
   onAnalyzeURL,
   isLoading,
   formSchema,

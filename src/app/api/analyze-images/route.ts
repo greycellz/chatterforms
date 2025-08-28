@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
           const mimeType = response.headers.get('content-type') || 'image/png'
           
           return {
-            type: 'image_url',
+            type: 'image_url' as const,
             image_url: {
               url: `data:${mimeType};base64,${base64}`
             }
@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
     )
 
     // Filter out failed image fetches
-    const validImages = imageContents.filter(img => img !== null)
+    const validImages = imageContents.filter((img): img is NonNullable<typeof img> => img !== null)
 
     if (validImages.length === 0) {
       return NextResponse.json({

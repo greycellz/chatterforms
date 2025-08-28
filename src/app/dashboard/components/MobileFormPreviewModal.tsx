@@ -1,10 +1,40 @@
 import React, { useState } from 'react'
 import styles from '../styles/MobileFormPreviewModal.module.css'
 
+interface FormSchema {
+  id?: string
+  title: string
+  fields: FormField[]
+  styling?: {
+    backgroundColor?: string
+    fontFamily?: string
+    fontSize?: string
+    color?: string
+    borderRadius?: string
+    padding?: string
+    margin?: string
+  }
+}
+
+interface FormField {
+  id: string
+  label: string
+  type: string
+  required: boolean
+  placeholder?: string
+  options?: string[]
+  confidence?: number
+  allowOther?: boolean
+  otherLabel?: string
+  otherPlaceholder?: string
+  pageNumber?: number
+  additionalContext?: string
+}
+
 interface MobileFormPreviewModalProps {
   isOpen: boolean
   onClose: () => void
-  formSchema: any
+  formSchema: FormSchema | null
   onPublish: () => void
   onCustomize: () => void
   isPublishing: boolean
@@ -33,7 +63,7 @@ export default function MobileFormPreviewModal({
     onPublish()
   }
 
-  const renderField = (field: any) => {
+  const renderField = (field: FormField) => {
     const fieldId = `field-${field.id}`
     
     switch (field.type) {
@@ -215,7 +245,7 @@ export default function MobileFormPreviewModal({
             <h2 className={styles.formTitle}>{formSchema.title}</h2>
             
             <div className={styles.formFields}>
-              {formSchema.fields?.map((field: any) => renderField(field))}
+              {formSchema.fields?.map((field: FormField) => renderField(field))}
             </div>
 
             {/* Submit Button */}

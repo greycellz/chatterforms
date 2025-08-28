@@ -31,6 +31,25 @@ interface FormData {
   submitButtonText?: string // Add button text to interface
 }
 
+interface GCPFormData {
+  form?: {
+    structure?: {
+      schema?: FormSchema
+      submitButtonText?: string
+    }
+    metadata?: {
+      created_at?: string
+    }
+  }
+  structure?: {
+    schema?: FormSchema
+    submitButtonText?: string
+  }
+  metadata?: {
+    created_at?: string
+  }
+}
+
 async function getFormData(formId: string): Promise<FormData | null> {
   const maxRetries = 3;
   const delay = 2000; // 2 seconds between retries
@@ -55,22 +74,22 @@ async function getFormData(formId: string): Promise<FormData | null> {
         continue;
       }
 
-      const gcpData = result.data
+      const gcpData = result.data as GCPFormData
       
       // Debug: Log the actual data structure
       console.log('GCP Form Data Structure:', JSON.stringify(gcpData, null, 2))
       
-          // Transform GCP data to expected format
-    const formData: FormData = {
-      id: formId,
-      schema: gcpData.form?.structure?.schema || gcpData.structure?.schema || gcpData.structure || {
-        title: 'Form',
-        fields: []
-      },
-      createdAt: gcpData.form?.metadata?.created_at || gcpData.metadata?.created_at || new Date().toISOString(),
-      submissions: [],
-      submitButtonText: gcpData.form?.structure?.submitButtonText || gcpData.structure?.submitButtonText || 'Submit Form'
-    }
+      // Transform GCP data to expected format
+      const formData: FormData = {
+        id: formId,
+        schema: gcpData.form?.structure?.schema || gcpData.structure?.schema || {
+          title: 'Form',
+          fields: []
+        },
+        createdAt: gcpData.form?.metadata?.created_at || gcpData.metadata?.created_at || new Date().toISOString(),
+        submissions: [],
+        submitButtonText: gcpData.form?.structure?.submitButtonText || gcpData.structure?.submitButtonText || 'Submit Form'
+      }
       
       console.log(`✅ Form retrieved successfully on attempt ${attempt}`);
       return formData

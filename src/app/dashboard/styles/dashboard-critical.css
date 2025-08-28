@@ -234,24 +234,6 @@
     }
   }
   
-  /* IPAD SPECIFIC OVERRIDE - Force horizontal layout for iPad */
-  @media (min-width: 768px) and (max-width: 1024px) {
-    .dashboard-layout {
-      flex-direction: row !important;
-      display: flex !important;
-      align-items: stretch !important;
-      justify-content: flex-start !important;
-      height: 100vh !important;
-    }
-    
-    .chat-panel-enhanced {
-      width: 45% !important;
-      height: 100vh !important;
-      border-right: 1px solid rgba(255, 255, 255, 0.15) !important;
-      border-bottom: none !important;
-    }
-  }
-  
   @media (max-width: 768px) {
     .compact-input-container {
       padding: 12px 16px !important;

@@ -53,13 +53,19 @@ export async function POST(request: NextRequest) {
       console.log(`📝 Form data structure:`, JSON.stringify(formData, null, 2))
       
       const result = await railwayClient.storeFormStructure(
-        formData,
+        {
+          ...formSchema,
+          id: formId,
+          formId // Ensure the schema includes the formId
+        },
         'anonymous', // TODO: Add user authentication
         {
           source: 'form-publishing',
           isUpdate: !!existingFormId,
           submitButtonText: submitButtonText || 'Submit Form',
-          isPublished: true
+          isPublished: true,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
         }
       )
       
