@@ -1,7 +1,128 @@
 import React, { useState, useEffect, useRef } from 'react'
 import styles from '../styles/MobileChatPanel.module.css'
-import { ChatMessage } from '../types'
+import { ChatMessage, FieldExtraction } from '../types'
 import MobileFormPreviewModal from './MobileFormPreviewModal'
+
+// Thinking message component with animation
+const ThinkingMessage = ({ steps, timestamp }: { steps?: string[], timestamp?: number }) => {
+  const [currentStep, setCurrentStep] = useState(0)
+  const [elapsed, setElapsed] = useState(0)
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setElapsed(Date.now() - (timestamp || Date.now()))
+    }, 100)
+
+    const stepInterval = setInterval(() => {
+      setCurrentStep(prev => (prev + 1) % (steps?.length || 1))
+    }, 2000)
+
+    return () => {
+      clearInterval(interval)
+      clearInterval(stepInterval)
+    }
+  }, [steps, timestamp])
+
+  return (
+    <div className={styles.thinkingMessage}>
+      <div className={styles.thinkingSpinner}>
+        <div className={styles.spinnerDot}></div>
+        <div className={styles.spinnerDot}></div>
+        <div className={styles.spinnerDot}></div>
+      </div>
+      <div className={styles.thinkingContent}>
+        <div className={styles.thinkingTitle}>Analyzing PDF...</div>
+        {steps && steps[currentStep] && (
+          <div className={styles.thinkingStep}>{steps[currentStep]}</div>
+        )}
+        <div className={styles.thinkingTime}>{Math.round(elapsed / 1000)}s</div>
+      </div>
+    </div>
+  )
+}
+
+// Field results message component
+const FieldResultsMessage = ({ 
+  extractedFields, 
+  onGenerateForm, 
+  isLoading,
+  onGenerateFormFromFields
+}: { 
+  extractedFields: FieldExtraction[]
+  onGenerateForm: () => void
+  isLoading: boolean
+  onGenerateFormFromFields?: (fields: FieldExtraction[]) => void
+}) => {
+  return (
+    <div className={styles.fieldResultsMessage}>
+      <div className={styles.fieldResultsHeader}>
+        <div className={styles.fieldResultsIcon}>✅</div>
+        <div className={styles.fieldResultsTitle}>Field extraction complete</div>
+      </div>
+      
+      <div className={styles.fieldResultsContent}>
+        <div className={styles.fieldResultsSummary}>
+          Extracted {extractedFields.length} fields from your document
+        </div>
+        
+        <div className={styles.fieldResultsList}>
+          {extractedFields.slice(0, 3).map((field, index) => (
+            <div key={index} className={styles.fieldResultItem}>
+              <span className={styles.fieldLabel}>{field.label}</span>
+              <span className={styles.fieldType}>({field.type})</span>
+              {field.required && <span className={styles.fieldRequired}>*</span>}
+            </div>
+          ))}
+          {extractedFields.length > 3 && (
+            <div className={styles.fieldResultMore}>
+              +{extractedFields.length - 3} more fields
+            </div>
+          )}
+        </div>
+        
+        <button
+          onClick={() => onGenerateFormFromFields ? onGenerateFormFromFields(extractedFields) : onGenerateForm()}
+          disabled={isLoading}
+          className={styles.generateFormButton}
+        >
+          {isLoading ? (
+            <>
+              <span className={styles.buttonSpinner}>⚡</span>
+              Generating form...
+            </>
+          ) : (
+            <>
+              <span className={styles.buttonIcon}>🚀</span>
+              Generate Form
+            </>
+          )}
+        </button>
+      </div>
+    </div>
+  )
+}
+
+// File message component
+const FileMessage = ({ message }: { message: ChatMessage }) => {
+  const isPDF = message.metadata?.fileType === 'pdf'
+  const isURL = message.metadata?.fileType === 'url'
+  
+  return (
+    <div className={styles.fileMessage}>
+      <div className={styles.fileIcon}>
+        {isPDF ? '📄' : isURL ? '🔗' : '📎'}
+      </div>
+      <div className={styles.fileContent}>
+        <div className={styles.fileName}>
+          {isPDF ? 'PDF uploaded' : isURL ? 'URL uploaded' : 'File uploaded'}
+        </div>
+        <div className={styles.fileName}>
+          {message.metadata?.fileName || message.content}
+        </div>
+      </div>
+    </div>
+  )
+}
 
 interface FormSchema {
   id?: string
@@ -49,6 +170,7 @@ interface MobileChatPanelProps {
   onPublishForm: () => void
   isPublishing: boolean
   onCustomizeForm: () => void
+  onGenerateFormFromFields?: (fields: FieldExtraction[]) => void
 }
 
 export default function MobileChatPanel({
@@ -66,7 +188,8 @@ export default function MobileChatPanel({
   error,
   onPublishForm,
   isPublishing,
-  onCustomizeForm
+  onCustomizeForm,
+  onGenerateFormFromFields
 }: MobileChatPanelProps) {
   const [isChatExpanded, setIsChatExpanded] = useState(false)
   const [showPopup, setShowPopup] = useState(false)
@@ -240,7 +363,23 @@ export default function MobileChatPanel({
                 </div>
                 <div className={`${styles.chatBubble} ${message.role === 'user' ? styles.user : styles.assistant}`}>
                   <div className={styles.chatContent}>
-                    {message.content}
+                    {message.role === 'thinking' ? (
+                      <ThinkingMessage 
+                        steps={message.metadata?.steps} 
+                        timestamp={message.timestamp}
+                      />
+                    ) : message.role === 'fieldResults' ? (
+                      <FieldResultsMessage 
+                        extractedFields={message.metadata?.extractedFields || []}
+                        onGenerateForm={onGenerateForm}
+                        isLoading={isLoading}
+                        onGenerateFormFromFields={onGenerateFormFromFields}
+                      />
+                    ) : message.role === 'file' ? (
+                      <FileMessage message={message} />
+                    ) : (
+                      message.content
+                    )}
                   </div>
                 </div>
               </div>

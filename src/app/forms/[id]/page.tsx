@@ -14,6 +14,14 @@ interface FormField {
 interface FormSchema {
   title: string
   fields: FormField[]
+  styling?: {
+    globalFontSize?: string
+    fieldSizes?: Record<string, string>
+    fontFamily?: string
+    fontColor?: string
+    backgroundColor?: string
+    buttonColor?: string
+  }
 }
 
 interface FormSubmission {
@@ -34,11 +42,22 @@ interface FormData {
 interface GCPFormData {
   form?: {
     structure?: {
-      schema?: FormSchema
-      submitButtonText?: string
+      title?: string
+      fields?: FormField[]
+      styling?: {
+        globalFontSize?: string
+        fieldSizes?: Record<string, string>
+        fontFamily?: string
+        fontColor?: string
+        backgroundColor?: string
+        buttonColor?: string
+      }
+      id?: string
+      formId?: string
     }
     metadata?: {
       created_at?: string
+      submitButtonText?: string
     }
   }
   structure?: {
@@ -82,13 +101,21 @@ async function getFormData(formId: string): Promise<FormData | null> {
       // Transform GCP data to expected format
       const formData: FormData = {
         id: formId,
-        schema: gcpData.form?.structure?.schema || gcpData.structure?.schema || {
-          title: 'Form',
-          fields: []
+        schema: {
+          title: gcpData.form?.structure?.title || 'Form',
+          fields: gcpData.form?.structure?.fields || [],
+          styling: gcpData.form?.structure?.styling || {
+            globalFontSize: 'm',
+            fieldSizes: {},
+            fontFamily: 'Arial, sans-serif',
+            fontColor: '#000000',
+            backgroundColor: '#ffffff',
+            buttonColor: '#3b82f6'
+          }
         },
         createdAt: gcpData.form?.metadata?.created_at || gcpData.metadata?.created_at || new Date().toISOString(),
         submissions: [],
-        submitButtonText: gcpData.form?.structure?.submitButtonText || gcpData.structure?.submitButtonText || 'Submit Form'
+        submitButtonText: gcpData.form?.metadata?.submitButtonText || 'Submit Form'
       }
       
       console.log(`✅ Form retrieved successfully on attempt ${attempt}`);
@@ -124,16 +151,7 @@ export default async function PublicFormPage({
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-2xl mx-auto px-4">
-        <div className="bg-white rounded-lg shadow-lg p-8">
-          <div className="mb-6 text-center">
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">
-              {formData.schema.title}
-            </h1>
-            <p className="text-sm text-gray-500">
-              Created with ChatterForms
-            </p>
-          </div>
-          
+        <div className="rounded-lg shadow-lg p-8">
           <PublicFormClient 
             formSchema={formData.schema} 
             formId={formData.id}

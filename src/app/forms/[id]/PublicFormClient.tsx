@@ -82,7 +82,14 @@ function getButtonSizeClasses(globalSize: string = 'm'): string {
 }
 
 export default function PublicFormClient({ formSchema, formId, submitButtonText = 'Submit Form' }: PublicFormClientProps) {
-  const [formData, setFormData] = useState<Record<string, string | boolean | string[] | { selected: string[], other?: string }>>({})
+  const [formData, setFormData] = useState<Record<string, string | boolean | string[] | { selected: string[], other?: string } | {
+    fileName: string
+    fileSize: number
+    fileType: string
+    gcpUrl: string | null
+    uploadedAt: string
+    status?: string
+  }>>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [error, setError] = useState('')
@@ -98,7 +105,14 @@ export default function PublicFormClient({ formSchema, formId, submitButtonText 
     buttonColor: formSchema.styling?.buttonColor || '#3b82f6'
   }
 
-  const handleInputChange = (fieldId: string, value: string | boolean | string[] | { selected: string[], other?: string }) => {
+  const handleInputChange = (fieldId: string, value: string | boolean | string[] | { selected: string[], other?: string } | {
+    fileName: string
+    fileSize: number
+    fileType: string
+    gcpUrl: string | null
+    uploadedAt: string
+    status?: string
+  }) => {
     setFormData(prev => ({
       ...prev,
       [fieldId]: value
@@ -267,9 +281,14 @@ export default function PublicFormClient({ formSchema, formId, submitButtonText 
                   type="checkbox"
                   name={field.id}
                   value={option}
-                  checked={Array.isArray(formData[field.id]) && (formData[field.id] as string[]).includes(option)}
+                  checked={checkboxData.selected.includes(option)}
                   onChange={(e) => handleCheckboxGroupChange(field.id, option, e.target.checked)}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 flex-shrink-0"
+                  className="rounded border-gray-300 focus:ring-2 focus:ring-blue-500 flex-shrink-0"
+                  style={{
+                    accentColor: stylingConfig.buttonColor,
+                    width: '16px',
+                    height: '16px'
+                  }}
                 />
                 <span 
                   className={`text-sm ${getTextSizeClasses(globalSize, 'label')}`}
@@ -290,9 +309,14 @@ export default function PublicFormClient({ formSchema, formId, submitButtonText 
                   type="checkbox"
                   name={`${field.id}_other`}
                   value="other"
-                  checked={Array.isArray(formData[field.id]) && (formData[field.id] as string[]).includes('other')}
+                  checked={checkboxData.selected.includes('other')}
                   onChange={(e) => handleCheckboxGroupChange(field.id, 'other', e.target.checked)}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 flex-shrink-0"
+                  className="rounded border-gray-300 focus:ring-2 focus:ring-blue-500 flex-shrink-0"
+                  style={{
+                    accentColor: stylingConfig.buttonColor,
+                    width: '16px',
+                    height: '16px'
+                  }}
                 />
                 <span 
                   className={`text-sm ${getTextSizeClasses(globalSize, 'label')}`}
@@ -324,7 +348,12 @@ export default function PublicFormClient({ formSchema, formId, submitButtonText 
               type="checkbox"
               checked={typeof formData[field.id] === 'boolean' ? formData[field.id] as boolean : false}
               onChange={(e) => handleInputChange(field.id, e.target.checked)}
-              className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              className="rounded border-gray-300 focus:ring-2 focus:ring-blue-500"
+              style={{
+                accentColor: stylingConfig.buttonColor,
+                width: '16px',
+                height: '16px'
+              }}
               required={field.required}
             />
             <span 
@@ -343,12 +372,50 @@ export default function PublicFormClient({ formSchema, formId, submitButtonText 
           <ModernFileUpload
             label={field.label}
             required={field.required}
-            accept={field.placeholder || "*/*"}
+            accept="*/*"
             multiple={false}
             maxSize={10}
             placeholder={field.placeholder || "Click to upload a file"}
-            onFileSelect={(files) => {
-              handleInputChange(field.id, files.map(f => f.name).join(', '))
+            onFileSelect={async (files) => {
+              if (files.length > 0) {
+                const file = files[0]
+                try {
+                  // Upload file to GCP Cloud Storage
+                  const formData = new FormData()
+                  formData.append('file', file)
+                  formData.append('formId', formId)
+                  formData.append('fieldId', field.id)
+                  
+                  const response = await fetch('/api/upload-file', {
+                    method: 'POST',
+                    body: formData
+                  })
+                  
+                  if (!response.ok) {
+                    throw new Error('File upload failed')
+                  }
+                  
+                  const result = await response.json()
+                  if (result.success) {
+                    // Store file metadata for form submission
+                    handleInputChange(field.id, {
+                      fileName: file.name,
+                      fileSize: file.size,
+                      fileType: file.type,
+                      gcpUrl: result.fileUrl,
+                      uploadedAt: new Date().toISOString()
+                    })
+                  } else {
+                    throw new Error(result.error || 'File upload failed')
+                  }
+                } catch (error) {
+                  console.error('File upload error:', error)
+                  // Show error to user but don't break the form
+                  setError(`File upload failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
+                  // Fallback to just storing file name
+                  handleInputChange(field.id, file.name)
+                }
+              }
             }}
           />
         )
@@ -416,6 +483,28 @@ export default function PublicFormClient({ formSchema, formId, submitButtonText 
       }}
       className="p-6 rounded-lg"
     >
+      {/* Form Header */}
+      <div className="mb-6 text-center">
+        <h1 
+          className="text-2xl font-bold mb-2"
+          style={{
+            fontFamily: stylingConfig.fontFamily,
+            color: stylingConfig.fontColor
+          }}
+        >
+          {formSchema.title}
+        </h1>
+        <p 
+          className="text-sm opacity-70"
+          style={{
+            fontFamily: stylingConfig.fontFamily,
+            color: stylingConfig.fontColor
+          }}
+        >
+          Created with ChatterForms
+        </p>
+      </div>
+      
       <form onSubmit={handleSubmit} className="space-y-6">
         {formSchema.fields.map((field) => (
           <div key={field.id} className="space-y-2">

@@ -451,6 +451,36 @@ Return ONLY valid JSON in this exact format:
   }
 
   /**
+   * Upload file to GCP Cloud Storage via Railway
+   */
+  async uploadFile(formData: FormData): Promise<RailwayResponse> {
+    try {
+      const response = await fetch(`${this.baseUrl}/upload-file`, {
+        method: 'POST',
+        body: formData
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'File upload failed')
+      }
+
+      return {
+        success: true,
+        data: data,
+        message: 'File uploaded successfully'
+      }
+    } catch (error) {
+      console.error('File upload error:', error)
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'File upload failed'
+      }
+    }
+  }
+
+  /**
    * Test GCP integration via Railway
    */
   async testGCPIntegration(): Promise<RailwayResponse> {

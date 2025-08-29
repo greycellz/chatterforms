@@ -319,7 +319,21 @@ function DashboardContent() {
       const effectiveForm = getEffectiveFormSchema()
       if (effectiveForm) {
         const effectiveButtonText = getEffectiveButtonText()
-        await publishForm(effectiveForm, effectiveButtonText)
+        
+        // Include styling configuration in the form schema before publishing
+        const formWithStyling = {
+          ...effectiveForm,
+          styling: {
+            globalFontSize: sizeConfig.globalFontSize,
+            fieldSizes: sizeConfig.fieldSizes,
+            fontFamily: stylingConfig.fontFamily,
+            fontColor: stylingConfig.fontColor,
+            backgroundColor: stylingConfig.backgroundColor,
+            buttonColor: stylingConfig.buttonColor
+          }
+        }
+        
+        await publishForm(formWithStyling, effectiveButtonText)
         
         // Save changes after successful publish
         handleSaveChanges()
@@ -397,6 +411,7 @@ function DashboardContent() {
                         isPublishing={isPublishing}
                         publishedFormId={publishedFormId || undefined}
                         onCustomizeForm={() => setIsStylingPanelOpen(true)}
+                        onGenerateFormFromFields={generateFormFromFields}
                       />
                     ) : (
           <>

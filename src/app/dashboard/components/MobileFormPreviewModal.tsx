@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React from 'react'
 import styles from '../styles/MobileFormPreviewModal.module.css'
 
 interface FormSchema {
@@ -46,17 +46,18 @@ export default function MobileFormPreviewModal({
   onClose,
   formSchema,
   onPublish,
-  onCustomize,
+  onCustomize: _onCustomize,
   isPublishing,
   publishedFormId
 }: MobileFormPreviewModalProps) {
-  const [isCustomizing, setIsCustomizing] = useState(false)
 
   if (!isOpen || !formSchema) return null
 
   const handleCustomize = () => {
-    setIsCustomizing(true)
-    onCustomize()
+    // TODO: Implement mobile styling panel
+    alert('Customize functionality coming soon to mobile!')
+    // setIsCustomizing(true)
+    // onCustomize()
   }
 
   const handlePublish = () => {
@@ -239,6 +240,47 @@ export default function MobileFormPreviewModal({
           </button>
         </div>
 
+        {/* Action Buttons - Moved to top */}
+        <div className={styles.modalActions}>
+          <button
+            className={styles.customizeButton}
+            onClick={handleCustomize}
+            disabled={isPublishing}
+          >
+            <span className={styles.buttonIcon}>🎨</span>
+            Customize
+          </button>
+          
+          {publishedFormId ? (
+            <a
+              href={`/forms/${publishedFormId}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={styles.viewButton}
+            >
+              <span className={styles.buttonIcon}>
+                <img 
+                  src="/orange-arrow.png" 
+                  alt="View" 
+                  style={{ width: '16px', height: '16px' }}
+                />
+              </span>
+              View Form
+            </a>
+          ) : (
+            <button
+              className={styles.publishButton}
+              onClick={handlePublish}
+              disabled={isPublishing}
+            >
+              <span className={styles.buttonIcon}>
+                {isPublishing ? '⏳' : '🚀'}
+              </span>
+              {isPublishing ? 'Publishing...' : 'Publish Form'}
+            </button>
+          )}
+        </div>
+
         {/* Form Preview */}
         <div className={styles.formPreview}>
           <div className={styles.formContainer}>
@@ -253,47 +295,6 @@ export default function MobileFormPreviewModal({
               Submit Form
             </button>
           </div>
-        </div>
-
-        {/* Action Buttons */}
-        <div className={styles.modalActions}>
-          <button
-            className={styles.customizeButton}
-            onClick={handleCustomize}
-            disabled={isPublishing}
-          >
-            <span className={styles.buttonIcon}>🎨</span>
-            Customize
-          </button>
-          
-          {publishedFormId ? (
-                         <a
-               href={`/forms/${publishedFormId}`}
-               target="_blank"
-               rel="noopener noreferrer"
-               className={styles.viewButton}
-             >
-               <span className={styles.buttonIcon}>
-                 <img 
-                   src="/orange-arrow.png" 
-                   alt="View" 
-                   style={{ width: '48px', height: '48px' }}
-                 />
-               </span>
-               View Form
-             </a>
-          ) : (
-            <button
-              className={styles.publishButton}
-              onClick={handlePublish}
-              disabled={isPublishing}
-            >
-              <span className={styles.buttonIcon}>
-                {isPublishing ? '⏳' : '🚀'}
-              </span>
-              {isPublishing ? 'Publishing...' : 'Publish Form'}
-            </button>
-          )}
         </div>
       </div>
     </div>

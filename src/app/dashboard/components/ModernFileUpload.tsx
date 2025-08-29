@@ -37,19 +37,22 @@ export default function ModernFileUpload({
         return
       }
 
-      // Check file type if accept is specified
-      if (accept !== "*/*") {
+      // Check file type if accept is specified and not wildcard
+      if (accept && accept !== "*/*") {
         const acceptedTypes = accept.split(',').map(type => type.trim())
         const fileType = file.type
         const fileExtension = '.' + file.name.split('.').pop()?.toLowerCase()
         
         const isAccepted = acceptedTypes.some(type => {
+          // Handle file extensions (e.g., .pdf, .jpg)
           if (type.startsWith('.')) {
-            return fileExtension === type
+            return fileExtension === type.toLowerCase()
           }
+          // Handle MIME type patterns (e.g., image/*, application/*)
           if (type.endsWith('/*')) {
             return fileType.startsWith(type.replace('/*', ''))
           }
+          // Handle exact MIME types (e.g., application/pdf)
           return fileType === type
         })
 

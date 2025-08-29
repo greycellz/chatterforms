@@ -239,10 +239,10 @@
 /* Action Buttons */
 .modalActions {
   display: flex;
-  gap: 12px;
-  padding: 20px;
+  gap: 8px;
+  padding: 12px 16px;
   background: rgba(255, 255, 255, 0.05);
-  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
   flex-shrink: 0;
 }
 
@@ -250,16 +250,16 @@
 .publishButton,
 .viewButton {
   flex: 1;
-  padding: 12px 16px;
-  border-radius: 12px;
-  font-size: 14px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 12px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 6px;
   text-decoration: none;
   border: none;
 }
@@ -312,7 +312,7 @@
 }
 
 .buttonIcon {
-  font-size: 16px;
+  font-size: 14px;
 }
 
 /* Animations */
