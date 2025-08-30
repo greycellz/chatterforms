@@ -3,6 +3,7 @@ import styles from '../styles/MobileFormPreviewModal.module.css'
 
 interface FormSchema {
   id?: string
+  formId?: string
   title: string
   fields: FormField[]
   styling?: {
@@ -39,6 +40,7 @@ interface MobileFormPreviewModalProps {
   onCustomize: () => void
   isPublishing: boolean
   publishedFormId?: string
+  hasUnsavedChanges?: boolean
 }
 
 export default function MobileFormPreviewModal({
@@ -48,7 +50,8 @@ export default function MobileFormPreviewModal({
   onPublish,
   onCustomize: _onCustomize,
   isPublishing,
-  publishedFormId
+  publishedFormId,
+  hasUnsavedChanges = false
 }: MobileFormPreviewModalProps) {
 
   if (!isOpen || !formSchema) return null
@@ -61,7 +64,20 @@ export default function MobileFormPreviewModal({
   }
 
   const handlePublish = () => {
-    onPublish()
+    const currentFormId = publishedFormId || formSchema?.formId
+    const isPublished = !!currentFormId
+    const needsUpdate = isPublished && hasUnsavedChanges
+    
+    if (needsUpdate) {
+      // Publish changes
+      onPublish()
+    } else if (isPublished) {
+      // View form - open in new tab
+      window.open(`/forms/${currentFormId}`, '_blank')
+    } else {
+      // First publish
+      onPublish()
+    }
   }
 
   const renderField = (field: FormField) => {
@@ -242,6 +258,7 @@ export default function MobileFormPreviewModal({
 
         {/* Action Buttons - Moved to top */}
         <div className={styles.modalActions}>
+          {/* TODO: Implement mobile styling panel - commented out for now
           <button
             className={styles.customizeButton}
             onClick={handleCustomize}
@@ -250,35 +267,45 @@ export default function MobileFormPreviewModal({
             <span className={styles.buttonIcon}>🎨</span>
             Customize
           </button>
+          */}
           
-          {publishedFormId ? (
-            <a
-              href={`/forms/${publishedFormId}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={styles.viewButton}
-            >
-              <span className={styles.buttonIcon}>
-                <img 
-                  src="/orange-arrow.png" 
-                  alt="View" 
-                  style={{ width: '16px', height: '16px' }}
-                />
-              </span>
-              View Form
-            </a>
-          ) : (
-            <button
-              className={styles.publishButton}
-              onClick={handlePublish}
-              disabled={isPublishing}
-            >
-              <span className={styles.buttonIcon}>
-                {isPublishing ? '⏳' : '🚀'}
-              </span>
-              {isPublishing ? 'Publishing...' : 'Publish Form'}
-            </button>
-          )}
+          {/* Debug logging for button state */}
+          {(() => {
+            // Use the same logic as desktop version
+            const currentFormId = publishedFormId || formSchema?.formId
+            const isPublished = !!currentFormId
+            const needsUpdate = isPublished && hasUnsavedChanges
+            
+            console.log('🔍 MobileFormPreviewModal Button Debug:', {
+              publishedFormId,
+              currentFormId,
+              isPublished,
+              hasUnsavedChanges,
+              needsUpdate,
+              isPublishing,
+              buttonText: needsUpdate ? 'Update Form' : (isPublished ? 'Republish Form' : 'Publish Form')
+            })
+            return null
+          })()}
+          
+          {/* Always show a button - no conditional View Form */}
+          <button
+            className={styles.publishButton}
+            onClick={handlePublish}
+            disabled={isPublishing}
+          >
+            <span className={styles.buttonIcon}>
+              {isPublishing ? '⏳' : '🚀'}
+            </span>
+            {isPublishing ? 'Publishing...' : (() => {
+              const currentFormId = publishedFormId || formSchema?.formId
+              const isPublished = !!currentFormId
+              const needsUpdate = isPublished && hasUnsavedChanges
+              return needsUpdate ? 'Publish Form' : (isPublished ? 'View Form' : 'Publish Form')
+            })()}
+          </button>
+          
+
         </div>
 
         {/* Form Preview */}

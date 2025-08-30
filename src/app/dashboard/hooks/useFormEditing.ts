@@ -29,6 +29,9 @@ export function useFormEditing(formSchema: FormSchema | null) {
     buttonColor: formSchema?.styling?.buttonColor || '#3b82f6'
   }))
 
+  // Track form schema changes to detect unsaved changes
+  const [lastPublishedSchema, setLastPublishedSchema] = useState<FormSchema | null>(null)
+
   // Update configs when form schema changes
   useEffect(() => {
     if (formSchema?.styling) {
@@ -44,6 +47,46 @@ export function useFormEditing(formSchema: FormSchema | null) {
       })
     }
   }, [formSchema])
+
+  // Detect when form schema changes and set hasUnsavedChanges
+  useEffect(() => {
+    if (formSchema && lastPublishedSchema) {
+      // Compare only user-relevant fields, ignore system properties like formId
+      const currentUserSchema = {
+        title: formSchema.title,
+        fields: formSchema.fields
+      }
+      const lastUserSchema = {
+        title: lastPublishedSchema.title,
+        fields: lastPublishedSchema.fields
+      }
+      
+      const hasChanges = JSON.stringify(currentUserSchema) !== JSON.stringify(lastUserSchema)
+      
+      if (hasChanges) {
+        console.log('🔍 Schema comparison detected user changes:', {
+          currentTitle: formSchema.title,
+          lastTitle: lastPublishedSchema.title,
+          currentFieldsCount: formSchema.fields?.length,
+          lastFieldsCount: lastPublishedSchema.fields?.length,
+          currentFormId: formSchema.formId,
+          lastFormId: lastPublishedSchema.formId
+        })
+      }
+      
+      setHasUnsavedChanges(hasChanges)
+    } else if (formSchema && !lastPublishedSchema) {
+      // If we have a form schema but no last published schema, 
+      // it means this is a new form that hasn't been published yet
+      setHasUnsavedChanges(true)
+    } else {
+      setHasUnsavedChanges(false)
+    }
+  }, [formSchema, lastPublishedSchema])
+
+
+
+
 
   // Get the effective form schema with pending changes applied
   const getEffectiveFormSchema = (): FormSchema | null => {
@@ -272,6 +315,25 @@ export function useFormEditing(formSchema: FormSchema | null) {
     }
   }
 
+  // Mark form as published (called after successful publish)
+  const markAsPublished = () => {
+    console.log('📝 markAsPublished called - Pre-state:', {
+      formSchema,
+      lastPublishedSchema,
+      hasUnsavedChanges
+    })
+
+    if (formSchema) {
+      setLastPublishedSchema(formSchema)
+      setHasUnsavedChanges(false)
+    }
+
+    console.log('📝 markAsPublished completed - Post-state:', {
+      lastPublishedSchema: formSchema,
+      hasUnsavedChanges: false
+    })
+  }
+
   return {
     // State
     editingField,
@@ -291,6 +353,7 @@ export function useFormEditing(formSchema: FormSchema | null) {
     toggleRequired,
     handleSizeChange,
     handleStylingChange,
-    getEffectiveFormSchema
+    getEffectiveFormSchema,
+    markAsPublished
   }
 }

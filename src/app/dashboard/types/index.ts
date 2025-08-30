@@ -54,6 +54,8 @@ export interface ChatMessage {
     duration?: number
     steps?: string[]
     isComplete?: boolean
+    // Analysis type for thinking messages
+    type?: 'image' | 'pdf' | 'url'
     // File message metadata
     fileType?: 'image' | 'pdf' | 'url'
     fileName?: string

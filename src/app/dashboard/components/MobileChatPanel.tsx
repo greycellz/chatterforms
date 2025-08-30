@@ -4,11 +4,18 @@ import { ChatMessage, FieldExtraction } from '../types'
 import MobileFormPreviewModal from './MobileFormPreviewModal'
 
 // Thinking message component with animation
-const ThinkingMessage = ({ steps, timestamp }: { steps?: string[], timestamp?: number }) => {
+const ThinkingMessage = ({ steps, timestamp, type }: { steps?: string[], timestamp?: number, type?: string }) => {
   const [currentStep, setCurrentStep] = useState(0)
   const [elapsed, setElapsed] = useState(0)
+  const [isClient, setIsClient] = useState(false)
 
   useEffect(() => {
+    setIsClient(true)
+  }, [])
+
+  useEffect(() => {
+    if (!isClient) return
+
     const interval = setInterval(() => {
       setElapsed(Date.now() - (timestamp || Date.now()))
     }, 100)
@@ -21,7 +28,20 @@ const ThinkingMessage = ({ steps, timestamp }: { steps?: string[], timestamp?: n
       clearInterval(interval)
       clearInterval(stepInterval)
     }
-  }, [steps, timestamp])
+  }, [steps, timestamp, isClient])
+
+  // Determine title based on type
+  const getTitle = () => {
+    switch (type) {
+      case 'image':
+        return 'Analyzing Image...'
+      case 'url':
+        return 'Analyzing URL...'
+      case 'pdf':
+      default:
+        return 'Analyzing PDF...'
+    }
+  }
 
   return (
     <div className={styles.thinkingMessage}>
@@ -31,11 +51,13 @@ const ThinkingMessage = ({ steps, timestamp }: { steps?: string[], timestamp?: n
         <div className={styles.spinnerDot}></div>
       </div>
       <div className={styles.thinkingContent}>
-        <div className={styles.thinkingTitle}>Analyzing PDF...</div>
+        <div className={styles.thinkingTitle}>{getTitle()}</div>
         {steps && steps[currentStep] && (
           <div className={styles.thinkingStep}>{steps[currentStep]}</div>
         )}
-        <div className={styles.thinkingTime}>{Math.round(elapsed / 1000)}s</div>
+        {isClient && (
+          <div className={styles.thinkingTime}>{Math.round(elapsed / 1000)}s</div>
+        )}
       </div>
     </div>
   )
@@ -107,6 +129,18 @@ const FileMessage = ({ message }: { message: ChatMessage }) => {
   const isPDF = message.metadata?.fileType === 'pdf'
   const isURL = message.metadata?.fileType === 'url'
   
+  // Truncate URL for display
+  const truncateURL = (url: string) => {
+    if (url.length > 40) {
+      return url.substring(0, 37) + '...'
+    }
+    return url
+  }
+  
+  const displayText = isURL && message.metadata?.fileName 
+    ? truncateURL(message.metadata.fileName)
+    : message.metadata?.fileName || message.content
+  
   return (
     <div className={styles.fileMessage}>
       <div className={styles.fileIcon}>
@@ -116,8 +150,8 @@ const FileMessage = ({ message }: { message: ChatMessage }) => {
         <div className={styles.fileName}>
           {isPDF ? 'PDF uploaded' : isURL ? 'URL uploaded' : 'File uploaded'}
         </div>
-        <div className={styles.fileName}>
-          {message.metadata?.fileName || message.content}
+        <div className={styles.fileName} title={message.metadata?.fileName || message.content}>
+          {displayText}
         </div>
       </div>
     </div>
@@ -169,6 +203,7 @@ interface MobileChatPanelProps {
   error: string
   onPublishForm: () => void
   isPublishing: boolean
+  hasUnsavedChanges?: boolean
   onCustomizeForm: () => void
   onGenerateFormFromFields?: (fields: FieldExtraction[]) => void
 }
@@ -188,6 +223,7 @@ export default function MobileChatPanel({
   error,
   onPublishForm,
   isPublishing,
+  hasUnsavedChanges = false,
   onCustomizeForm,
   onGenerateFormFromFields
 }: MobileChatPanelProps) {
@@ -196,9 +232,11 @@ export default function MobileChatPanel({
   const [showURLInput, setShowURLInput] = useState(false)
   const [urlValue, setUrlValue] = useState('')
   const [showFormModal, setShowFormModal] = useState(false)
+  const [showWorkspaceMenu, setShowWorkspaceMenu] = useState(false)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const popupRef = useRef<HTMLDivElement>(null)
+  const chatHistoryRef = useRef<HTMLDivElement>(null)
 
   // Auto-resize textarea
   useEffect(() => {
@@ -208,22 +246,46 @@ export default function MobileChatPanel({
     }
   }, [description])
 
-  // Handle click outside popup
+  // Auto-scroll to bottom when form is generated or new messages added
+  useEffect(() => {
+    if (chatHistoryRef.current) {
+      setTimeout(() => {
+        chatHistoryRef.current?.scrollTo({
+          top: chatHistoryRef.current.scrollHeight,
+          behavior: 'smooth'
+        })
+      }, 100)
+    }
+  }, [formSchema, chatHistory.length])
+
+  // Handle click outside popup and workspace menu
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (popupRef.current && !popupRef.current.contains(event.target as Node)) {
         setShowPopup(false)
       }
+      
+      // Close workspace menu if clicking outside
+      if (showWorkspaceMenu) {
+        const target = event.target as Node
+        const workspaceMenu = document.querySelector('[data-workspace-menu]')
+        const headerDropdown = document.querySelector('[data-header-dropdown]')
+        
+        if (workspaceMenu && !workspaceMenu.contains(target) && 
+            headerDropdown && !headerDropdown.contains(target)) {
+          setShowWorkspaceMenu(false)
+        }
+      }
     }
 
-    if (showPopup) {
+    if (showPopup || showWorkspaceMenu) {
       document.addEventListener('mousedown', handleClickOutside)
     }
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside)
     }
-  }, [showPopup])
+  }, [showPopup, showWorkspaceMenu])
 
   // Handle escape key
   useEffect(() => {
@@ -275,6 +337,8 @@ export default function MobileChatPanel({
       }
       
       setShowPopup(false)
+      // Clear the file input so the same file can be selected again
+      e.target.value = ''
     }
   }
 
@@ -292,8 +356,8 @@ export default function MobileChatPanel({
 
   // Function to render form preview button if form is generated
   const renderFormPreviewButton = () => {
-    // Show form preview button if we have any form data
-    if (formSchema && (publishedFormId || formSchema.id || formSchema.title || formSchema.fields)) {
+    // Show form preview button if we have any form data AND not currently loading
+    if (formSchema && !isLoading && (publishedFormId || formSchema.id || formSchema.title || formSchema.fields)) {
       return (
         <div className={styles.formLinkContainer}>
           <button
@@ -331,11 +395,41 @@ export default function MobileChatPanel({
           </div>
           <h2 className={styles.headerTitle}>Create New Form</h2>
         </div>
-        <button className={styles.headerDropdown}>
+        <button 
+          className={styles.headerDropdown}
+          onClick={() => setShowWorkspaceMenu(!showWorkspaceMenu)}
+          data-header-dropdown
+        >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M6 9l6 6 6-6"/>
           </svg>
         </button>
+        
+        {/* Workspace Dropdown Menu */}
+        {showWorkspaceMenu && (
+          <div className={styles.workspaceMenu} data-workspace-menu>
+            <button 
+              className={styles.menuItem}
+              onClick={() => {
+                window.location.href = '/'
+                setShowWorkspaceMenu(false)
+              }}
+            >
+              <span className={styles.menuIcon}>🏠</span>
+              <span className={styles.menuText}>Landing Page</span>
+            </button>
+            <button 
+              className={styles.menuItem}
+              onClick={() => {
+                window.location.href = '/dashboard'
+                setShowWorkspaceMenu(false)
+              }}
+            >
+              <span className={styles.menuIcon}>📄</span>
+              <span className={styles.menuText}>New Form</span>
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Chat History Section - Only show if there are messages */}
@@ -355,7 +449,10 @@ export default function MobileChatPanel({
             )}
           </div>
           
-          <div className={`${styles.chatHistoryContent} ${isChatExpanded ? styles.expanded : ''}`}>
+          <div 
+            ref={chatHistoryRef}
+            className={`${styles.chatHistoryContent} ${isChatExpanded ? styles.expanded : ''}`}
+          >
             {(isChatExpanded ? chatHistory : recentMessages).map((message, index) => (
               <div key={index} className={styles.chatMessage}>
                 <div className={styles.chatRole}>
@@ -367,6 +464,7 @@ export default function MobileChatPanel({
                       <ThinkingMessage 
                         steps={message.metadata?.steps} 
                         timestamp={message.timestamp}
+                        type={message.metadata?.type}
                       />
                     ) : message.role === 'fieldResults' ? (
                       <FieldResultsMessage 
@@ -432,20 +530,23 @@ export default function MobileChatPanel({
             onKeyDown={handleKeyDown}
             rows={1}
           />
-          <button
-            className={styles.plusButton}
-            onClick={() => setShowPopup(!showPopup)}
-            disabled={isLoading}
-            title="More options"
-          >
-            {showPopup ? '×' : '+'}
-          </button>
+          <div className={styles.plusButtonContainer}>
+            <button
+              className={styles.plusButton}
+              onClick={() => setShowPopup(!showPopup)}
+              disabled={isLoading}
+              title="More options"
+            >
+              {showPopup ? '×' : '+'}
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Quick Actions - Streamlined single action */}
+      {/* Quick Actions - Original layout */}
       <div className={styles.quickActionsSection}>
         <div className={styles.quickActionsContainer}>
+          {/* Generate/Update Actions */}
           {description.trim() && !formSchema && (
             <button 
               className={styles.quickActionButton}
@@ -466,6 +567,9 @@ export default function MobileChatPanel({
               Update Form
             </button>
           )}
+          
+          {/* Templates Button */}
+          {/* TODO: Implement template browsing - commented out for now
           <button 
             className={styles.quickActionButton}
             onClick={() => {
@@ -477,6 +581,7 @@ export default function MobileChatPanel({
             <span className={styles.quickActionIcon}>✨</span>
             Templates
           </button>
+          */}
         </div>
       </div>
 
@@ -513,31 +618,29 @@ export default function MobileChatPanel({
         </div>
       )}
 
-      {/* Plus Button Popup */}
+      {/* Plus Button Popup - Positioned like landing page */}
       {showPopup && (
-        <div className={styles.inputSection} ref={popupRef}>
-          <div className={styles.quickActionsContainer}>
-            <button 
-              className={styles.quickActionButton}
-              onClick={() => {
-                setShowURLInput(true)
-                setShowPopup(false)
-              }}
-            >
-              <span className={styles.quickActionIcon}>🔗</span>
-              Clone from URL
-            </button>
-            <button 
-              className={styles.quickActionButton}
-              onClick={() => {
-                fileInputRef.current?.click()
-                setShowPopup(false)
-              }}
-            >
-              <span className={styles.quickActionIcon}>📎</span>
-              Upload PDF/Image
-            </button>
-          </div>
+        <div className={styles.popupMenu} ref={popupRef}>
+          <button 
+            className={styles.menuItem}
+            onClick={() => {
+              setShowURLInput(true)
+              setShowPopup(false)
+            }}
+          >
+            <span className={styles.menuIcon}>🔗</span>
+            <span className={styles.menuText}>Clone from URL</span>
+          </button>
+          <button 
+            className={styles.menuItem}
+            onClick={() => {
+              fileInputRef.current?.click()
+              setShowPopup(false)
+            }}
+          >
+            <span className={styles.menuIcon}>📎</span>
+            <span className={styles.menuText}>Upload PDF/Image</span>
+          </button>
         </div>
       )}
 
@@ -561,6 +664,7 @@ export default function MobileChatPanel({
         onCustomize={onCustomizeForm}
         isPublishing={isPublishing}
         publishedFormId={publishedFormId}
+        hasUnsavedChanges={hasUnsavedChanges}
       />
     </div>
   )

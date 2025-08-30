@@ -95,10 +95,12 @@ function DashboardContent() {
   const processedLandingParamsRef = useRef(false) // Add ref for immediate access
   const [isStylingPanelOpen, setIsStylingPanelOpen] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
+  const [isClient, setIsClient] = useState(false)
   const searchParams = useSearchParams()
 
-  // Detect mobile screen sizes
+  // Detect mobile screen sizes (client-side only)
   useEffect(() => {
+    setIsClient(true)
     const checkScreenSize = () => {
       const width = window.innerWidth
       setIsMobile(width < 768)
@@ -155,8 +157,11 @@ function DashboardContent() {
     handleStylingChange,
     sizeConfig,
     stylingConfig,
-    getEffectiveFormSchema
+    getEffectiveFormSchema,
+    markAsPublished
   } = useFormEditing(formSchema)
+
+
 
   // Process landing page parameters ONCE
   useEffect(() => {
@@ -293,8 +298,7 @@ function DashboardContent() {
       // Pass the current button text to preserve it during update
       await generateForm(description, effectiveForm, true, currentButtonText)
       
-      // Clear pending changes after successful generation
-      discardChanges()
+      // Don't clear pending changes after AI update - let user publish the changes
       setDescription('')
     } catch {
       // Error is handled in the hook
@@ -316,6 +320,11 @@ function DashboardContent() {
   // MOVED: Publish functionality to form preview
   const handlePublishForm = async () => {
     try {
+      console.log('📝 handlePublishForm called - Pre-state:', {
+        publishedFormId,
+        hasUnsavedChanges
+      })
+
       const effectiveForm = getEffectiveFormSchema()
       if (effectiveForm) {
         const effectiveButtonText = getEffectiveButtonText()
@@ -333,10 +342,26 @@ function DashboardContent() {
           }
         }
         
-        await publishForm(formWithStyling, effectiveButtonText)
-        
-        // Save changes after successful publish
-        handleSaveChanges()
+        await publishForm(formWithStyling, effectiveButtonText, () => {
+          console.log('📝 onPublished callback executing - Pre-callback state:', {
+            publishedFormId,
+            hasUnsavedChanges
+          })
+
+          // Save changes after successful publish
+          handleSaveChanges()
+          
+          // Mark form as published to clear unsaved changes flag
+          // Use setTimeout to ensure this happens after all state updates
+          setTimeout(() => {
+            markAsPublished()
+          }, 0)
+
+          console.log('📝 onPublished callback completed - Post-callback state:', {
+            publishedFormId,
+            hasUnsavedChanges: false // Should be false after markAsPublished
+          })
+        })
       }
     } catch {
       // Error is handled in the hook
@@ -394,7 +419,7 @@ function DashboardContent() {
 
       <div className="dashboard-layout">
                             {/* Conditional Layout - Mobile, iPad, or Desktop */}
-                    {isMobile ? (
+                    {isClient && isMobile ? (
                       <MobileChatPanel
                         chatHistory={chatHistory}
                         description={description}
@@ -410,10 +435,11 @@ function DashboardContent() {
                         onPublishForm={handlePublishForm}
                         isPublishing={isPublishing}
                         publishedFormId={publishedFormId || undefined}
+                        hasUnsavedChanges={hasUnsavedChanges}
                         onCustomizeForm={() => setIsStylingPanelOpen(true)}
                         onGenerateFormFromFields={generateFormFromFields}
                       />
-                    ) : (
+                    ) : isClient ? (
           <>
             <EnhancedChatPanel
               description={description}
@@ -489,7 +515,7 @@ function DashboardContent() {
               }}
             />
           </>
-        )}
+        ) : null}
       </div>
     </div>
   )

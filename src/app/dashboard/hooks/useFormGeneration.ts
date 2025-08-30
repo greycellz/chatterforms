@@ -7,6 +7,7 @@ export function useFormGeneration() {
   const [isLoading, setIsLoading] = useState(false)
   const [isPublishing, setIsPublishing] = useState(false)
   const [publishedFormId, setPublishedFormId] = useState<string | null>(null)
+
   const [error, setError] = useState('')
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([])
   const [customButtonText, setCustomButtonText] = useState<string>('Submit Form')
@@ -134,19 +135,24 @@ export function useFormGeneration() {
     
     const startTime = Date.now()
     
-    // Add thinking message immediately
-    setChatHistory(prev => [
-      ...prev,
-      { 
+          // Add thinking message immediately
+      const thinkingMessage: ChatMessage = { 
         role: 'thinking', 
         content: 'Analyzing screenshot...',
         timestamp: startTime,
         metadata: {
           duration: 0,
+          type: 'image',
           steps: ['Processing image', 'Extracting form fields', 'Validating field types']
         }
       }
-    ])
+      
+      console.log('🔍 Adding thinking message for image analysis:', thinkingMessage)
+      
+      setChatHistory(prev => [
+        ...prev,
+        thinkingMessage
+      ])
 
     try {
       // Use Railway backend for analysis
@@ -239,6 +245,7 @@ export function useFormGeneration() {
         timestamp: startTime + 100,
         metadata: {
           duration: 0,
+          type: 'url',
           steps: ['Fetching webpage', 'Extracting form fields', 'Validating field types']
         }
       }
@@ -314,6 +321,7 @@ export function useFormGeneration() {
         timestamp: startTime,
         metadata: {
           duration: 0,
+          type: 'pdf',
           steps: ['Processing PDF', 'Extracting form fields', 'Validating field types']
         }
       }
@@ -389,8 +397,13 @@ export function useFormGeneration() {
     return await generateForm(description, null, false, undefined, validatedFields)
   }
 
-  const publishForm = async (effectiveFormSchema: FormSchema, submitButtonText: string) => {
+  const publishForm = async (effectiveFormSchema: FormSchema, submitButtonText: string, onPublished?: () => void) => {
     if (!effectiveFormSchema) return
+
+          console.log('🚀 Starting publish - Pre-state:', {
+        publishedFormId,
+        isPublishing: false
+      })
 
     setIsPublishing(true)
     setError('')
@@ -416,12 +429,32 @@ export function useFormGeneration() {
         throw new Error(data.error || 'Failed to publish form')
       }
 
+      console.log('🚀 Publish successful - Setting states:', {
+        newFormId: data.formId,
+        oldPublishedFormId: publishedFormId
+      })
+
       setPublishedFormId(data.formId)
+      
+      console.log('🚀 After setting publishedFormId:', {
+        publishedFormId: data.formId
+      })
       
       if (effectiveFormSchema && !effectiveFormSchema.formId) {
         const updatedSchema = { ...effectiveFormSchema, formId: data.formId }
         setFormSchema(updatedSchema)
       }
+      
+      // Call the onPublished callback after state updates
+      if (onPublished) {
+        console.log('🚀 Calling onPublished callback')
+        onPublished()
+      }
+      
+      console.log('🚀 Publish function completed - Final state:', {
+        publishedFormId: data.formId,
+        isPublishing: false
+      })
       
       return data.formId
     } catch (err) {
@@ -457,6 +490,9 @@ export function useFormGeneration() {
         }
       }
     ])
+    
+    // Automatically trigger analysis
+    analyzeScreenshot(imageData)
   }
 
   const handlePDFUpload = (file: File) => {
@@ -483,6 +519,9 @@ export function useFormGeneration() {
         }
       }
     ])
+    
+    // Automatically trigger analysis
+    analyzePDF(file)
   }
 
   const handleURLUpload = (url: string) => {
@@ -509,6 +548,9 @@ export function useFormGeneration() {
         }
       }
     ])
+    
+    // Automatically trigger analysis
+    analyzeURL(url)
   }
 
   const resetAnalysis = () => {
@@ -531,6 +573,8 @@ export function useFormGeneration() {
   }
 
   const clearError = () => setError('')
+
+
 
   return {
     // Form state

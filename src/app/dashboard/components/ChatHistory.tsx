@@ -119,9 +119,14 @@ const groupMessages = (messages: ChatMessage[]) => {
 // Thinking message component with real-time elapsed time
 const ThinkingMessage = ({ steps, timestamp }: { duration?: number, steps?: string[], timestamp?: number }) => {
   const [elapsedTime, setElapsedTime] = useState(0)
+  const [isClient, setIsClient] = useState(false)
   
   useEffect(() => {
-    if (!timestamp) return
+    setIsClient(true)
+  }, [])
+  
+  useEffect(() => {
+    if (!timestamp || !isClient) return
     
     const updateElapsed = () => {
       const elapsed = Math.round((Date.now() - timestamp) / 1000)
@@ -135,14 +140,14 @@ const ThinkingMessage = ({ steps, timestamp }: { duration?: number, steps?: stri
     const interval = setInterval(updateElapsed, 1000)
     
     return () => clearInterval(interval)
-  }, [timestamp])
+  }, [timestamp, isClient])
   
   return (
     <div className={styles.modernThinkingMessage}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
         <div style={{ fontSize: '16px' }}>💭</div>
         <span className={styles.modernThinkingText}>
-          {elapsedTime > 0 ? `Analyzing... (${elapsedTime}s)` : 'Analyzing...'}
+          {isClient && elapsedTime > 0 ? `Analyzing... (${elapsedTime}s)` : 'Analyzing...'}
         </span>
       </div>
       
