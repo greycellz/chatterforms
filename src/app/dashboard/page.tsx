@@ -220,12 +220,12 @@ function DashboardContent() {
             
             if (mode === 'image') {
               handleImageUpload(fileData.data)
-              await analyzeScreenshot(fileData.data)
+              // analyzeScreenshot is automatically called by handleImageUpload
             } else if (mode === 'pdf') {
               // Convert base64 back to File object with correct format
               const file = base64ToFile(fileData.data, fileData.name, fileData.type, fileData.isPDF)
               handlePDFUpload(file)
-              await analyzePDF(file)
+              // analyzePDF is automatically called by handlePDFUpload
             }
           }
         }

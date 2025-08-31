@@ -372,7 +372,7 @@ export default function MobileChatPanel({
               />
             </span>
             <span className={styles.formLinkText}>
-              {publishedFormId ? 'View Your Form' : 'Preview Your Form'}
+              {publishedFormId ? 'Preview Your Form' : 'Preview Your Form'}
             </span>
           </button>
         </div>
@@ -411,6 +411,7 @@ export default function MobileChatPanel({
             <button 
               className={styles.menuItem}
               onClick={() => {
+                console.log('🏠 Landing Page button clicked')
                 window.location.href = '/'
                 setShowWorkspaceMenu(false)
               }}
@@ -421,6 +422,7 @@ export default function MobileChatPanel({
             <button 
               className={styles.menuItem}
               onClick={() => {
+                console.log('📄 New Form button clicked')
                 window.location.href = '/dashboard'
                 setShowWorkspaceMenu(false)
               }}
