@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import './landing.css'
 import Link from 'next/link'
 import plusButtonStyles from './styles/PlusButton.module.css'
+import { AuthModal } from '@/components/auth'
 
 const TYPING_EXAMPLES = [
   "Create a patient intake form with contact info and medical history...",
@@ -23,6 +24,8 @@ export default function Home() {
   const [showPopup, setShowPopup] = useState(false)
   const [showURLInput, setShowURLInput] = useState(false)
   const [urlValue, setUrlValue] = useState('')
+  const [showAuthModal, setShowAuthModal] = useState(false)
+  const [authMode, setAuthMode] = useState<'login' | 'signup'>('signup')
   const fileInputRef = useRef<HTMLInputElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const popupRef = useRef<HTMLDivElement>(null)
@@ -95,6 +98,27 @@ export default function Home() {
 
     return () => clearTimeout(timeout)
   }, [currentExampleIndex, inputValue])
+
+  // Authentication handlers
+  const handleAuthSuccess = (user: { id: string; email: string; firstName: string; lastName: string; name: string; emailVerified: boolean; plan: string; status: string }, token: string) => {
+    // Store user data and token
+    localStorage.setItem('user', JSON.stringify(user))
+    localStorage.setItem('token', token)
+    
+    // Close modal and stay on current page
+    setShowAuthModal(false)
+    // Note: No redirect - user stays wherever they are
+  }
+
+  const handleSignUpClick = () => {
+    setAuthMode('signup')
+    setShowAuthModal(true)
+  }
+
+  const handleLoginClick = () => {
+    setAuthMode('login')
+    setShowAuthModal(true)
+  }
 
   // URL Detection Functions
   const isURLInput = (text: string): boolean => {
@@ -333,7 +357,7 @@ export default function Home() {
             <a href="#features">Features</a>
             <a href="#examples">Examples</a>
             <a href="#pricing">Pricing</a>
-            <a href="#" className="sign-up-btn">Sign Up</a>
+            <button onClick={handleSignUpClick} className="sign-up-btn">Sign Up</button>
           </div>
         </nav>
 
@@ -509,6 +533,14 @@ export default function Home() {
         accept="image/*,.pdf" 
         multiple
         onChange={handleFileChange}
+      />
+
+      {/* Authentication Modal */}
+      <AuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        onSuccess={handleAuthSuccess}
+        initialMode={authMode}
       />
     </div>
   )
