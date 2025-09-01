@@ -510,24 +510,26 @@ export default function Home() {
             </div>
           )}
 
-          {/* Features */}
-          <div className="features">
-            <div className="feature-card">
-              <span className="feature-icon">🎨</span>
-              <h3 className="feature-title">Live Customization</h3>
-              <p className="feature-desc">
-                Change colors, fonts, and layout in real-time. See your form transform as you design.
-              </p>
+          {/* Features - Only show for non-authenticated users */}
+          {!isAuthenticated && (
+            <div className="features">
+              <div className="feature-card">
+                <span className="feature-icon">🎨</span>
+                <h3 className="feature-title">Live Customization</h3>
+                <p className="feature-desc">
+                  Change colors, fonts, and layout in real-time. See your form transform as you design.
+                </p>
+              </div>
+              
+              <div className="feature-card">
+                <span className="feature-icon">⚡</span>
+                <h3 className="feature-title">Instant Publishing</h3>
+                <p className="feature-desc">
+                  Get a shareable link immediately. No hosting, databases, or configuration needed.
+                </p>
+              </div>
             </div>
-            
-            <div className="feature-card">
-              <span className="feature-icon">⚡</span>
-              <h3 className="feature-title">Instant Publishing</h3>
-              <p className="feature-desc">
-                Get a shareable link immediately. No hosting, databases, or configuration needed.
-              </p>
-            </div>
-          </div>
+          )}
 
           {/* User Forms Workspace */}
           {isAuthenticated && <FormCards />}

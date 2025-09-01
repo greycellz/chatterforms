@@ -14,6 +14,17 @@ interface Form {
   isHIPAA: boolean
   isAnonymous?: boolean
   migratedAt?: string
+  // Backend data structure fields
+  structure?: {
+    title: string
+    fields: unknown[]
+  }
+  form_id?: string
+  user_id?: string
+  updated_at?: {
+    _seconds: number
+    _nanoseconds: number
+  }
 }
 
 export default function FormCards() {
@@ -150,8 +161,18 @@ export default function FormCards() {
     router.push(`/dashboard?formId=${formId}`)
   }
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
+  const formatDate = (dateString: string | { _seconds: number; _nanoseconds: number }) => {
+    let date: Date
+    
+    if (typeof dateString === 'string') {
+      date = new Date(dateString)
+    } else if (dateString._seconds) {
+      // Handle Firestore timestamp
+      date = new Date(dateString._seconds * 1000)
+    } else {
+      return 'Recently edited'
+    }
+    
     const now = new Date()
     const diffTime = Math.abs(now.getTime() - date.getTime())
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
@@ -303,7 +324,9 @@ export default function FormCards() {
               onClick={() => handleFormClick(form.id)}
             >
               <div className={styles.formHeader}>
-                <h3 className={styles.formTitle}>{form.title}</h3>
+                <h3 className={styles.formTitle}>
+                  {form.structure?.title || form.title || 'Untitled Form'}
+                </h3>
                 <div className={styles.formStatus}>
                   <span
                     className={styles.statusBadge}
@@ -321,14 +344,14 @@ export default function FormCards() {
               
               <div className={styles.formMetadata}>
                 <p className={styles.lastEdited}>
-                  {formatDate(form.lastEdited)}
+                  {formatDate(form.updated_at || form.lastEdited)}
                 </p>
                 <p className={styles.submissions}>
                   {form.submissionCount} submission{form.submissionCount !== 1 ? 's' : ''}
                 </p>
                 {form.migratedAt && (
                   <p className={styles.migratedInfo}>
-                    Migrated on {new Date(form.migratedAt).toLocaleDateString()}
+                    Migrated on {formatDate(form.migratedAt)}
                   </p>
                 )}
               </div>
