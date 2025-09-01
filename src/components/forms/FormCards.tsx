@@ -89,15 +89,18 @@ export default function FormCards() {
     const loadForms = async () => {
       if (isAuthenticated && user) {
         // Authenticated user - fetch their forms
+        console.log('🔍 Fetching forms for authenticated user:', user.id)
         await fetchUserForms()
       } else if (isAnonymous && anonymousUserId) {
         // Anonymous user with existing session - fetch their forms
+        console.log('🔍 Fetching forms for anonymous user:', anonymousUserId)
         await fetchUserForms()
       } else if (!isAuthenticated && !isAnonymous) {
         // No user and no anonymous session - create anonymous session
         console.log('🆕 Creating anonymous session for new user')
         try {
-          await createAnonymousSession()
+          const newAnonymousUserId = await createAnonymousSession()
+          console.log('🆕 Anonymous session created, now fetching forms for:', newAnonymousUserId)
           // After creating session, fetch forms
           await fetchUserForms()
         } catch (error) {

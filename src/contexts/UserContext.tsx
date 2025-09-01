@@ -128,6 +128,14 @@ export function UserProvider({ children }: UserProviderProps) {
 
   const createAnonymousSession = async (): Promise<string> => {
     try {
+      // Check if we already have an anonymous session
+      const existingAnonymousUserId = localStorage.getItem('anonymousUserId')
+      if (existingAnonymousUserId) {
+        console.log('✅ Reusing existing anonymous session:', existingAnonymousUserId)
+        setAnonymousUserId(existingAnonymousUserId)
+        return existingAnonymousUserId
+      }
+
       const apiUrl = process.env.NEXT_PUBLIC_RAILWAY_URL
       
       // Create a test form to trigger anonymous session creation
@@ -161,7 +169,7 @@ export function UserProvider({ children }: UserProviderProps) {
         setAnonymousUserId(tempUserId)
         localStorage.setItem('anonymousUserId', tempUserId)
         
-        console.log('✅ Anonymous session created:', tempUserId)
+        console.log('✅ New anonymous session created:', tempUserId)
         return tempUserId
       } else {
         throw new Error('Failed to create anonymous session')
@@ -179,10 +187,12 @@ export function UserProvider({ children }: UserProviderProps) {
   const migrateAnonymousForms = async (realUserId: string): Promise<boolean> => {
     try {
       if (!anonymousUserId) {
-        console.log('No anonymous forms to migrate')
+        console.log('🔄 No anonymous forms to migrate')
         return true
       }
 
+      console.log('🔄 Starting migration of anonymous forms from', anonymousUserId, 'to', realUserId)
+      
       const apiUrl = process.env.NEXT_PUBLIC_RAILWAY_URL
       const response = await fetch(`${apiUrl}/api/forms/migrate-anonymous`, {
         method: 'POST',
@@ -206,11 +216,12 @@ export function UserProvider({ children }: UserProviderProps) {
         
         return true
       } else {
-        console.error('Failed to migrate forms:', response.status)
+        const errorText = await response.text()
+        console.error('❌ Failed to migrate forms:', response.status, errorText)
         return false
       }
     } catch (error) {
-      console.error('Error migrating forms:', error)
+      console.error('❌ Error migrating forms:', error)
       return false
     }
   }
@@ -225,15 +236,27 @@ export function UserProvider({ children }: UserProviderProps) {
   }
 
   const login = async (userData: User, userToken: string) => {
+    console.log('🔑 Login initiated for user:', userData.id)
+    
     // Migrate anonymous forms if they exist
     if (anonymousUserId) {
-      await migrateAnonymousForms(userData.id)
+      console.log('🔄 Migrating anonymous forms before login...')
+      const migrationSuccess = await migrateAnonymousForms(userData.id)
+      if (migrationSuccess) {
+        console.log('✅ Anonymous forms migrated successfully during login')
+      } else {
+        console.log('⚠️ Anonymous forms migration failed during login')
+      }
+    } else {
+      console.log('ℹ️ No anonymous forms to migrate during login')
     }
     
     setUser(userData)
     setToken(userToken)
     localStorage.setItem('user', JSON.stringify(userData))
     localStorage.setItem('token', userToken)
+    
+    console.log('✅ Login completed for user:', userData.id)
   }
 
   const logout = () => {
