@@ -3,6 +3,7 @@
 import React from 'react'
 import { FormCards } from '@/components/forms'
 import { Navigation } from '@/components/navigation'
+import '../landing.css'
 import './workspace.css'
 
 export default function WorkspacePage() {
