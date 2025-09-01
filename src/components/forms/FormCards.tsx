@@ -50,7 +50,8 @@ export default function FormCards() {
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Element
-      if (!target.closest(`.${styles.filterIcon}`) && !target.closest(`.${styles.sortIcon}`)) {
+      if (!target.closest(`.${styles.filterIcon}`) && !target.closest(`.${styles.filterDropdown}`) && 
+          !target.closest(`.${styles.sortIcon}`) && !target.closest(`.${styles.sortDropdown}`)) {
         setShowFilterDropdown(false)
         setShowSortDropdown(false)
       }
@@ -110,6 +111,11 @@ export default function FormCards() {
   }, [getCurrentUserId, isAuthenticated, token, isAnonymous])
 
   const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'name'>('newest')
+  
+  // Debug logging for state changes
+  useEffect(() => {
+    console.log('🔍 State changed - statusFilter:', statusFilter, 'sortBy:', sortBy)
+  }, [statusFilter, sortBy])
 
   // Fetch user's forms
   useEffect(() => {
@@ -341,93 +347,96 @@ export default function FormCards() {
               onChange={(e) => setSearchQuery(e.target.value)}
               className={styles.searchInput}
             />
-            <button 
-              className={styles.filterIcon}
-              onClick={() => setShowFilterDropdown(!showFilterDropdown)}
-              title="Filter forms"
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/>
-              </svg>
-            </button>
-            <button 
-              className={styles.sortIcon}
-              onClick={() => setShowSortDropdown(!showSortDropdown)}
-              title="Sort forms"
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M3 6h18M6 12h12M9 18h6"/>
-              </svg>
-            </button>
+            <div className={styles.buttonContainer}>
+              <button 
+                className={styles.filterIcon}
+                onClick={() => setShowFilterDropdown(!showFilterDropdown)}
+                title="Filter forms"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/>
+                </svg>
+                
+                {/* Filter Dropdown */}
+                {showFilterDropdown && (
+                  <div className={styles.filterDropdown}>
+                    <div className={styles.dropdownItem} onClick={() => { 
+                      console.log('🔍 Filter clicked: All Forms'); 
+                      setStatusFilter('all'); 
+                      setShowFilterDropdown(false); 
+                    }}>
+                      All Forms
+                    </div>
+                    <div className={styles.dropdownItem} onClick={() => { 
+                      console.log('🔍 Filter clicked: Draft'); 
+                      setStatusFilter('draft'); 
+                      setShowFilterDropdown(false); 
+                    }}>
+                      Draft
+                    </div>
+                    <div className={styles.dropdownItem} onClick={() => { 
+                      console.log('🔍 Filter clicked: Published'); 
+                      setStatusFilter('published'); 
+                      setShowFilterDropdown(false); 
+                    }}>
+                      Published
+                    </div>
+                    <div className={styles.dropdownItem} onClick={() => { 
+                      console.log('🔍 Filter clicked: HIPAA'); 
+                      setStatusFilter('hipaa'); 
+                      setShowFilterDropdown(false); 
+                    }}>
+                      HIPAA
+                    </div>
+                    <div className={styles.dropdownItem} onClick={() => { 
+                      console.log('🔍 Filter clicked: Non-HIPAA'); 
+                      setStatusFilter('non-hipaa'); 
+                      setShowFilterDropdown(false); 
+                    }}>
+                      Non-HIPAA
+                    </div>
+                  </div>
+                )}
+              </button>
+              
+              <button 
+                className={styles.sortIcon}
+                onClick={() => setShowSortDropdown(!showSortDropdown)}
+                title="Sort forms"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M3 6h18M6 12h12M9 18h6"/>
+                </svg>
+                
+                {/* Sort Dropdown */}
+                {showSortDropdown && (
+                  <div className={styles.sortDropdown}>
+                    <div className={styles.dropdownItem} onClick={() => { 
+                      console.log('🔍 Sort clicked: Newest First'); 
+                      setSortBy('newest'); 
+                      setShowSortDropdown(false); 
+                    }}>
+                      Newest First
+                    </div>
+                    <div className={styles.dropdownItem} onClick={() => { 
+                      console.log('🔍 Sort clicked: Oldest First'); 
+                      setSortBy('oldest'); 
+                      setShowSortDropdown(false); 
+                    }}>
+                      Oldest First
+                    </div>
+                    <div className={styles.dropdownItem} onClick={() => { 
+                      console.log('🔍 Sort clicked: Name'); 
+                      setSortBy('name'); 
+                      setShowSortDropdown(false); 
+                    }}>
+                      Name
+                    </div>
+                  </div>
+                )}
+              </button>
+            </div>
           </div>
-          
-          {/* Filter Dropdown */}
-          {showFilterDropdown && (
-            <div className={styles.filterDropdown}>
-              <div className={styles.dropdownItem} onClick={() => { 
-                console.log('🔍 Filter clicked: All Forms'); 
-                setStatusFilter('all'); 
-                setShowFilterDropdown(false); 
-              }}>
-                All Forms
-              </div>
-              <div className={styles.dropdownItem} onClick={() => { 
-                console.log('🔍 Filter clicked: Draft'); 
-                setStatusFilter('draft'); 
-                setShowFilterDropdown(false); 
-              }}>
-                Draft
-              </div>
-              <div className={styles.dropdownItem} onClick={() => { 
-                console.log('🔍 Filter clicked: Published'); 
-                setStatusFilter('published'); 
-                setShowFilterDropdown(false); 
-              }}>
-                Published
-              </div>
-              <div className={styles.dropdownItem} onClick={() => { 
-                console.log('🔍 Filter clicked: HIPAA'); 
-                setStatusFilter('hipaa'); 
-                setShowFilterDropdown(false); 
-              }}>
-                HIPAA
-              </div>
-              <div className={styles.dropdownItem} onClick={() => { 
-                console.log('🔍 Filter clicked: Non-HIPAA'); 
-                setStatusFilter('non-hipaa'); 
-                setShowFilterDropdown(false); 
-              }}>
-                Non-HIPAA
-              </div>
-            </div>
-          )}
-          
-          {/* Sort Dropdown */}
-          {showSortDropdown && (
-            <div className={styles.sortDropdown}>
-              <div className={styles.dropdownItem} onClick={() => { 
-                console.log('🔍 Sort clicked: Newest First'); 
-                setSortBy('newest'); 
-                setShowSortDropdown(false); 
-              }}>
-                Newest First
-              </div>
-              <div className={styles.dropdownItem} onClick={() => { 
-                console.log('🔍 Sort clicked: Oldest First'); 
-                setSortBy('oldest'); 
-                setShowSortDropdown(false); 
-              }}>
-                Oldest First
-              </div>
-              <div className={styles.dropdownItem} onClick={() => { 
-                console.log('🔍 Sort clicked: Name'); 
-                setSortBy('name'); 
-                setShowSortDropdown(false); 
-              }}>
-                Name
-              </div>
-            </div>
-          )}
         </div>
       </div>
 
