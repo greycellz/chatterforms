@@ -105,6 +105,7 @@
 
 .filterIcon,
 .sortIcon {
+  position: relative;
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.3);
   border-radius: 8px;
@@ -129,6 +130,7 @@
 }
 
 .searchContainer {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -353,6 +355,38 @@
 
 /* Dropdown Styles */
 .dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  min-width: 160px;
+  z-index: 1000;
+  margin-top: 8px;
+  overflow: hidden;
+}
+
+/* Position filter dropdown relative to filter button */
+.filterDropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  min-width: 160px;
+  z-index: 1000;
+  margin-top: 8px;
+  overflow: hidden;
+}
+
+/* Position sort dropdown relative to sort button */
+.sortDropdown {
   position: absolute;
   top: 100%;
   right: 0;

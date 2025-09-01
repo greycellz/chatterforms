@@ -146,9 +146,15 @@ export default function FormCards() {
 
     // Apply search filter
     if (searchQuery) {
-      filtered = filtered.filter(form =>
-        form.title.toLowerCase().includes(searchQuery.toLowerCase())
-      )
+      console.log('🔍 Searching for:', searchQuery)
+      console.log('🔍 Forms before search:', filtered.length)
+      filtered = filtered.filter(form => {
+        const title = form.structure?.title || form.title || ''
+        const matches = title.toLowerCase().includes(searchQuery.toLowerCase())
+        console.log('🔍 Form title:', title, 'matches:', matches)
+        return matches
+      })
+      console.log('🔍 Forms after search:', filtered.length)
     }
 
     // Apply status filter
@@ -311,7 +317,7 @@ export default function FormCards() {
           
           {/* Filter Dropdown */}
           {showFilterDropdown && (
-            <div className={styles.dropdown}>
+            <div className={styles.filterDropdown}>
               <div className={styles.dropdownItem} onClick={() => { setStatusFilter('all'); setShowFilterDropdown(false); }}>
                 All Forms
               </div>
@@ -332,7 +338,7 @@ export default function FormCards() {
           
           {/* Sort Dropdown */}
           {showSortDropdown && (
-            <div className={styles.dropdown}>
+            <div className={styles.sortDropdown}>
               <div className={styles.dropdownItem} onClick={() => { setSortBy('newest'); setShowSortDropdown(false); }}>
                 Newest First
               </div>
