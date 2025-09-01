@@ -193,12 +193,16 @@ export default function FormCards() {
       let result = 0
       switch (sortBy) {
         case 'newest':
-          result = new Date(formatDate(b.updated_at || b.lastEdited)).getTime() - new Date(formatDate(a.updated_at || a.lastEdited)).getTime()
-          console.log('🔍 Sort newest - Form A:', a.structure?.title || a.title, 'Form B:', b.structure?.title || b.title, 'result:', result)
+          const dateA = parseDate(b.updated_at || b.lastEdited)
+          const dateB = parseDate(a.updated_at || a.lastEdited)
+          result = dateA.getTime() - dateB.getTime()
+          console.log('🔍 Sort newest - Form A:', a.structure?.title || a.title, 'date:', dateA, 'Form B:', b.structure?.title || b.title, 'date:', dateB, 'result:', result)
           break
         case 'oldest':
-          result = new Date(formatDate(a.updated_at || a.lastEdited)).getTime() - new Date(formatDate(b.updated_at || b.lastEdited)).getTime()
-          console.log('🔍 Sort oldest - Form A:', a.structure?.title || a.title, 'Form B:', b.structure?.title || b.title, 'result:', result)
+          const dateAOld = parseDate(a.updated_at || a.lastEdited)
+          const dateBOld = parseDate(b.updated_at || b.lastEdited)
+          result = dateAOld.getTime() - dateBOld.getTime()
+          console.log('🔍 Sort oldest - Form A:', a.structure?.title || a.title, 'date:', dateAOld, 'Form B:', b.structure?.title || b.title, 'date:', dateBOld, 'result:', result)
           break
         case 'name':
           result = (a.structure?.title || a.title).localeCompare(b.structure?.title || b.title)
@@ -266,6 +270,17 @@ export default function FormCards() {
         return 'Archived'
       default:
         return 'Unknown'
+    }
+  }
+
+  // Helper function to convert date to Date object
+  const parseDate = (dateInput: string | { _seconds: number; _nanoseconds: number } | undefined): Date => {
+    if (typeof dateInput === 'string') {
+      return new Date(dateInput)
+    } else if (dateInput && typeof dateInput === 'object' && '_seconds' in dateInput) {
+      return new Date(dateInput._seconds * 1000)
+    } else {
+      return new Date()
     }
   }
 
