@@ -97,8 +97,16 @@ export default function AuthModal({
 
       if (data.success) {
         if (mode === 'signup') {
-          setSuccessMessage('Account created successfully! Please check your email to verify your account.')
-          // Don't close modal yet for signup - show success message
+          // For signup, we need to automatically log the user in to trigger form migration
+          // The backend should return user data and token even for unverified accounts
+          if (data.data && data.data.user && data.data.token) {
+            console.log('🔑 Auto-login after signup to trigger form migration')
+            onSuccess(data.data.user, data.data.token)
+            onClose()
+          } else {
+            setSuccessMessage('Account created successfully! Please check your email to verify your account.')
+            // Don't close modal yet for signup - show success message
+          }
         } else {
           // Login successful
           onSuccess(data.data.user, data.data.token)
