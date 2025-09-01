@@ -400,10 +400,10 @@ export function useFormGeneration() {
   const publishForm = async (effectiveFormSchema: FormSchema, submitButtonText: string, onPublished?: () => void) => {
     if (!effectiveFormSchema) return
 
-          console.log('🚀 Starting publish - Pre-state:', {
-        publishedFormId,
-        isPublishing: false
-      })
+    console.log('🚀 Starting publish - Pre-state:', {
+      publishedFormId,
+      isPublishing: false
+    })
 
     setIsPublishing(true)
     setError('')
@@ -415,17 +415,30 @@ export function useFormGeneration() {
         existingFormId: effectiveFormSchema.formId || publishedFormId
       }
 
+      // Get authentication token from localStorage
+      const token = localStorage.getItem('token')
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      }
+
+      // Add authorization header if user is authenticated
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`
+      }
+
       const response = await fetch('/api/publish-form', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
         body: JSON.stringify(requestBody),
       })
 
       const data = await response.json()
 
       if (!response.ok) {
+        if (response.status === 401) {
+          // Authentication required
+          throw new Error('Please sign up or sign in to publish your forms')
+        }
         throw new Error(data.error || 'Failed to publish form')
       }
 

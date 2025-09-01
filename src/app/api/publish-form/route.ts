@@ -14,6 +14,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid form schema' }, { status: 400 })
     }
 
+    // Check for user authentication
+    const authHeader = request.headers.get('authorization')
+    const isAuthenticated = authHeader && authHeader.startsWith('Bearer ')
+    
+    if (!isAuthenticated) {
+      return NextResponse.json({ 
+        error: 'Authentication required to publish forms',
+        code: 'AUTHENTICATION_REQUIRED',
+        message: 'Please sign up or sign in to publish your forms'
+      }, { status: 401 })
+    }
+
     let formId = existingFormId
 
     // If we have an existing form ID, try to update the existing form
@@ -52,13 +64,18 @@ export async function POST(request: NextRequest) {
       console.log(`📝 Storing form in GCP with ID: ${formId}`)
       console.log(`📝 Form data structure:`, JSON.stringify(formData, null, 2))
       
+      // Extract user ID from token (you'll need to implement this based on your auth system)
+      const token = authHeader.replace('Bearer ', '')
+      // TODO: Decode JWT token to get user ID
+      const userId = 'authenticated-user' // Placeholder - implement actual user ID extraction
+      
       const result = await railwayClient.storeFormStructure(
         {
           ...formSchema,
           id: formId,
           formId // Ensure the schema includes the formId
         },
-        'anonymous', // TODO: Add user authentication
+        userId, // Use actual user ID instead of 'anonymous'
         {
           source: 'form-publishing',
           isUpdate: !!existingFormId,

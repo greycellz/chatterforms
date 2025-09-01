@@ -1,5 +1,6 @@
 // src/app/dashboard/components/EnhancedFormPreview.tsx
 import { useState } from 'react'
+import { useUser } from '@/contexts'
 import FormHeader from './FormHeader'
 import FieldList from './FieldList'
 import SubmitButtonEditor from './SubmitButtonEditor'
@@ -650,34 +651,53 @@ const PublishSection = ({
       </div>
 
       {/* Compact Publish Button */}
-      <button
-        onClick={onPublishForm}
-        disabled={isPublishing}
-        className={`compact-publish-btn ${needsUpdate ? 'update-mode' : 'publish-mode'}`}
-        title={needsUpdate ? 'Update the live form with your changes' : 'Publish your form to make it live'}
-      >
-        {isPublishing ? (
-          <>
-            <div className="publish-spinner" />
-            <span>Publishing...</span>
-          </>
-        ) : needsUpdate ? (
-          <>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/>
-              <path d="M21 3v5h-5"/>
-            </svg>
-            <span>Update Live</span>
-          </>
-        ) : (
-          <>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M22 2L15 22L11 13L2 9L22 2Z"/>
-            </svg>
-            <span>{isPublished ? 'Republish' : 'Publish'}</span>
-          </>
-        )}
-      </button>
+      {isAnonymous ? (
+        <button
+          onClick={() => {
+            // Show authentication prompt
+            alert('Please sign up or sign in to publish your forms. Your forms will be saved when you create an account.')
+          }}
+          className="compact-publish-btn auth-required"
+          title="Sign up or sign in to publish your forms"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+            <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+          </svg>
+          <span>Sign Up to Publish</span>
+        </button>
+      ) : (
+        <button
+          onClick={onPublishForm}
+          disabled={isPublishing}
+          className={`compact-publish-btn ${needsUpdate ? 'update-mode' : 'publish-mode'}`}
+          title={needsUpdate ? 'Update the live form with your changes' : 'Publish your form to make it live'}
+        >
+          {isPublishing ? (
+            <>
+              <div className="publish-spinner" />
+              <span>Publishing...</span>
+            </>
+          ) : needsUpdate ? (
+            <>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/>
+                <path d="M21 3v5h-5"/>
+              </svg>
+              <span>Update Live</span>
+            </>
+          ) : (
+            <>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M22 2L15 22L11 13L2 9L22 2Z"/>
+              </svg>
+              <span>{isPublished ? 'Republish' : 'Publish'}</span>
+            </>
+          )}
+        </button>
+      )}
 
       {/* Compact Form URL Display */}
       {currentFormId && (
@@ -760,6 +780,7 @@ export default function FormPreview({
   extractedFields,
   onGenerateFormFromFields
 }: FormPreviewProps) {
+  const { isAuthenticated, isAnonymous } = useUser()
   
   // Handle individual radio option editing
   const handleRadioOptionEdit = (fieldId: string, optionIndex: number) => {
