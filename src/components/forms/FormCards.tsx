@@ -27,7 +27,11 @@ interface Form {
   }
 }
 
-export default function FormCards() {
+interface FormCardsProps {
+  showAllForms?: boolean
+}
+
+export default function FormCards({ showAllForms = false }: FormCardsProps) {
   const { 
     user, 
     token, 
@@ -330,14 +334,21 @@ export default function FormCards() {
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <h2 className={styles.title}>
-          {isAnonymous ? 'Your Forms' : `${user?.name || 'User'}'s Forms`}
-          {isAnonymous && (
-            <span className={styles.anonymousBadge}>
-              Anonymous Session
-            </span>
+        <div className={styles.headerContent}>
+          <h2 className={styles.title}>
+            {isAnonymous ? 'Your Forms' : `${user?.name || 'User'}'s Forms`}
+            {isAnonymous && (
+              <span className={styles.anonymousBadge}>
+                Anonymous Session
+              </span>
+            )}
+          </h2>
+          {!showAllForms && (
+            <a href="/workspace" className={styles.viewAllLink}>
+              View All →
+            </a>
           )}
-        </h2>
+        </div>
         <div className={styles.controls}>
           <div className={styles.searchContainer}>
             <input
@@ -458,7 +469,7 @@ export default function FormCards() {
         </div>
       ) : (
         <div className={styles.formsGrid}>
-          {filteredForms.map((form) => (
+          {(showAllForms ? filteredForms : filteredForms.slice(0, 8)).map((form) => (
             <div
               key={form.id}
               className={styles.formCard}
@@ -468,19 +479,12 @@ export default function FormCards() {
                 <h3 className={styles.formTitle}>
                   {form.structure?.title || form.title || 'Untitled Form'}
                 </h3>
-                <div className={styles.formStatus}>
-                  <span
-                    className={styles.statusBadge}
-                    style={{ backgroundColor: getStatusColor(form.status) }}
-                  >
-                    {getStatusText(form.status)}
-                  </span>
-                  {form.isAnonymous && (
-                    <span className={styles.anonymousIndicator}>
-                      🔒 Anonymous
-                    </span>
-                  )}
-                </div>
+                {/* Mobile triple dots - always visible */}
+                <button className={styles.mobileMenuButton}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/>
+                  </svg>
+                </button>
               </div>
               
               <div className={styles.formMetadata}>
@@ -490,14 +494,25 @@ export default function FormCards() {
                 <p className={styles.submissions}>
                   {form.submissionCount} submission{form.submissionCount !== 1 ? 's' : ''}
                 </p>
-                {form.migratedAt && (
-                  <p className={styles.migratedInfo}>
-                    Migrated {formatDate(form.migratedAt)}
-                  </p>
+              </div>
+
+              {/* Status badge moved to bottom-right */}
+              <div className={styles.formStatus}>
+                <span
+                  className={styles.statusBadge}
+                  style={{ backgroundColor: getStatusColor(form.status) }}
+                >
+                  {getStatusText(form.status)}
+                </span>
+                {form.isAnonymous && (
+                  <span className={styles.anonymousIndicator}>
+                    🔒 Anonymous
+                  </span>
                 )}
               </div>
 
-              <div className={styles.formActions}>
+              {/* Hover overlay with action buttons */}
+              <div className={styles.formActionsOverlay}>
                 <button className={styles.actionButton}>
                   Edit Form
                 </button>

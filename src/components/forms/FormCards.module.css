@@ -1,6 +1,6 @@
 .container {
   padding: 24px;
-  max-width: 960px !important;
+  max-width: 1200px !important;
   margin: 0 auto;
   border: 2px solid #4c1d95;
   border-radius: 16px;
@@ -25,17 +25,38 @@
 
 .header {
   margin-bottom: 32px;
-  text-align: center;
+}
+
+.headerContent {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.viewAllLink {
+  color: #8b5cf6;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 14px;
+  padding: 8px 16px;
+  border: 1px solid #8b5cf6;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.viewAllLink:hover {
+  background: #8b5cf6;
+  color: white;
 }
 
 .title {
   font-size: 32px;
   font-weight: 700;
   color: white;
-  margin-bottom: 8px;
+  margin: 0;
   display: flex;
   align-items: center;
-  justify-content: center;
   gap: 12px;
   flex-wrap: wrap;
 }
@@ -183,19 +204,22 @@
 
 .formsGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 24px;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 20px;
 }
 
 .formCard {
   background: white;
   border: 1px solid #e5e7eb;
   border-radius: 12px;
-  padding: 20px;
+  padding: 16px;
   cursor: pointer;
   transition: all 0.2s ease;
   position: relative;
   overflow: hidden;
+  height: 150px;
+  display: flex;
+  flex-direction: column;
 }
 
 .formCard:hover {
@@ -209,6 +233,23 @@
   justify-content: space-between;
   align-items: flex-start;
   margin-bottom: 12px;
+  flex: 1;
+}
+
+.mobileMenuButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  color: #6b7280;
+  transition: all 0.2s ease;
+  display: none;
+}
+
+.mobileMenuButton:hover {
+  background: #f3f4f6;
+  color: #374151;
 }
 
 .formTitle {
@@ -225,6 +266,8 @@
   flex-direction: column;
   align-items: flex-end;
   gap: 4px;
+  margin-top: auto;
+  margin-bottom: 8px;
 }
 
 .statusBadge {
@@ -272,6 +315,27 @@
   font-weight: 500;
 }
 
+.formActionsOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  border-radius: 12px;
+}
+
+.formCard:hover .formActionsOverlay {
+  opacity: 1;
+}
+
 .formActions {
   display: flex;
   gap: 8px;
@@ -279,15 +343,16 @@
 }
 
 .actionButton {
-  padding: 6px 12px;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  font-size: 12px;
-  font-weight: 500;
-  color: #374151;
-  background: white;
+  padding: 8px 16px;
+  border: 1px solid white;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: white;
+  background: transparent;
   cursor: pointer;
   transition: all 0.2s ease;
+  min-width: 100px;
 }
 
 .actionButton:hover {
@@ -439,7 +504,7 @@
   }
   
   .formsGrid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     gap: 16px;
   }
   
@@ -447,7 +512,11 @@
     padding: 16px;
   }
   
-  .quickActions {
-    opacity: 1;
+  .mobileMenuButton {
+    display: block;
+  }
+  
+  .formActionsOverlay {
+    display: none;
   }
 }
