@@ -6,7 +6,7 @@ import styles from './AuthModal.module.css'
 interface AuthModalProps {
   isOpen: boolean
   onClose: () => void
-  onSuccess: (user: any, token: string) => void
+  onSuccess: (user: { id: string; email: string; firstName: string; lastName: string; name: string; emailVerified: boolean; plan: string; status: string }, token: string) => void
   initialMode?: 'login' | 'signup'
 }
 
@@ -107,7 +107,8 @@ export default function AuthModal({
       } else {
         setError(data.error || 'An error occurred')
       }
-    } catch (err) {
+    } catch (error) {
+      console.error('Auth error:', error)
       setError('Network error. Please try again.')
     } finally {
       setIsLoading(false)
