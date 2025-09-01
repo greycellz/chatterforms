@@ -64,10 +64,31 @@ export async function POST(request: NextRequest) {
       console.log(`📝 Storing form in GCP with ID: ${formId}`)
       console.log(`📝 Form data structure:`, JSON.stringify(formData, null, 2))
       
-      // Extract user ID from token (you'll need to implement this based on your auth system)
+      // Extract user ID from token
       const token = authHeader.replace('Bearer ', '')
-      // TODO: Decode JWT token to get user ID
-      const userId = 'authenticated-user' // Placeholder - implement actual user ID extraction
+      
+      // Decode JWT token to get user ID
+      let userId: string
+      try {
+        // Simple JWT decode (payload only, no signature verification for now)
+        const payload = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
+        userId = payload.userId || payload.id || payload.sub
+        console.log('🔑 Extracted user ID from token:', userId)
+      } catch (error) {
+        console.error('❌ Failed to decode JWT token:', error)
+        return NextResponse.json({ 
+          error: 'Invalid authentication token',
+          code: 'INVALID_TOKEN'
+        }, { status: 401 })
+      }
+      
+      if (!userId) {
+        console.error('❌ No user ID found in token')
+        return NextResponse.json({ 
+          error: 'User ID not found in token',
+          code: 'USER_ID_MISSING'
+        }, { status: 401 })
+      }
       
       const result = await railwayClient.storeFormStructure(
         {
