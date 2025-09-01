@@ -1,0 +1,251 @@
+.userMenuContainer {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.userButton {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #333;
+  font-size: 14px;
+}
+
+.userButton:hover {
+  background: rgba(88, 28, 135, 0.05);
+  border-color: rgba(88, 28, 135, 0.1);
+}
+
+.userAvatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #581c87, #7c3aed);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.userInfo {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+}
+
+.userName {
+  font-weight: 600;
+  color: #333;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 120px;
+}
+
+.userEmail {
+  font-size: 12px;
+  color: #333;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 120px;
+}
+
+.dropdownIcon {
+  width: 16px;
+  height: 16px;
+  color: #666;
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+
+.dropdownIcon.rotated {
+  transform: rotate(180deg);
+}
+
+.dropdownMenu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 8px;
+  background: white;
+  border: 1px solid #e5e5e5;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  min-width: 280px;
+  z-index: 1000;
+  animation: slideIn 0.2s ease;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.menuHeader {
+  padding: 20px 20px 16px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.menuUserInfo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.menuAvatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #581c87, #7c3aed);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 18px;
+}
+
+.menuUserName {
+  font-weight: 600;
+  color: #333;
+  font-size: 16px;
+  margin-bottom: 2px;
+}
+
+.menuUserEmail {
+  font-size: 14px;
+  color: #666;
+}
+
+.menuDivider {
+  height: 1px;
+  background: #f0f0f0;
+  margin: 0;
+}
+
+.menuItems {
+  padding: 8px 0;
+}
+
+.menuItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 20px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  color: #333;
+  font-size: 14px;
+  text-align: left;
+}
+
+.menuItem:hover {
+  background: #f8f9fa;
+}
+
+.menuItem:focus {
+  outline: none;
+  background: #f0f0f0;
+}
+
+.menuItem svg {
+  width: 18px;
+  height: 18px;
+  color: #666;
+  flex-shrink: 0;
+}
+
+.logoutButton {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 20px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  color: #dc2626;
+  font-size: 14px;
+  text-align: left;
+  border-top: 1px solid #f0f0f0;
+}
+
+.logoutButton:hover {
+  background: #fef2f2;
+}
+
+.logoutButton:focus {
+  outline: none;
+  background: #fee2e2;
+}
+
+.logoutButton svg {
+  width: 18px;
+  height: 18px;
+  color: #dc2626;
+  flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+  .userInfo {
+    display: none;
+  }
+  
+  .userButton {
+    padding: 8px;
+    gap: 0;
+  }
+  
+  .dropdownMenu {
+    position: fixed;
+    top: auto;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin: 0;
+    border-radius: 12px 12px 0 0;
+    min-width: auto;
+    max-height: 80vh;
+    overflow-y: auto;
+  }
+  
+  .menuHeader {
+    padding: 24px 20px 20px;
+  }
+  
+  .menuItems {
+    padding: 12px 0;
+  }
+  
+  .menuItem {
+    padding: 16px 20px;
+    font-size: 16px;
+  }
+  
+  .logoutButton {
+    padding: 16px 20px;
+    font-size: 16px;
+  }
+}

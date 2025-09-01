@@ -6,6 +6,9 @@ import './landing.css'
 import Link from 'next/link'
 import plusButtonStyles from './styles/PlusButton.module.css'
 import { AuthModal } from '@/components/auth'
+import { useUser } from '@/contexts'
+import { UserMenu } from '@/components/user'
+import { FormCards } from '@/components/forms'
 
 const TYPING_EXAMPLES = [
   "Create a patient intake form with contact info and medical history...",
@@ -30,6 +33,7 @@ export default function Home() {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const popupRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
+  const { login, isAuthenticated } = useUser()
 
   // Close popup when clicking outside
   useEffect(() => {
@@ -101,9 +105,8 @@ export default function Home() {
 
   // Authentication handlers
   const handleAuthSuccess = (user: { id: string; email: string; firstName: string; lastName: string; name: string; emailVerified: boolean; plan: string; status: string }, token: string) => {
-    // Store user data and token
-    localStorage.setItem('user', JSON.stringify(user))
-    localStorage.setItem('token', token)
+    // Use UserContext to handle login
+    login(user, token)
     
     // Close modal and stay on current page
     setShowAuthModal(false)
@@ -357,7 +360,10 @@ export default function Home() {
             <a href="#features">Features</a>
             <a href="#examples">Examples</a>
             <a href="#pricing">Pricing</a>
-            <button onClick={handleSignUpClick} className="sign-up-btn">Sign Up</button>
+            <UserMenu />
+            {!isAuthenticated && (
+              <button onClick={handleSignUpClick} className="sign-up-btn">Sign Up</button>
+            )}
           </div>
         </nav>
 
@@ -522,6 +528,9 @@ export default function Home() {
               </p>
             </div>
           </div>
+
+          {/* User Forms Workspace */}
+          {isAuthenticated && <FormCards />}
         </main>
       </div>
 
