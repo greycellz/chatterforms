@@ -330,7 +330,7 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  gap: 16px;
+  gap: 8px;
   opacity: 0;
   transition: opacity 0.2s ease;
   border-radius: 12px;
@@ -347,17 +347,17 @@
 }
 
 .actionButton {
-  padding: 12px 20px;
+  padding: 8px 16px;
   border: 2px solid white;
-  border-radius: 8px;
-  font-size: 14px;
+  border-radius: 6px;
+  font-size: 13px;
   font-weight: 600;
   color: white;
   background: transparent;
   cursor: pointer;
   transition: all 0.2s ease;
-  min-width: 120px;
-  min-height: 48px;
+  min-width: 100px;
+  min-height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -368,7 +368,7 @@
   background: #8b5cf6;
   border-color: #8b5cf6;
   color: white;
-  transform: scale(1.05);
+  transform: scale(1.02);
 }
 
 .actionButton:hover {
