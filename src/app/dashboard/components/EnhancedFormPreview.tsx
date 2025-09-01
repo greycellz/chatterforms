@@ -598,13 +598,15 @@ const PublishSection = ({
   hasUnsavedChanges,
   isPublishing,
   publishedFormId,
-  onPublishForm
+  onPublishForm,
+  isAnonymous
 }: {
   formSchema: FormSchema | null
   hasUnsavedChanges: boolean
   isPublishing: boolean
   publishedFormId: string | null
   onPublishForm: () => void
+  isAnonymous: boolean
 }) => {
   const [copySuccess, setCopySuccess] = useState(false)
 
@@ -864,6 +866,7 @@ export default function FormPreview({
           isPublishing={isPublishing}
           publishedFormId={publishedFormId}
           onPublishForm={onPublishForm}
+          isAnonymous={isAnonymous}
         />
       </div>
       
