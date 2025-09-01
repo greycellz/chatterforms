@@ -1,11 +1,13 @@
 .container {
   padding: 24px;
-  max-width: 960px;
+  max-width: 960px !important;
   margin: 0 auto;
   border: 2px solid #4c1d95;
   border-radius: 16px;
   background: rgba(76, 29, 149, 0.1);
   backdrop-filter: blur(10px);
+  /* Debug: Make width change more obvious */
+  box-shadow: 0 0 0 4px rgba(255, 0, 0, 0.3);
 }
 
 @media (max-width: 1024px) {
