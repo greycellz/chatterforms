@@ -25,6 +25,9 @@ interface Form {
     _seconds: number
     _nanoseconds: number
   }
+  created_at?: string
+  createdAt?: string
+  lastSubmissionDate?: string
 }
 
 interface FormCardsProps {
@@ -243,18 +246,37 @@ export default function FormCards({ showAllForms = false }: FormCardsProps) {
       // Handle Firestore timestamp
       date = new Date(dateString._seconds * 1000)
     } else {
-      return 'Recently edited'
+      return 'Unknown date'
     }
     
-    const now = new Date()
-    const diffTime = Math.abs(now.getTime() - date.getTime())
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+    // Return actual date in MM/DD/YYYY format
+    return date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    })
+  }
 
-    if (diffDays === 1) return 'Edited yesterday'
-    if (diffDays < 7) return `Edited ${diffDays} days ago`
-    if (diffDays < 30) return `Edited ${Math.ceil(diffDays / 7)} weeks ago`
-    if (diffDays < 365) return `Edited ${Math.ceil(diffDays / 30)} months ago`
-    return `Edited ${Math.ceil(diffDays / 365)} years ago`
+  const formatCreatedDate = (dateString: string | { _seconds: number; _nanoseconds: number } | undefined) => {
+    if (!dateString) return 'Unknown date'
+    
+    let date: Date
+    
+    if (typeof dateString === 'string') {
+      date = new Date(dateString)
+    } else if (dateString._seconds) {
+      // Handle Firestore timestamp
+      date = new Date(dateString._seconds * 1000)
+    } else {
+      return 'Unknown date'
+    }
+    
+    // Return actual date in MM/DD/YYYY format
+    return date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    })
   }
 
   const getStatusColor = (status: string) => {
@@ -488,11 +510,19 @@ export default function FormCards({ showAllForms = false }: FormCardsProps) {
               </div>
               
               <div className={styles.formMetadata}>
+                <p className={styles.createdDate}>
+                  Created: {formatCreatedDate(form.created_at || form.createdAt)}
+                </p>
                 <p className={styles.lastEdited}>
-                  {formatDate(form.updated_at || form.lastEdited)}
+                  Last edit: {formatDate(form.updated_at || form.lastEdited)}
                 </p>
                 <p className={styles.submissions}>
                   {form.submissionCount} submission{form.submissionCount !== 1 ? 's' : ''}
+                  {form.submissionCount > 0 && form.lastSubmissionDate && (
+                    <span className={styles.lastSubmission}>
+                      • Last: {formatDate(form.lastSubmissionDate)}
+                    </span>
+                  )}
                 </p>
               </div>
 
