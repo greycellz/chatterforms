@@ -142,6 +142,7 @@ export default function FormCards() {
 
   // Filter and sort forms when search or filters change
   useEffect(() => {
+    console.log('🔍 useEffect triggered with:', { searchQuery, statusFilter, sortBy, formsCount: forms.length })
     let filtered = forms
 
     // Apply search filter
@@ -159,28 +160,58 @@ export default function FormCards() {
 
     // Apply status filter
     if (statusFilter !== 'all') {
+      console.log('🔍 Applying filter:', statusFilter)
+      console.log('🔍 Forms before filter:', filtered.length)
+      
       if (statusFilter === 'hipaa') {
-        filtered = filtered.filter(form => form.isHIPAA === true)
+        filtered = filtered.filter(form => {
+          const isHIPAA = form.isHIPAA === true
+          console.log('🔍 Form:', form.structure?.title || form.title, 'isHIPAA:', form.isHIPAA, 'matches:', isHIPAA)
+          return isHIPAA
+        })
       } else if (statusFilter === 'non-hipaa') {
-        filtered = filtered.filter(form => form.isHIPAA === false)
+        filtered = filtered.filter(form => {
+          const isNonHIPAA = form.isHIPAA === false
+          console.log('🔍 Form:', form.structure?.title || form.title, 'isHIPAA:', form.isHIPAA, 'matches:', isNonHIPAA)
+          return isNonHIPAA
+        })
       } else {
-        filtered = filtered.filter(form => form.status === statusFilter)
+        filtered = filtered.filter(form => {
+          const matches = form.status === statusFilter
+          console.log('🔍 Form:', form.structure?.title || form.title, 'status:', form.status, 'filter:', statusFilter, 'matches:', matches)
+          return matches
+        })
       }
+      console.log('🔍 Forms after filter:', filtered.length)
     }
 
     // Apply sorting
+    console.log('🔍 Applying sort:', sortBy)
+    console.log('🔍 Forms before sort:', filtered.length)
+    
     filtered.sort((a, b) => {
+      let result = 0
       switch (sortBy) {
         case 'newest':
-          return new Date(formatDate(b.updated_at || b.lastEdited)).getTime() - new Date(formatDate(a.updated_at || a.lastEdited)).getTime()
+          result = new Date(formatDate(b.updated_at || b.lastEdited)).getTime() - new Date(formatDate(a.updated_at || a.lastEdited)).getTime()
+          console.log('🔍 Sort newest - Form A:', a.structure?.title || a.title, 'Form B:', b.structure?.title || b.title, 'result:', result)
+          break
         case 'oldest':
-          return new Date(formatDate(a.updated_at || a.lastEdited)).getTime() - new Date(formatDate(b.updated_at || b.lastEdited)).getTime()
+          result = new Date(formatDate(a.updated_at || a.lastEdited)).getTime() - new Date(formatDate(b.updated_at || b.lastEdited)).getTime()
+          console.log('🔍 Sort oldest - Form A:', a.structure?.title || a.title, 'Form B:', b.structure?.title || b.title, 'result:', result)
+          break
         case 'name':
-          return (a.structure?.title || a.title).localeCompare(b.structure?.title || b.title)
+          result = (a.structure?.title || a.title).localeCompare(b.structure?.title || b.title)
+          console.log('🔍 Sort name - Form A:', a.structure?.title || a.title, 'Form B:', b.structure?.title || b.title, 'result:', result)
+          break
         default:
-          return 0
+          console.log('🔍 Unknown sort type:', sortBy)
+          result = 0
       }
+      return result
     })
+    
+    console.log('🔍 Forms after sort:', filtered.length)
 
     setFilteredForms(filtered)
   }, [forms, searchQuery, statusFilter, sortBy])
@@ -318,19 +349,39 @@ export default function FormCards() {
           {/* Filter Dropdown */}
           {showFilterDropdown && (
             <div className={styles.filterDropdown}>
-              <div className={styles.dropdownItem} onClick={() => { setStatusFilter('all'); setShowFilterDropdown(false); }}>
+              <div className={styles.dropdownItem} onClick={() => { 
+                console.log('🔍 Filter clicked: All Forms'); 
+                setStatusFilter('all'); 
+                setShowFilterDropdown(false); 
+              }}>
                 All Forms
               </div>
-              <div className={styles.dropdownItem} onClick={() => { setStatusFilter('draft'); setShowFilterDropdown(false); }}>
+              <div className={styles.dropdownItem} onClick={() => { 
+                console.log('🔍 Filter clicked: Draft'); 
+                setStatusFilter('draft'); 
+                setShowFilterDropdown(false); 
+              }}>
                 Draft
               </div>
-              <div className={styles.dropdownItem} onClick={() => { setStatusFilter('published'); setShowFilterDropdown(false); }}>
+              <div className={styles.dropdownItem} onClick={() => { 
+                console.log('🔍 Filter clicked: Published'); 
+                setStatusFilter('published'); 
+                setShowFilterDropdown(false); 
+              }}>
                 Published
               </div>
-              <div className={styles.dropdownItem} onClick={() => { setStatusFilter('hipaa'); setShowFilterDropdown(false); }}>
+              <div className={styles.dropdownItem} onClick={() => { 
+                console.log('🔍 Filter clicked: HIPAA'); 
+                setStatusFilter('hipaa'); 
+                setShowFilterDropdown(false); 
+              }}>
                 HIPAA
               </div>
-              <div className={styles.dropdownItem} onClick={() => { setStatusFilter('non-hipaa'); setShowFilterDropdown(false); }}>
+              <div className={styles.dropdownItem} onClick={() => { 
+                console.log('🔍 Filter clicked: Non-HIPAA'); 
+                setStatusFilter('non-hipaa'); 
+                setShowFilterDropdown(false); 
+              }}>
                 Non-HIPAA
               </div>
             </div>
@@ -339,13 +390,25 @@ export default function FormCards() {
           {/* Sort Dropdown */}
           {showSortDropdown && (
             <div className={styles.sortDropdown}>
-              <div className={styles.dropdownItem} onClick={() => { setSortBy('newest'); setShowSortDropdown(false); }}>
+              <div className={styles.dropdownItem} onClick={() => { 
+                console.log('🔍 Sort clicked: Newest First'); 
+                setSortBy('newest'); 
+                setShowSortDropdown(false); 
+              }}>
                 Newest First
               </div>
-              <div className={styles.dropdownItem} onClick={() => { setSortBy('oldest'); setShowSortDropdown(false); }}>
+              <div className={styles.dropdownItem} onClick={() => { 
+                console.log('🔍 Sort clicked: Oldest First'); 
+                setSortBy('oldest'); 
+                setShowSortDropdown(false); 
+              }}>
                 Oldest First
               </div>
-              <div className={styles.dropdownItem} onClick={() => { setSortBy('name'); setShowSortDropdown(false); }}>
+              <div className={styles.dropdownItem} onClick={() => { 
+                console.log('🔍 Sort clicked: Name'); 
+                setSortBy('name'); 
+                setShowSortDropdown(false); 
+              }}>
                 Name
               </div>
             </div>
