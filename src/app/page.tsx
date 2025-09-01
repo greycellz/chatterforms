@@ -5,9 +5,7 @@ import { useRouter } from 'next/navigation'
 import './landing.css'
 import Link from 'next/link'
 import plusButtonStyles from './styles/PlusButton.module.css'
-import { AuthModal } from '@/components/auth'
-import { useUser } from '@/contexts'
-import { UserMenu } from '@/components/user'
+import { Navigation } from '@/components/navigation'
 import { FormCards } from '@/components/forms'
 
 const TYPING_EXAMPLES = [
@@ -27,13 +25,10 @@ export default function Home() {
   const [showPopup, setShowPopup] = useState(false)
   const [showURLInput, setShowURLInput] = useState(false)
   const [urlValue, setUrlValue] = useState('')
-  const [showAuthModal, setShowAuthModal] = useState(false)
-  const [authMode, setAuthMode] = useState<'login' | 'signup'>('signup')
   const fileInputRef = useRef<HTMLInputElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const popupRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
-  const { login, isAuthenticated } = useUser()
 
   // Close popup when clicking outside
   useEffect(() => {
@@ -103,25 +98,7 @@ export default function Home() {
     return () => clearTimeout(timeout)
   }, [currentExampleIndex, inputValue])
 
-  // Authentication handlers
-  const handleAuthSuccess = (user: { id: string; email: string; firstName: string; lastName: string; name: string; emailVerified: boolean; plan: string; status: string }, token: string) => {
-    // Use UserContext to handle login
-    login(user, token)
-    
-    // Close modal and stay on current page
-    setShowAuthModal(false)
-    // Note: No redirect - user stays wherever they are
-  }
 
-  const handleSignUpClick = () => {
-    setAuthMode('signup')
-    setShowAuthModal(true)
-  }
-
-  const handleLoginClick = () => {
-    setAuthMode('login')
-    setShowAuthModal(true)
-  }
 
   // URL Detection Functions
   const isURLInput = (text: string): boolean => {
@@ -352,20 +329,7 @@ export default function Home() {
 
       <div className="page-container">
         {/* Navigation */}
-        <nav className="nav">
-          <Link href="/" className="logo">
-            ChatterForms
-          </Link>
-          <div className="nav-links">
-            <a href="#features">Features</a>
-            <a href="#examples">Examples</a>
-            <a href="#pricing">Pricing</a>
-            <UserMenu />
-            {!isAuthenticated && (
-              <button onClick={handleSignUpClick} className="sign-up-btn">Sign Up</button>
-            )}
-          </div>
-        </nav>
+        <Navigation />
 
         {/* Hero Section */}
         <main className="hero">
@@ -510,33 +474,29 @@ export default function Home() {
             </div>
           )}
 
-          {/* Features - Only show for non-authenticated users */}
-          {!isAuthenticated && (
-            <div className="features">
-              <div className="feature-card">
-                <span className="feature-icon">🎨</span>
-                <h3 className="feature-title">Live Customization</h3>
-                <p className="feature-desc">
-                  Change colors, fonts, and layout in real-time. See your form transform as you design.
-                </p>
-              </div>
-              
-              <div className="feature-card">
-                <span className="feature-icon">⚡</span>
-                <h3 className="feature-title">Instant Publishing</h3>
-                <p className="feature-desc">
-                  Get a shareable link immediately. No hosting, databases, or configuration needed.
-                </p>
-              </div>
+          {/* Features */}
+          <div className="features">
+            <div className="feature-card">
+              <span className="feature-icon">🎨</span>
+              <h3 className="feature-title">Live Customization</h3>
+              <p className="feature-desc">
+                Change colors, fonts, and layout in real-time. See your form transform as you design.
+              </p>
             </div>
-          )}
+            
+            <div className="feature-card">
+              <span className="feature-icon">⚡</span>
+              <h3 className="feature-title">Instant Publishing</h3>
+              <p className="feature-desc">
+                Get a shareable link immediately. No hosting, databases, or configuration needed.
+              </p>
+            </div>
+          </div>
 
           {/* User Forms Workspace */}
-          {isAuthenticated && (
-            <div className="workspace-section">
-              <FormCards />
-            </div>
-          )}
+          <div className="workspace-section">
+            <FormCards />
+          </div>
         </main>
       </div>
 
@@ -550,13 +510,7 @@ export default function Home() {
         onChange={handleFileChange}
       />
 
-      {/* Authentication Modal */}
-      <AuthModal
-        isOpen={showAuthModal}
-        onClose={() => setShowAuthModal(false)}
-        onSuccess={handleAuthSuccess}
-        initialMode={authMode}
-      />
+
     </div>
   )
 }
