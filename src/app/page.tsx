@@ -7,6 +7,7 @@ import Link from 'next/link'
 import plusButtonStyles from './styles/PlusButton.module.css'
 import { Navigation } from '@/components/navigation'
 import { FormCards } from '@/components/forms'
+import { useUser } from '@/contexts'
 
 const TYPING_EXAMPLES = [
   "Create a patient intake form with contact info and medical history...",
@@ -29,6 +30,7 @@ export default function Home() {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const popupRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
+  const { isAuthenticated } = useUser()
 
   // Close popup when clicking outside
   useEffect(() => {
@@ -474,29 +476,33 @@ export default function Home() {
             </div>
           )}
 
-          {/* Features */}
-          <div className="features">
-            <div className="feature-card">
-              <span className="feature-icon">🎨</span>
-              <h3 className="feature-title">Live Customization</h3>
-              <p className="feature-desc">
-                Change colors, fonts, and layout in real-time. See your form transform as you design.
-              </p>
+          {/* Features - Only show for non-authenticated users */}
+          {!isAuthenticated && (
+            <div className="features">
+              <div className="feature-card">
+                <span className="feature-icon">🎨</span>
+                <h3 className="feature-title">Live Customization</h3>
+                <p className="feature-desc">
+                  Change colors, fonts, and layout in real-time. See your form transform as you design.
+                </p>
+              </div>
+              
+              <div className="feature-card">
+                <span className="feature-icon">⚡</span>
+                <h3 className="feature-title">Instant Publishing</h3>
+                <p className="feature-desc">
+                  Get a shareable link immediately. No hosting, databases, or configuration needed.
+                </p>
+              </div>
             </div>
-            
-            <div className="feature-card">
-              <span className="feature-icon">⚡</span>
-              <h3 className="feature-title">Instant Publishing</h3>
-              <p className="feature-desc">
-                Get a shareable link immediately. No hosting, databases, or configuration needed.
-              </p>
-            </div>
-          </div>
+          )}
 
           {/* User Forms Workspace */}
-          <div className="workspace-section">
-            <FormCards />
-          </div>
+          {isAuthenticated && (
+            <div className="workspace-section">
+              <FormCards />
+            </div>
+          )}
         </main>
       </div>
 
