@@ -19,6 +19,10 @@ interface Form {
     title: string
     fields: unknown[]
   }
+  metadata?: {
+    created_at?: string
+    updated_at?: string
+  }
   form_id?: string
   user_id?: string
   updated_at?: {
@@ -511,10 +515,10 @@ export default function FormCards({ showAllForms = false }: FormCardsProps) {
               
               <div className={styles.formMetadata}>
                 <p className={styles.createdDate}>
-                  Created: {formatCreatedDate(form.created_at || form.createdAt)}
+                  Created: {formatCreatedDate(form.metadata?.created_at || form.created_at || form.createdAt)}
                 </p>
                 <p className={styles.lastEdited}>
-                  Last edit: {formatDate(form.updated_at || form.lastEdited)}
+                  Last edit: {formatDate(form.metadata?.updated_at || form.updated_at || form.lastEdited)}
                 </p>
                 <p className={styles.submissions}>
                   {form.submissionCount} submission{form.submissionCount !== 1 ? 's' : ''}
