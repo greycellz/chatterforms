@@ -42,7 +42,23 @@ export default function FormCards() {
   const [filteredForms, setFilteredForms] = useState<Form[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
-  const [statusFilter, setStatusFilter] = useState<'all' | 'draft' | 'published' | 'archived'>('all')
+  const [statusFilter, setStatusFilter] = useState<'all' | 'draft' | 'published' | 'hipaa' | 'non-hipaa'>('all')
+  const [showFilterDropdown, setShowFilterDropdown] = useState(false)
+  const [showSortDropdown, setShowSortDropdown] = useState(false)
+  
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element
+      if (!target.closest(`.${styles.filterIcon}`) && !target.closest(`.${styles.sortIcon}`)) {
+        setShowFilterDropdown(false)
+        setShowSortDropdown(false)
+      }
+    }
+    
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
   
   const fetchUserForms = useCallback(async () => {
     try {
@@ -93,7 +109,7 @@ export default function FormCards() {
     }
   }, [getCurrentUserId, isAuthenticated, token, isAnonymous])
 
-  const [sortBy, setSortBy] = useState<'lastEdited' | 'newest' | 'submissions'>('lastEdited')
+  const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'name'>('newest')
 
   // Fetch user's forms
   useEffect(() => {
@@ -137,18 +153,24 @@ export default function FormCards() {
 
     // Apply status filter
     if (statusFilter !== 'all') {
-      filtered = filtered.filter(form => form.status === statusFilter)
+      if (statusFilter === 'hipaa') {
+        filtered = filtered.filter(form => form.isHIPAA === true)
+      } else if (statusFilter === 'non-hipaa') {
+        filtered = filtered.filter(form => form.isHIPAA === false)
+      } else {
+        filtered = filtered.filter(form => form.status === statusFilter)
+      }
     }
 
     // Apply sorting
     filtered.sort((a, b) => {
       switch (sortBy) {
-        case 'lastEdited':
-          return new Date(b.lastEdited).getTime() - new Date(a.lastEdited).getTime()
         case 'newest':
-          return new Date(b.lastEdited).getTime() - new Date(a.lastEdited).getTime()
-        case 'submissions':
-          return b.submissionCount - a.submissionCount
+          return new Date(formatDate(b.updated_at || b.lastEdited)).getTime() - new Date(formatDate(a.updated_at || a.lastEdited)).getTime()
+        case 'oldest':
+          return new Date(formatDate(a.updated_at || a.lastEdited)).getTime() - new Date(formatDate(b.updated_at || b.lastEdited)).getTime()
+        case 'name':
+          return (a.structure?.title || a.title).localeCompare(b.structure?.title || b.title)
         default:
           return 0
       }
@@ -269,8 +291,8 @@ export default function FormCards() {
             />
             <button 
               className={styles.filterIcon}
-              onClick={() => setStatusFilter(statusFilter === 'all' ? 'draft' : 'all')}
-              title={statusFilter === 'all' ? 'Show drafts only' : 'Show all forms'}
+              onClick={() => setShowFilterDropdown(!showFilterDropdown)}
+              title="Filter forms"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/>
@@ -278,14 +300,50 @@ export default function FormCards() {
             </button>
             <button 
               className={styles.sortIcon}
-              onClick={() => setSortBy(sortBy === 'lastEdited' ? 'newest' : 'lastEdited')}
-              title={sortBy === 'lastEdited' ? 'Sort by newest' : 'Sort by last edited'}
+              onClick={() => setShowSortDropdown(!showSortDropdown)}
+              title="Sort forms"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M3 6h18M6 12h12M9 18h6"/>
               </svg>
             </button>
           </div>
+          
+          {/* Filter Dropdown */}
+          {showFilterDropdown && (
+            <div className={styles.dropdown}>
+              <div className={styles.dropdownItem} onClick={() => { setStatusFilter('all'); setShowFilterDropdown(false); }}>
+                All Forms
+              </div>
+              <div className={styles.dropdownItem} onClick={() => { setStatusFilter('draft'); setShowFilterDropdown(false); }}>
+                Draft
+              </div>
+              <div className={styles.dropdownItem} onClick={() => { setStatusFilter('published'); setShowFilterDropdown(false); }}>
+                Published
+              </div>
+              <div className={styles.dropdownItem} onClick={() => { setStatusFilter('hipaa'); setShowFilterDropdown(false); }}>
+                HIPAA
+              </div>
+              <div className={styles.dropdownItem} onClick={() => { setStatusFilter('non-hipaa'); setShowFilterDropdown(false); }}>
+                Non-HIPAA
+              </div>
+            </div>
+          )}
+          
+          {/* Sort Dropdown */}
+          {showSortDropdown && (
+            <div className={styles.dropdown}>
+              <div className={styles.dropdownItem} onClick={() => { setSortBy('newest'); setShowSortDropdown(false); }}>
+                Newest First
+              </div>
+              <div className={styles.dropdownItem} onClick={() => { setSortBy('oldest'); setShowSortDropdown(false); }}>
+                Oldest First
+              </div>
+              <div className={styles.dropdownItem} onClick={() => { setSortBy('name'); setShowSortDropdown(false); }}>
+                Name
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
