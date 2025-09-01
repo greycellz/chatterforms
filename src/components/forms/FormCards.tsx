@@ -226,26 +226,17 @@ export default function FormCards() {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className={styles.searchInput}
               />
+              <button className={styles.filterIcon} disabled>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/>
+                </svg>
+              </button>
+              <button className={styles.sortIcon} disabled>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M3 6h18M6 12h12M9 18h6"/>
+                </svg>
+              </button>
             </div>
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value as 'all' | 'draft' | 'published' | 'archived')}
-              className={styles.filterSelect}
-            >
-              <option value="all">All Forms</option>
-              <option value="draft">Drafts</option>
-              <option value="published">Published</option>
-              <option value="archived">Archived</option>
-            </select>
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as 'lastEdited' | 'newest' | 'submissions')}
-              className={styles.sortSelect}
-            >
-              <option value="lastEdited">Last Edited</option>
-              <option value="newest">Newest</option>
-              <option value="submissions">Most Submissions</option>
-            </select>
           </div>
         </div>
         <div className={styles.loadingContainer}>
@@ -276,26 +267,25 @@ export default function FormCards() {
               onChange={(e) => setSearchQuery(e.target.value)}
               className={styles.searchInput}
             />
+            <button 
+              className={styles.filterIcon}
+              onClick={() => setStatusFilter(statusFilter === 'all' ? 'draft' : 'all')}
+              title={statusFilter === 'all' ? 'Show drafts only' : 'Show all forms'}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/>
+              </svg>
+            </button>
+            <button 
+              className={styles.sortIcon}
+              onClick={() => setSortBy(sortBy === 'lastEdited' ? 'newest' : 'lastEdited')}
+              title={sortBy === 'lastEdited' ? 'Sort by newest' : 'Sort by last edited'}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M3 6h18M6 12h12M9 18h6"/>
+              </svg>
+            </button>
           </div>
-                      <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value as 'all' | 'draft' | 'published' | 'archived')}
-              className={styles.filterSelect}
-            >
-              <option value="all">All Forms</option>
-              <option value="draft">Drafts</option>
-              <option value="published">Published</option>
-              <option value="archived">Archived</option>
-            </select>
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as 'lastEdited' | 'newest' | 'submissions')}
-              className={styles.sortSelect}
-            >
-            <option value="lastEdited">Last Edited</option>
-            <option value="newest">Newest</option>
-            <option value="submissions">Most Submissions</option>
-          </select>
         </div>
       </div>
 
@@ -351,7 +341,7 @@ export default function FormCards() {
                 </p>
                 {form.migratedAt && (
                   <p className={styles.migratedInfo}>
-                    Migrated on {formatDate(form.migratedAt)}
+                    Migrated {formatDate(form.migratedAt)}
                   </p>
                 )}
               </div>

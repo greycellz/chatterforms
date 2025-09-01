@@ -532,7 +532,11 @@ export default function Home() {
           )}
 
           {/* User Forms Workspace */}
-          {isAuthenticated && <FormCards />}
+          {isAuthenticated && (
+            <div className="workspace-section">
+              <FormCards />
+            </div>
+          )}
         </main>
       </div>
 
