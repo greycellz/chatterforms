@@ -11,7 +11,7 @@ interface NavigationProps {
 }
 
 export default function Navigation({ showAuthButton = true }: NavigationProps) {
-  const { isAuthenticated } = useUser()
+  const { isAuthenticated, login } = useUser()
   const [showAuthModal, setShowAuthModal] = useState(false)
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('signup')
 
@@ -21,7 +21,9 @@ export default function Navigation({ showAuthButton = true }: NavigationProps) {
   }
 
   const handleAuthSuccess = (user: any, token: string) => {
-    // Handle successful authentication
+    // Handle successful authentication by calling login
+    console.log('🔑 Navigation: Authentication successful, logging in user:', user.id)
+    login(user, token)
     setShowAuthModal(false)
   }
 

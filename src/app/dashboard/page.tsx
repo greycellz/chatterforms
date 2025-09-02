@@ -169,11 +169,12 @@ function DashboardContent() {
     const mode = searchParams.get('mode')
     const filename = searchParams.get('filename')
     const url = searchParams.get('url')
+    const formId = searchParams.get('formId')
     
     // Check multiple safeguards to prevent HMR re-runs
     const sessionProcessed = sessionStorage.getItem('landingParamsProcessed')
     const sessionTimestamp = sessionStorage.getItem('landingParamsTimestamp')
-    const currentParams = JSON.stringify({ input, mode, filename, url })
+    const currentParams = JSON.stringify({ input, mode, filename, url, formId })
     const lastProcessedParams = sessionStorage.getItem('lastProcessedParams')
     
     // Check if session storage has expired (5 minutes)
@@ -249,6 +250,50 @@ function DashboardContent() {
     searchParams, 
     hasProcessedLandingParams
   ])
+
+  // 🎯 NEW: Handle form loading from workspace
+  useEffect(() => {
+    const formId = searchParams.get('formId')
+    
+    if (formId) {
+      loadExistingForm(formId)
+    }
+  }, [searchParams])
+
+  // 🎯 NEW: Function to load existing form data
+  const loadExistingForm = async (formId: string) => {
+    try {
+      console.log('🔄 Loading existing form:', formId)
+      
+      // Get the API URL from environment
+      const apiUrl = process.env.NEXT_PUBLIC_RAILWAY_URL || 'https://my-poppler-api-production.up.railway.app'
+      
+      // Fetch form data from backend
+      const response = await fetch(`${apiUrl}/api/forms/${formId}`)
+      
+      if (response.ok) {
+        const formData = await response.json()
+        console.log('✅ Form data loaded:', formData)
+        
+        // Load form into the dashboard state
+        if (formData.form && formData.form.schema) {
+          // Update form schema
+          updateFormSchema(formData.form.schema)
+          
+          // Update button text if available
+          if (formData.form.submitButtonText) {
+            updateButtonText(formData.form.submitButtonText)
+          }
+          
+          console.log('✅ Form loaded successfully into dashboard')
+        }
+      } else {
+        console.error('❌ Failed to load form:', response.status)
+      }
+    } catch (error) {
+      console.error('❌ Error loading form:', error)
+    }
+  }
 
   // 🎯 NEW: Handle example selection from empty state
   const handleExampleSelect = async (examplePrompt: string) => {
