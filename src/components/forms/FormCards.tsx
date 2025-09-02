@@ -589,13 +589,33 @@ export default function FormCards({ showAllForms = false }: FormCardsProps) {
 
               {/* Hover overlay with action buttons */}
               <div className={styles.formActionsOverlay}>
-                <button className={styles.actionButton}>
+                <button 
+                  className={styles.actionButton}
+                  onClick={(e) => {
+                    e.stopPropagation() // Prevent form click
+                    window.open(`/dashboard?formId=${form.id}`, '_blank')
+                  }}
+                >
                   Edit Form
                 </button>
-                <button className={styles.actionButton}>
+                <button 
+                  className={styles.actionButton}
+                  onClick={(e) => {
+                    e.stopPropagation() // Prevent form click
+                    // Open published form in new tab (not edit mode)
+                    const publishedUrl = `${window.location.origin}/form/${form.id}`
+                    window.open(publishedUrl, '_blank')
+                  }}
+                >
                   View Form
                 </button>
-                <button className={styles.actionButton}>
+                <button 
+                  className={styles.actionButton}
+                  onClick={(e) => {
+                    e.stopPropagation() // Prevent form click
+                    window.open(`/submissions/${form.id}`, '_blank')
+                  }}
+                >
                   Submissions
                 </button>
                 <button 
