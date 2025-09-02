@@ -6,6 +6,7 @@ import { useState, useEffect, Suspense, useRef } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { useFormEditing } from './hooks/useFormEditing'
 import { useFormGeneration } from './hooks/useFormGeneration'
+import { useUser } from '@/contexts'
 
             // CSS IMPORTS - Load in this specific order for proper precedence
             import './dashboard.css'                           // Your existing base styles
@@ -97,6 +98,7 @@ function DashboardContent() {
   const [isMobile, setIsMobile] = useState(false)
   const [isClient, setIsClient] = useState(false)
   const searchParams = useSearchParams()
+  const { user } = useUser()
 
   // Detect mobile screen sizes (client-side only)
   useEffect(() => {
@@ -139,7 +141,7 @@ function DashboardContent() {
     handleURLUpload,
     handlePageSelectionComplete,
     resetAnalysis
-  } = useFormGeneration()
+  } = useFormGeneration(user?.id)
 
   const {
     editingField,

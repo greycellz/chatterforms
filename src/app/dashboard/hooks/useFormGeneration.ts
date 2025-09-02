@@ -2,7 +2,7 @@ import { useState, useRef } from 'react'
 import { FormSchema, ChatMessage, FieldExtraction, PDFPageSelectionResponse } from '../types'
 import { railwayClient, AnalysisResult } from '@/lib/railway-client'
 
-export function useFormGeneration() {
+export function useFormGeneration(userId?: string) {
   const [formSchema, setFormSchema] = useState<FormSchema | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [isPublishing, setIsPublishing] = useState(false)
@@ -85,19 +85,19 @@ export function useFormGeneration() {
         setCustomButtonText(preserveButtonText)
       }
       
-      // Store form structure in GCP via Railway
-      try {
-        await railwayClient.storeFormStructure(
-          updatedSchema,
-          'anonymous', // TODO: Add user authentication
-          {
-            source: 'form-generation',
-            isEdit,
-            hasExtractedFields: !!extractedFields,
-            uploadedSource: uploadedPDF ? 'pdf' : uploadedURL ? 'url' : uploadedImage ? 'screenshot' : 'text'
-          }
-        )
-        console.log('✅ Form structure stored in GCP')
+              // Store form structure in GCP via Railway
+        try {
+          await railwayClient.storeFormStructure(
+            updatedSchema,
+            userId || 'anonymous', // Use authenticated user ID if available
+            {
+              source: 'form-generation',
+              isEdit,
+              hasExtractedFields: !!extractedFields,
+              uploadedSource: uploadedPDF ? 'pdf' : uploadedURL ? 'url' : uploadedImage ? 'screenshot' : 'text'
+            }
+          )
+          console.log('✅ Form structure stored in GCP')
       } catch (error) {
         console.error('❌ Failed to store form in GCP:', error)
         // Don't fail the form generation if GCP storage fails
