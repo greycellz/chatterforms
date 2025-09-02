@@ -279,19 +279,41 @@ function DashboardContent() {
         if (formData.form) {
           console.log('🔍 Form data structure:', formData.form)
           
-          // Check if the form has a schema field
+          // Transform backend data to FormSchema format
+          let schema = null
+          
           if (formData.form.schema) {
-            // Update form schema
-            updateFormSchema(formData.form.schema)
-            console.log('✅ Form schema updated')
-          } else if (formData.form.fields) {
-            // If no schema but has fields, create a schema
-            const schema = {
-              title: formData.form.title || 'Untitled Form',
-              fields: formData.form.fields
+            // Backend has a schema field
+            schema = {
+              title: formData.form.schema.title || formData.form.title || 'Untitled Form',
+              fields: formData.form.schema.fields || [],
+              formId: formData.form.form_id || formData.form.formId
             }
-            updateFormSchema(schema)
+            console.log('✅ Form schema extracted from schema field')
+          } else if (formData.form.fields) {
+            // Backend has fields directly
+            schema = {
+              title: formData.form.title || 'Untitled Form',
+              fields: formData.form.fields,
+              formId: formData.form.form_id || formData.form.formId
+            }
             console.log('✅ Form schema created from fields')
+          } else if (formData.form.structure) {
+            // Backend has structure field
+            schema = {
+              title: formData.form.structure.title || formData.form.title || 'Untitled Form',
+              fields: formData.form.structure.fields || [],
+              formId: formData.form.form_id || formData.form.formId
+            }
+            console.log('✅ Form schema created from structure')
+          }
+          
+          if (schema) {
+            console.log('🔍 Transformed schema:', schema)
+            updateFormSchema(schema)
+            console.log('✅ Form schema updated in state')
+          } else {
+            console.error('❌ Could not create schema from form data')
           }
           
           // Update button text if available
@@ -536,9 +558,12 @@ function DashboardContent() {
             />
 
             {/* Form Preview - Only show on desktop */}
+            {console.log('🔍 Dashboard rendering FormPreview with formSchema:', formSchema)}
             <FormPreview
               formSchema={formSchema}
               effectiveFormSchema={getEffectiveFormSchema()}
+              // Debug logging
+              key={`form-preview-${formSchema ? 'with-schema' : 'no-schema'}`}
               isLoading={isLoading}
               hasUnsavedChanges={hasUnsavedChanges}
               editingField={editingField}
