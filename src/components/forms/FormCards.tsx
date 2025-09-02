@@ -309,6 +309,42 @@ export default function FormCards({ showAllForms = false }: FormCardsProps) {
     }
   }
 
+  const handleDeleteForm = async (formId: string, formTitle: string) => {
+    const confirmed = window.confirm(
+      `Are you sure you want to delete "${formTitle}"?\n\nThis will permanently remove:\n• The form structure\n• All form submissions\n• Form analytics\n• Any associated data\n\nThis action cannot be undone.`
+    )
+    
+    if (!confirmed) return
+    
+    try {
+      console.log(`🗑️ Deleting form: ${formId}`)
+      
+      const apiUrl = process.env.NEXT_PUBLIC_RAILWAY_URL
+      const response = await fetch(`${apiUrl}/api/forms/${formId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(isAuthenticated && token ? { 'Authorization': `Bearer ${token}` } : {})
+        }
+      })
+      
+      if (response.ok) {
+        console.log(`✅ Form deleted successfully: ${formId}`)
+        // Remove form from local state
+        setForms(prevForms => prevForms.filter(form => form.id !== formId))
+        // Show success message (you could add a toast notification here)
+        alert('Form deleted successfully')
+      } else {
+        const errorData = await response.json()
+        console.error(`❌ Failed to delete form: ${formId}`, errorData)
+        alert(`Failed to delete form: ${errorData.error || 'Unknown error'}`)
+      }
+    } catch (error) {
+      console.error(`❌ Error deleting form: ${formId}`, error)
+      alert('Failed to delete form. Please try again.')
+    }
+  }
+
   // Helper function to convert date to Date object
   const parseDate = (dateInput: string | { _seconds: number; _nanoseconds: number } | undefined): Date => {
     if (typeof dateInput === 'string') {
@@ -506,7 +542,13 @@ export default function FormCards({ showAllForms = false }: FormCardsProps) {
                   {form.structure?.title || form.title || 'Untitled Form'}
                 </h3>
                 {/* Mobile triple dots - always visible */}
-                <button className={styles.mobileMenuButton}>
+                <button 
+                  className={styles.mobileMenuButton}
+                  onClick={(e) => {
+                    e.stopPropagation() // Prevent form click
+                    // TODO: Add mobile dropdown menu with delete option
+                  }}
+                >
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/>
                   </svg>
@@ -555,6 +597,15 @@ export default function FormCards({ showAllForms = false }: FormCardsProps) {
                 </button>
                 <button className={styles.actionButton}>
                   Submissions
+                </button>
+                <button 
+                  className={`${styles.actionButton} ${styles.deleteButton}`}
+                  onClick={(e) => {
+                    e.stopPropagation() // Prevent form click
+                    handleDeleteForm(form.id, form.structure?.title || form.title || 'Untitled Form')
+                  }}
+                >
+                  🗑️ Delete
                 </button>
               </div>
             </div>

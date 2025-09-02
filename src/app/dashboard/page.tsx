@@ -509,6 +509,7 @@ function DashboardContent() {
 
       <div className="dashboard-layout">
                             {/* Conditional Layout - Mobile, iPad, or Desktop */}
+                    {console.log('🔍 Mobile detection:', { isClient, isMobile, formSchema: !!formSchema })}
                     {isClient && isMobile ? (
                       <MobileChatPanel
                         chatHistory={chatHistory}

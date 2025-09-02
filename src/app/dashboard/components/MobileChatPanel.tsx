@@ -227,6 +227,15 @@ export default function MobileChatPanel({
   onCustomizeForm,
   onGenerateFormFromFields
 }: MobileChatPanelProps) {
+  
+  console.log('🔍 MobileChatPanel: Component rendered with props:', {
+    hasFormSchema: !!formSchema,
+    formSchemaTitle: formSchema?.title,
+    formSchemaFields: formSchema?.fields?.length,
+    isLoading,
+    publishedFormId
+  })
+  
   const [isChatExpanded, setIsChatExpanded] = useState(false)
   const [showPopup, setShowPopup] = useState(false)
   const [showURLInput, setShowURLInput] = useState(false)
@@ -356,8 +365,19 @@ export default function MobileChatPanel({
 
   // Function to render form preview button if form is generated
   const renderFormPreviewButton = () => {
+    console.log('🔍 MobileChatPanel renderFormPreviewButton:', {
+      hasFormSchema: !!formSchema,
+      isLoading,
+      publishedFormId,
+      formSchemaId: formSchema?.id,
+      formSchemaTitle: formSchema?.title,
+      formSchemaFields: formSchema?.fields?.length,
+      condition: formSchema && !isLoading && (publishedFormId || formSchema.id || formSchema.title || formSchema.fields)
+    })
+    
     // Show form preview button if we have any form data AND not currently loading
     if (formSchema && !isLoading && (publishedFormId || formSchema.id || formSchema.title || formSchema.fields)) {
+      console.log('✅ MobileChatPanel: Showing preview button')
       return (
         <div className={styles.formLinkContainer}>
           <button
@@ -377,6 +397,8 @@ export default function MobileChatPanel({
           </button>
         </div>
       )
+    } else {
+      console.log('❌ MobileChatPanel: Not showing preview button')
     }
     return null
   }
@@ -501,12 +523,12 @@ export default function MobileChatPanel({
                 </div>
               </div>
             )}
-            
-                                    {/* Form Preview Button - Show when form is generated */}
-                        {renderFormPreviewButton()}
           </div>
         </div>
       )}
+
+      {/* Form Preview Button - Show when form is loaded OR generated */}
+      {renderFormPreviewButton()}
 
       {/* Welcome Message - Show when no chat history */}
       {chatHistory.length === 0 && (

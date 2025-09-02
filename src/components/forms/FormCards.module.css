@@ -384,6 +384,18 @@
   transform: scale(1.02);
 }
 
+.deleteButton {
+  border-color: #ef4444 !important;
+  color: #ef4444 !important;
+}
+
+.deleteButton:hover,
+.deleteButton:focus {
+  background: #ef4444 !important;
+  border-color: #ef4444 !important;
+  color: white !important;
+}
+
 .emptyState {
   text-align: center;
   padding: 60px 20px;
