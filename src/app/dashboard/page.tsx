@@ -170,11 +170,12 @@ function DashboardContent() {
     const filename = searchParams.get('filename')
     const url = searchParams.get('url')
     const formId = searchParams.get('formId')
+    const userId = searchParams.get('userId')
     
     // Check multiple safeguards to prevent HMR re-runs
     const sessionProcessed = sessionStorage.getItem('landingParamsProcessed')
     const sessionTimestamp = sessionStorage.getItem('landingParamsTimestamp')
-    const currentParams = JSON.stringify({ input, mode, filename, url, formId })
+    const currentParams = JSON.stringify({ input, mode, filename, url, formId, userId })
     const lastProcessedParams = sessionStorage.getItem('lastProcessedParams')
     
     // Check if session storage has expired (5 minutes)
@@ -229,6 +230,11 @@ function DashboardContent() {
               // analyzePDF is automatically called by handlePDFUpload
             }
           }
+        } else if (mode === 'create' && userId) {
+          // Create new form mode for authenticated user
+          console.log('🔑 Dashboard: Create new form mode for authenticated user:', userId)
+          // Clear any existing form and reset to creation state
+          // The form creation will use the authenticated user context
         }
         
         // Reset flag after processing (increased delay to prevent race conditions)

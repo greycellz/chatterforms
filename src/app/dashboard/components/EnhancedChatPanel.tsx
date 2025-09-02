@@ -3,6 +3,7 @@ import ChatHistory from './ChatHistory'
 import AnalysisReview from './AnalysisReview'
 import CompactChatInput from './CompactChatInput'
 import { FormSchema, ChatMessage, FieldExtraction, PDFPageSelectionResponse } from '../types'
+import { useUser } from '@/contexts'
 
 // Import the styles
 //import '../styles/compact-chat-input.css'
@@ -81,6 +82,7 @@ export default function EnhancedChatPanel({
   isFromLanding
 }: EnhancedChatPanelProps) {
   const [showWorkspaceMenu, setShowWorkspaceMenu] = useState(false)
+  const { isAuthenticated, user } = useUser()
   
   // Close menu when clicking outside
   const handleClickOutside = (event: MouseEvent) => {
@@ -132,12 +134,23 @@ export default function EnhancedChatPanel({
               <span className="menu-text">Back to Landing</span>
             </button>
             <button className="menu-item" onClick={() => {
-              // Reset the dashboard to create a new form
-              window.location.href = '/dashboard'
+              if (isAuthenticated && user) {
+                // If authenticated, create new form with authenticated user
+                console.log('🔑 Creating new form for authenticated user:', user.id)
+                // Clear current form and reset to creation mode
+                window.location.href = '/dashboard?mode=create&userId=' + user.id
+              } else {
+                // If not authenticated, go to landing page for anonymous creation
+                console.log('👤 User not authenticated, redirecting to landing page')
+                window.location.href = '/'
+              }
               setShowWorkspaceMenu(false)
             }}>
               <span className="menu-icon">📄</span>
               <span className="menu-text">New Form</span>
+              {isAuthenticated && (
+                <span className="auth-indicator">🔒</span>
+              )}
             </button>
             <div className="menu-divider"></div>
             <button className="menu-item disabled">
