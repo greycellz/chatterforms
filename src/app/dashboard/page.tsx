@@ -276,13 +276,28 @@ function DashboardContent() {
         console.log('✅ Form data loaded:', formData)
         
         // Load form into the dashboard state
-        if (formData.form && formData.form.schema) {
-          // Update form schema
-          updateFormSchema(formData.form.schema)
+        if (formData.form) {
+          console.log('🔍 Form data structure:', formData.form)
+          
+          // Check if the form has a schema field
+          if (formData.form.schema) {
+            // Update form schema
+            updateFormSchema(formData.form.schema)
+            console.log('✅ Form schema updated')
+          } else if (formData.form.fields) {
+            // If no schema but has fields, create a schema
+            const schema = {
+              title: formData.form.title || 'Untitled Form',
+              fields: formData.form.fields
+            }
+            updateFormSchema(schema)
+            console.log('✅ Form schema created from fields')
+          }
           
           // Update button text if available
           if (formData.form.submitButtonText) {
             updateButtonText(formData.form.submitButtonText)
+            console.log('✅ Submit button text updated')
           }
           
           console.log('✅ Form loaded successfully into dashboard')
