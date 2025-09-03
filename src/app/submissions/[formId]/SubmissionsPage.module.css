@@ -3,9 +3,9 @@
   margin: 0 auto;
   padding: 24px;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  background: #0f0f23;
+  background: #ffffff;
   min-height: 100vh;
-  color: #ffffff;
+  color: #111827;
 }
 
 .header {
@@ -17,12 +17,12 @@
 .header h1 {
   font-size: 32px;
   font-weight: 700;
-  color: #ffffff;
+  color: #111827;
   margin: 0 0 16px 0;
 }
 
 .formInfo {
-  background: #1e1e3f;
+  background: #f8fafc;
   padding: 20px;
   border-radius: 12px;
   border: 1px solid #6366f1;
@@ -32,20 +32,20 @@
 .formInfo h2 {
   font-size: 24px;
   font-weight: 600;
-  color: #ffffff;
+  color: #111827;
   margin: 0 0 8px 0;
 }
 
 .formInfo p {
   margin: 4px 0;
-  color: #a5b4fc;
+  color: #374151;
   font-size: 14px;
 }
 
 .emptyState {
   text-align: center;
   padding: 80px 20px;
-  color: #a5b4fc;
+  color: #6b7280;
 }
 
 .emptyIcon {
@@ -58,7 +58,7 @@
   font-size: 24px;
   font-weight: 600;
   margin: 0 0 8px 0;
-  color: #ffffff;
+  color: #111827;
 }
 
 .emptyState p {
@@ -68,40 +68,47 @@
 
 /* Table Styles */
 .submissionsContainer {
-  background: #1e1e3f;
+  background: #ffffff;
   border-radius: 12px;
-  border: 1px solid #6366f1;
+  border: 1px solid #e5e7eb;
   overflow: hidden;
-  box-shadow: 0 4px 6px rgba(99, 102, 241, 0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.tableScrollContainer {
+  overflow-x: auto;
+  overflow-y: hidden;
+  border-radius: 12px;
 }
 
 .tableHeader {
-  background: #312e81;
-  border-bottom: 1px solid #6366f1;
+  background: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
 }
 
 .tableRow {
   display: grid;
-  grid-template-columns: 80px 150px repeat(auto-fit, minmax(150px, 1fr)) 80px;
-  gap: 16px;
-  padding: 16px;
+  grid-template-columns: 80px 150px repeat(auto-fit, minmax(150px, 1fr)) 60px;
+  gap: 12px;
+  padding: 12px 16px;
   align-items: center;
-  border-bottom: 1px solid #3730a3;
+  border-bottom: 1px solid #f3f4f6;
+  min-width: 800px; /* Ensure minimum width for scrolling */
 }
 
 .tableHeader .tableRow {
   font-weight: 600;
-  color: #ffffff;
-  background: #312e81;
+  color: #374151;
+  background: #f9fafb;
 }
 
 .tableBody .tableRow {
-  background: #1e1e3f;
+  background: #ffffff;
   transition: background-color 0.2s ease;
 }
 
 .tableBody .tableRow:hover {
-  background: #2d1b69;
+  background: #f8fafc;
 }
 
 .clickableRow {
@@ -109,32 +116,28 @@
 }
 
 .tableCell {
-  padding: 8px;
-  font-size: 14px;
-  color: #e0e7ff;
+  padding: 6px 8px;
+  font-size: 13px;
+  color: #374151;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.expandButton {
-  background: #6366f1;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  padding: 6px 12px;
-  cursor: pointer;
+.expandIndicator {
+  color: #6366f1;
   font-size: 12px;
-  transition: background-color 0.2s ease;
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
 }
 
-.expandButton:hover {
-  background: #4f46e5;
+.expandIndicator:hover {
+  opacity: 1;
 }
 
 .expandedDetails {
-  background: #2d1b69;
-  border-top: 1px solid #6366f1;
+  background: #f8fafc;
+  border-top: 1px solid #e5e7eb;
   padding: 20px;
 }
 
@@ -179,16 +182,16 @@
 }
 
 .submissionCard {
-  background: #2d1b69;
-  border: 1px solid #6366f1;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
   border-radius: 12px;
   padding: 24px;
-  box-shadow: 0 4px 6px rgba(99, 102, 241, 0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   transition: box-shadow 0.2s ease;
 }
 
 .submissionCard:hover {
-  box-shadow: 0 6px 12px rgba(99, 102, 241, 0.2);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .submissionHeader {
@@ -203,7 +206,7 @@
 .submissionHeader h3 {
   font-size: 20px;
   font-weight: 600;
-  color: #ffffff;
+  color: #111827;
   margin: 0;
 }
 
@@ -232,23 +235,23 @@
 
 .fieldRow {
   display: flex;
-  margin-bottom: 16px;
-  padding: 12px;
-  background: #1e1e3f;
+  margin-bottom: 12px;
+  padding: 10px;
+  background: #f9fafb;
   border-radius: 6px;
-  border: 1px solid #6366f1;
+  border: 1px solid #e5e7eb;
 }
 
 .fieldLabel {
   font-weight: 600;
-  color: #a5b4fc;
+  color: #374151;
   min-width: 200px;
   margin-right: 16px;
   font-size: 14px;
 }
 
 .fieldValue {
-  color: #e0e7ff;
+  color: #111827;
   font-size: 14px;
   flex: 1;
   word-break: break-word;
@@ -256,14 +259,14 @@
 
 .submissionFooter {
   padding-top: 16px;
-  border-top: 1px solid #6366f1;
+  border-top: 1px solid #e5e7eb;
 }
 
 .metadata {
   display: flex;
   gap: 16px;
   font-size: 12px;
-  color: #a5b4fc;
+  color: #6b7280;
   flex-wrap: wrap;
 }
 
@@ -321,7 +324,8 @@
   .tableRow {
     grid-template-columns: 60px 120px 1fr 60px;
     gap: 8px;
-    padding: 12px;
+    padding: 8px 12px;
+    min-width: 600px; /* Smaller minimum for mobile */
   }
   
   .tableCell {

@@ -248,76 +248,78 @@ export default function SubmissionsPage() {
         </div>
       ) : (
         <div className={styles.submissionsContainer}>
-          {/* Table Header */}
-          <div className={styles.tableHeader}>
-            <div className={styles.tableRow}>
-              <div className={styles.tableCell}>Submission #</div>
-              <div className={styles.tableCell}>Date</div>
-              {getTableColumns().map(field => (
-                <div key={field.id} className={styles.tableCell}>
-                  {field.label}
+          <div className={styles.tableScrollContainer}>
+            {/* Table Header */}
+            <div className={styles.tableHeader}>
+              <div className={styles.tableRow}>
+                <div className={styles.tableCell}>Submission #</div>
+                <div className={styles.tableCell}>Date</div>
+                {getTableColumns().map(field => (
+                  <div key={field.id} className={styles.tableCell}>
+                    {field.label}
+                  </div>
+                ))}
+                <div className={styles.tableCell}>Actions</div>
+              </div>
+            </div>
+
+            {/* Table Body */}
+            <div className={styles.tableBody}>
+              {submissions.map((submission, index) => (
+                <div key={submission.submission_id} className={styles.tableRowContainer}>
+                  <div 
+                    className={`${styles.tableRow} ${styles.clickableRow}`}
+                    onClick={() => toggleSubmissionExpansion(submission.submission_id)}
+                  >
+                    <div className={styles.tableCell}>
+                      #{submissions.length - index}
+                    </div>
+                    <div className={styles.tableCell}>
+                      {formatTimestamp(submission.timestamp)}
+                    </div>
+                    {getTableColumns().map(field => (
+                      <div key={field.id} className={styles.tableCell}>
+                        {getFieldValue(submission, field.id)}
+                      </div>
+                    ))}
+                    <div className={styles.tableCell}>
+                      <span className={styles.expandIndicator}>
+                        {expandedSubmission === submission.submission_id ? '▼' : '▶'}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Expanded Submission Details */}
+                  {expandedSubmission === submission.submission_id && (
+                    <div className={styles.expandedDetails}>
+                      <div className={styles.submissionCard}>
+                        <div className={styles.submissionHeader}>
+                          <h3>Submission #{submissions.length - index} - Full Details</h3>
+                          <div className={styles.submissionMeta}>
+                            <span className={styles.timestamp}>
+                              {formatTimestamp(submission.timestamp)}
+                            </span>
+                            <span className={styles.submissionId}>
+                              ID: {submission.submission_id}
+                            </span>
+                          </div>
+                        </div>
+                        
+                        {renderSubmissionData(submission)}
+                        
+                        <div className={styles.submissionFooter}>
+                          <div className={styles.metadata}>
+                            <span>IP: {submission.ip_address}</span>
+                            <span>User Agent: {submission.user_agent}</span>
+                            {submission.is_hipaa && <span className={styles.hipaaBadge}>HIPAA</span>}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               ))}
-              <div className={styles.tableCell}>Actions</div>
             </div>
-          </div>
-
-          {/* Table Body */}
-          <div className={styles.tableBody}>
-            {submissions.map((submission, index) => (
-              <div key={submission.submission_id} className={styles.tableRowContainer}>
-                <div 
-                  className={`${styles.tableRow} ${styles.clickableRow}`}
-                  onClick={() => toggleSubmissionExpansion(submission.submission_id)}
-                >
-                  <div className={styles.tableCell}>
-                    #{submissions.length - index}
-                  </div>
-                  <div className={styles.tableCell}>
-                    {formatTimestamp(submission.timestamp)}
-                  </div>
-                  {getTableColumns().map(field => (
-                    <div key={field.id} className={styles.tableCell}>
-                      {getFieldValue(submission, field.id)}
-                    </div>
-                  ))}
-                  <div className={styles.tableCell}>
-                    <button className={styles.expandButton}>
-                      {expandedSubmission === submission.submission_id ? '▼' : '▶'}
-                    </button>
-                  </div>
-                </div>
-
-                {/* Expanded Submission Details */}
-                {expandedSubmission === submission.submission_id && (
-                  <div className={styles.expandedDetails}>
-                    <div className={styles.submissionCard}>
-                      <div className={styles.submissionHeader}>
-                        <h3>Submission #{submissions.length - index} - Full Details</h3>
-                        <div className={styles.submissionMeta}>
-                          <span className={styles.timestamp}>
-                            {formatTimestamp(submission.timestamp)}
-                          </span>
-                          <span className={styles.submissionId}>
-                            ID: {submission.submission_id}
-                          </span>
-                        </div>
-                      </div>
-                      
-                      {renderSubmissionData(submission)}
-                      
-                      <div className={styles.submissionFooter}>
-                        <div className={styles.metadata}>
-                          <span>IP: {submission.ip_address}</span>
-                          <span>User Agent: {submission.user_agent}</span>
-                          {submission.is_hipaa && <span className={styles.hipaaBadge}>HIPAA</span>}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            ))}
           </div>
 
           {/* CSV Download Button */}
