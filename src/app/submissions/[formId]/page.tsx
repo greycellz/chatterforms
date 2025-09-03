@@ -141,6 +141,72 @@ export default function SubmissionsPage() {
     return String(value).length > 30 ? String(value).substring(0, 30) + '...' : String(value)
   }
 
+  const downloadCSV = () => {
+    if (!formData || submissions.length === 0) return
+
+    // Get all unique field IDs from all submissions
+    const allFieldIds = new Set<string>()
+    submissions.forEach(submission => {
+      Object.keys(submission.submission_data).forEach(fieldId => {
+        allFieldIds.add(fieldId)
+      })
+    })
+
+    // Create field mapping
+    const fieldMap = new Map<string, string>()
+    formData.fields.forEach(field => {
+      if (allFieldIds.has(field.id)) {
+        fieldMap.set(field.id, field.label)
+      }
+    })
+
+    // Create CSV header
+    const headers = ['Submission #', 'Date', 'IP Address', 'User Agent']
+    const fieldLabels = Array.from(fieldMap.values())
+    headers.push(...fieldLabels)
+
+    // Create CSV rows
+    const csvRows = [headers.join(',')]
+    
+    submissions.forEach((submission, index) => {
+      const row = [
+        `#${submissions.length - index}`,
+        formatTimestamp(submission.timestamp),
+        submission.ip_address || '',
+        submission.user_agent || ''
+      ]
+
+      // Add field values
+      fieldMap.forEach((label, fieldId) => {
+        const value = submission.submission_data[fieldId]
+        let fieldValue = ''
+        if (value !== undefined && value !== null && value !== '') {
+          fieldValue = Array.isArray(value) ? value.join('; ') : String(value)
+          // Escape commas and quotes for CSV
+          fieldValue = fieldValue.replace(/"/g, '""')
+          if (fieldValue.includes(',') || fieldValue.includes('"') || fieldValue.includes('\n')) {
+            fieldValue = `"${fieldValue}"`
+          }
+        }
+        row.push(fieldValue)
+      })
+
+      csvRows.push(row.join(','))
+    })
+
+    // Create and download CSV file
+    const csvContent = csvRows.join('\n')
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+    const link = document.createElement('a')
+    const url = URL.createObjectURL(blob)
+    link.setAttribute('href', url)
+    link.setAttribute('download', `${formData.title || 'form'}_submissions.csv`)
+    link.style.visibility = 'hidden'
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }
+
   if (isLoading) {
     return (
       <div className={styles.container}>
@@ -256,8 +322,12 @@ export default function SubmissionsPage() {
 
           {/* CSV Download Button */}
           <div className={styles.actionsSection}>
-            <button className={styles.csvDownloadButton}>
-              📥 Download CSV
+            <button 
+              className={styles.csvDownloadButton}
+              onClick={downloadCSV}
+              disabled={submissions.length === 0}
+            >
+              📥 Download CSV ({submissions.length} submissions)
             </button>
           </div>
         </div>
