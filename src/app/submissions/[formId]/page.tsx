@@ -262,7 +262,6 @@ export default function SubmissionsPage() {
                     {field.label}
                   </div>
                 ))}
-                <div className={styles.tableCell}>Actions</div>
               </div>
             </div>
 
@@ -285,9 +284,6 @@ export default function SubmissionsPage() {
                         {getFieldValue(submission, field.id)}
                       </div>
                     ))}
-                                      <div className={styles.tableCell}>
-                    {/* Row is clickable for expansion */}
-                  </div>
                   </div>
 
                   {/* Expanded Submission Details */}
