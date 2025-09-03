@@ -116,23 +116,8 @@ export default function SubmissionsPage() {
   const getTableColumns = () => {
     if (!formData?.fields) return []
     
-    // Get the most common fields that have values
-    const fieldCounts = new Map<string, number>()
-    submissions.forEach(submission => {
-      Object.keys(submission.submission_data).forEach(fieldId => {
-        fieldCounts.set(fieldId, (fieldCounts.get(fieldId) || 0) + 1)
-      })
-    })
-    
-    // Sort by frequency and take top 5 fields
-    const topFields = Array.from(fieldCounts.entries())
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 5)
-      .map(([fieldId]) => fieldId)
-    
+    // Return all fields for complete data comparison
     return formData.fields
-      .filter(field => topFields.includes(field.id))
-      .slice(0, 5) // Limit to 5 columns for readability
   }
 
   const getFieldValue = (submission: Submission, fieldId: string) => {
