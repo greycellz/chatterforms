@@ -243,7 +243,7 @@ export default function SubmissionsPage() {
                 <div className={styles.tableCell}>#</div>
                 <div className={styles.tableCell}>Date</div>
                 {getTableColumns().map(field => (
-                  <div key={field.id} className={styles.tableCell}>
+                  <div key={field.id} className={styles.tableCell} title={field.label}>
                     {field.label}
                   </div>
                 ))}
@@ -265,7 +265,7 @@ export default function SubmissionsPage() {
                       {formatTimestamp(submission.timestamp)}
                     </div>
                     {getTableColumns().map(field => (
-                      <div key={field.id} className={styles.tableCell}>
+                      <div key={field.id} className={styles.tableCell} title={submission.submission_data[field.id] || '-'}>
                         {getFieldValue(submission, field.id)}
                       </div>
                     ))}
