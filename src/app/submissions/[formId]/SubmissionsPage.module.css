@@ -154,9 +154,8 @@
 /* Removed expand indicator styles - rows are clickable without visual indicators */
 
 .expandedDetails {
-  background: rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(10px);
-  border-top: 1px solid rgba(255, 255, 255, 0.3);
+  background: #ffffff;
+  border-top: 1px solid #e5e7eb;
   padding: 20px;
 }
 
@@ -201,12 +200,11 @@
 }
 
 .submissionCard {
-  background: rgba(0, 0, 0, 0.4);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
   border-radius: 12px;
   padding: 24px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   transition: box-shadow 0.2s ease;
 }
 
@@ -257,22 +255,21 @@
   display: flex;
   margin-bottom: 12px;
   padding: 10px;
-  background: rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(5px);
+  background: #f9fafb;
   border-radius: 6px;
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border: 1px solid #e5e7eb;
 }
 
 .fieldLabel {
   font-weight: 600;
-  color: #a5b4fc;
+  color: #374151;
   min-width: 200px;
   margin-right: 16px;
   font-size: 14px;
 }
 
 .fieldValue {
-  color: #e0e7ff;
+  color: #111827;
   font-size: 14px;
   flex: 1;
   word-break: break-word;
