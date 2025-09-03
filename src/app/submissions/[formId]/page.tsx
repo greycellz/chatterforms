@@ -255,7 +255,7 @@ export default function SubmissionsPage() {
             {/* Table Header */}
             <div className={styles.tableHeader}>
               <div className={styles.tableRow}>
-                <div className={styles.tableCell}>Submission #</div>
+                <div className={styles.tableCell}>#</div>
                 <div className={styles.tableCell}>Date</div>
                 {getTableColumns().map(field => (
                   <div key={field.id} className={styles.tableCell}>
