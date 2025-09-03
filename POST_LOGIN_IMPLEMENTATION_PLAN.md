@@ -228,9 +228,12 @@ curl -X GET "https://my-poppler-api-dev.up.railway.app/api/forms/user/4x3s2MQoJN
 - [x] **Click to Expand**: Click row to see full submission details
 - [x] **Responsive Design**: Mobile-friendly table with proper grid
 - [x] **CSV Export**: Download all submissions with proper formatting
-- [x] **ChatterForms Styling**: Dark theme with purple accents
+- [x] **ChatterForms Styling**: Light theme with purple accents
 - [x] **Field Mapping**: Dynamic columns based on form structure
 - [x] **Metadata Display**: IP, user agent, timestamps, HIPAA status
+- [x] **Horizontal Scrolling**: Support for tables with many columns
+- [x] **Compact Rows**: Reduced padding and font sizes for better density
+- [x] **Row Click Expansion**: Entire row clickable without arrow buttons
 
 ### Phase 3: Collaboration Features
 **Timeline**: 4-5 weeks

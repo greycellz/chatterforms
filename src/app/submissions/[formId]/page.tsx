@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
+import Navigation from '@/components/navigation/Navigation'
 import styles from './SubmissionsPage.module.css'
 
 interface Submission {
@@ -230,15 +231,17 @@ export default function SubmissionsPage() {
   }
 
   return (
-    <div className={styles.container}>
-      <div className={styles.header}>
-        <h1>Form Submissions</h1>
-        <div className={styles.formInfo}>
-          <h2>{formData?.title || 'Untitled Form'}</h2>
-          <p>Form ID: {formId}</p>
-          <p>Total Submissions: {submissions.length}</p>
+    <>
+      <Navigation />
+      <div className={styles.container}>
+        <div className={styles.header}>
+          <h1>Form Submissions</h1>
+          <div className={styles.formInfo}>
+            <h2>{formData?.title || 'Untitled Form'}</h2>
+            <p>Form ID: {formId}</p>
+            <p>Total Submissions: {submissions.length}</p>
+          </div>
         </div>
-      </div>
 
       {submissions.length === 0 ? (
         <div className={styles.emptyState}>
@@ -282,11 +285,11 @@ export default function SubmissionsPage() {
                         {getFieldValue(submission, field.id)}
                       </div>
                     ))}
-                    <div className={styles.tableCell}>
-                      <span className={styles.expandIndicator}>
-                        {expandedSubmission === submission.submission_id ? '▼' : '▶'}
-                      </span>
-                    </div>
+                                      <div className={styles.tableCell}>
+                    <span className={styles.expandIndicator}>
+                      {expandedSubmission === submission.submission_id ? '−' : '+'}
+                    </span>
+                  </div>
                   </div>
 
                   {/* Expanded Submission Details */}
@@ -334,6 +337,7 @@ export default function SubmissionsPage() {
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </>
   )
 }
