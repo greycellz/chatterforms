@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
-import Navigation from '@/components/navigation/Navigation'
+import { Navigation } from '@/components/navigation'
 import styles from './SubmissionsPage.module.css'
 
 interface Submission {
@@ -286,9 +286,7 @@ export default function SubmissionsPage() {
                       </div>
                     ))}
                                       <div className={styles.tableCell}>
-                    <span className={styles.expandIndicator}>
-                      {expandedSubmission === submission.submission_id ? '−' : '+'}
-                    </span>
+                    {/* Row is clickable for expansion */}
                   </div>
                   </div>
 
