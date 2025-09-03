@@ -603,7 +603,7 @@ export default function FormCards({ showAllForms = false }: FormCardsProps) {
                   onClick={(e) => {
                     e.stopPropagation() // Prevent form click
                     // Open published form in new tab (not edit mode)
-                    const publishedUrl = `${window.location.origin}/form/${form.id}`
+                    const publishedUrl = `${window.location.origin}/forms/${form.id}`
                     window.open(publishedUrl, '_blank')
                   }}
                 >
