@@ -5,6 +5,7 @@ import FormHeader from './FormHeader'
 import FieldList from './FieldList'
 import SubmitButtonEditor from './SubmitButtonEditor'
 import EnhancedEmptyState from './EnhancedEmptyState'
+import AuthModal from '@/components/auth/AuthModal'
 import { SizeType, SizeConfig, StylingConfig } from '../components/SizeUtilities'
 import { FieldExtraction } from '../types'
 import styles from './LoadingAnimation.module.css'
@@ -62,7 +63,6 @@ interface FormPreviewProps {
   onExampleSelect?: (example: string) => void
   
   // Styling panel state
-  isStylingPanelOpen?: boolean
   onStylingPanelToggle?: (isOpen: boolean) => void
   
   // Analysis state props
@@ -599,16 +599,19 @@ const PublishSection = ({
   isPublishing,
   publishedFormId,
   onPublishForm,
-  isAnonymous
+  shouldShowAuthModal,
+  onLogin
 }: {
   formSchema: FormSchema | null
   hasUnsavedChanges: boolean
   isPublishing: boolean
   publishedFormId: string | null
   onPublishForm: () => void
-  isAnonymous: boolean
+  shouldShowAuthModal: boolean
+  onLogin: (user: { id: string; email: string; firstName: string; lastName: string; name: string; emailVerified: boolean; plan: string; status: string }, token: string) => Promise<void>
 }) => {
   const [copySuccess, setCopySuccess] = useState(false)
+  const [showAuthModal, setShowAuthModal] = useState(false)
 
   if (!formSchema) return null
 
@@ -643,8 +646,24 @@ const PublishSection = ({
     return '#059669'
   }
 
+  // Auth modal handlers
+  const handleAuthSuccess = async (user: { id: string; email: string; firstName: string; lastName: string; name: string; emailVerified: boolean; plan: string; status: string }, token: string) => {
+    console.log('🔑 Auth successful, user logged in:', user.id)
+    // Call login to update user context and trigger form migration
+    await onLogin(user, token)
+    setShowAuthModal(false)
+  }
+
   return (
     <div className="simple-publish-section">
+      {/* Auth Modal */}
+      <AuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        onSuccess={handleAuthSuccess}
+        initialMode="signup"
+      />
+
       {/* Status & Action */}
       <div className="publish-header">
         <div className="status-text" style={{ color: getStatusColor() }}>
@@ -652,54 +671,43 @@ const PublishSection = ({
         </div>
       </div>
 
-      {/* Compact Publish Button */}
-      {isAnonymous ? (
-        <button
-          onClick={() => {
-            // Show authentication prompt
-            alert('Please sign up or sign in to publish your forms. Your forms will be saved when you create an account.')
-          }}
-          className="compact-publish-btn auth-required"
-          title="Sign up or sign in to publish your forms"
-        >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
-            <circle cx="9" cy="7" r="4"/>
-            <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
-            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-          </svg>
-          <span>Sign Up to Publish</span>
-        </button>
-      ) : (
-        <button
-          onClick={onPublishForm}
-          disabled={isPublishing}
-          className={`compact-publish-btn ${needsUpdate ? 'update-mode' : 'publish-mode'}`}
-          title={needsUpdate ? 'Update the live form with your changes' : 'Publish your form to make it live'}
-        >
-          {isPublishing ? (
-            <>
-              <div className="publish-spinner" />
-              <span>Publishing...</span>
-            </>
-          ) : needsUpdate ? (
-            <>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/>
-                <path d="M21 3v5h-5"/>
-              </svg>
-              <span>Update Live</span>
-            </>
-          ) : (
-            <>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M22 2L15 22L11 13L2 9L22 2Z"/>
-              </svg>
-              <span>{isPublished ? 'Republish' : 'Publish'}</span>
-            </>
-          )}
-        </button>
-      )}
+      {/* Compact Publish Button - Always show, handle auth in click */}
+      <button
+        onClick={() => {
+          if (shouldShowAuthModal) {
+            console.log('🔍 Non-authenticated user clicked publish - showing auth modal')
+            setShowAuthModal(true)
+          } else {
+            console.log('🔍 Authenticated user clicked publish - proceeding with publish')
+            onPublishForm()
+          }
+        }}
+        disabled={isPublishing}
+        className={`compact-publish-btn ${needsUpdate ? 'update-mode' : 'publish-mode'}`}
+        title={shouldShowAuthModal ? 'Sign up or sign in to publish your forms' : (needsUpdate ? 'Update the live form with your changes' : 'Publish your form to make it live')}
+      >
+        {isPublishing ? (
+          <>
+            <div className="publish-spinner" />
+            <span>Publishing...</span>
+          </>
+        ) : needsUpdate ? (
+          <>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/>
+              <path d="M21 3v5h-5"/>
+            </svg>
+            <span>Update Live</span>
+          </>
+        ) : (
+          <>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M22 2L15 22L11 13L2 9L22 2Z"/>
+            </svg>
+            <span>{isPublished ? 'Republish' : 'Publish'}</span>
+          </>
+        )}
+      </button>
 
       {/* Compact Form URL Display */}
       {currentFormId && (
@@ -774,7 +782,6 @@ export default function FormPreview({
   isPublishing,
   publishedFormId,
   onExampleSelect,
-  isStylingPanelOpen,
   onStylingPanelToggle,
   isAnalyzing,
   analysisComplete,
@@ -782,7 +789,19 @@ export default function FormPreview({
   extractedFields,
   onGenerateFormFromFields
 }: FormPreviewProps) {
-  const { isAuthenticated, isAnonymous } = useUser()
+  const { isAnonymous, isAuthenticated, anonymousUserId, login } = useUser()
+  
+  // Show auth modal for users who are neither authenticated nor have anonymous session
+  const shouldShowAuthModal = !isAuthenticated && !anonymousUserId
+  
+  // Debug logging
+  console.log('🔍 FormPreview User State:', {
+    isAnonymous,
+    isAuthenticated,
+    anonymousUserId,
+    shouldShowAuthButton: isAnonymous,
+    shouldShowAuthModal
+  })
   
   // Handle individual radio option editing
   const handleRadioOptionEdit = (fieldId: string, optionIndex: number) => {
@@ -866,7 +885,8 @@ export default function FormPreview({
           isPublishing={isPublishing}
           publishedFormId={publishedFormId}
           onPublishForm={onPublishForm}
-          isAnonymous={isAnonymous}
+          shouldShowAuthModal={shouldShowAuthModal}
+          onLogin={login}
         />
       </div>
       

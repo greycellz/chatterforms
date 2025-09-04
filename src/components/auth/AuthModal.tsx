@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
+import { createPortal } from 'react-dom'
 import styles from './AuthModal.module.css'
 
 interface AuthModalProps {
@@ -139,7 +140,7 @@ export default function AuthModal({
 
   if (!isOpen) return null
 
-  return (
+  const modalContent = (
     <div className={styles.overlay} onClick={onClose}>
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
         <div className={styles.header}>
@@ -279,4 +280,9 @@ export default function AuthModal({
       </div>
     </div>
   )
+
+  if (typeof window !== 'undefined') {
+    return createPortal(modalContent, document.body)
+  }
+  return null
 }

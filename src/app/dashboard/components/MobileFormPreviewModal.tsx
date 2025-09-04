@@ -1,4 +1,6 @@
-import React from 'react'
+import React, { useState } from 'react'
+import { useUser } from '@/contexts'
+import AuthModal from '@/components/auth/AuthModal'
 import styles from '../styles/MobileFormPreviewModal.module.css'
 
 interface FormSchema {
@@ -53,6 +55,8 @@ export default function MobileFormPreviewModal({
   publishedFormId,
   hasUnsavedChanges = false
 }: MobileFormPreviewModalProps) {
+  const { isAnonymous, login } = useUser()
+  const [showAuthModal, setShowAuthModal] = useState(false)
 
   if (!isOpen || !formSchema) return null
 
@@ -64,6 +68,12 @@ export default function MobileFormPreviewModal({
   }
 
   const handlePublish = () => {
+    // Check if user needs to authenticate
+    if (isAnonymous) {
+      setShowAuthModal(true)
+      return
+    }
+
     const currentFormId = publishedFormId || formSchema?.formId
     const isPublished = !!currentFormId
     const needsUpdate = isPublished && hasUnsavedChanges
@@ -243,9 +253,25 @@ export default function MobileFormPreviewModal({
     }
   }
 
+  // Auth modal handlers
+  const handleAuthSuccess = async (user: any, token: string) => {
+    console.log('🔑 Mobile auth successful, user logged in:', user.id)
+    // Call login to update user context and trigger form migration
+    await login(user, token)
+    setShowAuthModal(false)
+  }
+
   return (
     <div className={styles.modalOverlay} onClick={onClose}>
       <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+        {/* Auth Modal */}
+        <AuthModal
+          isOpen={showAuthModal}
+          onClose={() => setShowAuthModal(false)}
+          onSuccess={handleAuthSuccess}
+          initialMode="signup"
+        />
+
         {/* Header */}
         <div className={styles.modalHeader}>
           <h3 className={styles.modalTitle}>Form Preview</h3>

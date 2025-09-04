@@ -31,7 +31,7 @@ interface UserContextType {
   isAnonymous: boolean
   anonymousUserId: string | null
   anonymousSession: AnonymousSession | null
-  login: (userData: User, token: string) => void
+  login: (userData: User, token: string) => Promise<void>
   logout: () => void
   updateUser: (userData: Partial<User>) => void
   checkAuthStatus: () => Promise<void>
