@@ -1,3 +1,58 @@
+/* Minimal Header */
+.minimalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.logoSection {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo {
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.brandName {
+  color: white;
+  font-weight: 600;
+  font-size: 18px;
+}
+
+.backToLanding {
+  color: rgba(255, 255, 255, 0.8);
+  text-decoration: none;
+  font-size: 14px;
+  padding: 8px 16px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.backToLanding:hover {
+  color: white;
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
 /* Global background override - match landing page */
 .container {
   max-width: 1200px;
@@ -25,7 +80,7 @@
 
 /* Navigation integration */
 .container {
-  margin-top: 20px;
+  margin-top: 0;
 }
 
 .header {
@@ -141,9 +196,9 @@
 }
 
 .tableBody .tableRow:hover {
-  background: rgba(255, 255, 255, 0.15);
-  border-left: 4px solid rgba(255, 255, 255, 0.5);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  background: #e2e8f0;
+  border-left: 4px solid #6366f1;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   transform: translateX(2px);
 }
 
@@ -166,6 +221,15 @@
   align-items: center;
   box-sizing: border-box;
   flex: 0 0 120px;
+}
+
+/* Light gray background with black text for data rows */
+.tableBody .tableRow {
+  background: #f8fafc;
+}
+
+.tableBody .tableCell {
+  color: #111827;
 }
 
 /* Specific widths for consistent alignment */

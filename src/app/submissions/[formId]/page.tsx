@@ -217,7 +217,15 @@ export default function SubmissionsPage() {
 
   return (
     <>
-      <Navigation />
+      <div className={styles.minimalHeader}>
+        <div className={styles.logoSection}>
+          <div className={styles.logo}>CF</div>
+          <span className={styles.brandName}>ChatterForms</span>
+        </div>
+        <a href="/" className={styles.backToLanding}>
+          ← Back to Landing Page
+        </a>
+      </div>
       <div className={styles.container}>
         <div className={styles.header}>
           <h1>Form Submissions</h1>
